@@ -1,0 +1,73 @@
+---
+description: AI-DLC agentic workflow — hats, bolts, and filesystem state for non-trivial work
+alwaysApply: true
+---
+
+# AI-DLC Workflow
+
+This project uses the AI-DLC methodology (plugin `ai-dlc@ai-dlc`, enabled in `.claude/settings.local.json`). Cursor and Claude Code share the same state under `.ai-dlc/` so work is resumable and cross-agent.
+
+## When to engage AI-DLC
+
+- **Engage**: features, refactors, investigations, anything that touches >1 file or has non-obvious trade-offs.
+- **Skip**: typo fixes, one-line tweaks, direct questions about the code.
+
+For small tasks, just work directly. For everything else, use the flow below.
+
+## The flow
+
+### 1. Elaborate (once per intent)
+
+Run `/ai-dlc:elaborate` (Claude Code) or follow the same structure manually in Cursor. Produces under `.ai-dlc/{slug}/`:
+
+- `intent.md` — what we're building and why.
+- `completion-criteria.md` — atomic, measurable, verifiable criteria.
+- `discovery.md` — domain findings that inform the build.
+
+Criteria must be specific ("Users can log in with Google OAuth", "API p95 < 200ms"), not vague ("make it work").
+
+### 2. Execute through hats (one Bolt = one pass)
+
+Default workflow: `planner → builder → reviewer`.
+
+| Hat | Focus | Writes |
+|---|---|---|
+| Planner | Plan this iteration | `current-plan.md` |
+| Builder | Implement to spec | code + `scratchpad.md` |
+| Reviewer | Verify vs. criteria | approve → Bolt done; reject → back to planner |
+
+- **Advance** when the current hat's deliverable is complete.
+- **Fail fast** — reviewer rejection returns to the previous hat immediately.
+- Don't skip hats. Don't linger.
+- Reviewer rejection doesn't reset work; it starts a new Bolt on the same unit.
+
+### 3. Persist state as you go
+
+Write into `.ai-dlc/{slug}/state/`:
+
+- `iteration.json` — current hat, Bolt count, status.
+- `current-plan.md` — living plan for the active iteration.
+- `scratchpad.md` — learnings, gotchas, partial results.
+- `blockers.md` — explicit blockers so the next Bolt can unblock.
+
+Save early, save often. `/clear` is cheap when state is on disk.
+
+## Configuration
+
+`.ai-dlc/settings.yml` holds project-level defaults (VCS, default branch, change strategy, passes, review agents). Resolution order when reading config:
+
+1. Unit frontmatter (highest)
+2. Intent settings (`.ai-dlc/{slug}/settings.yml`)
+3. Global settings (`.ai-dlc/settings.yml`) (lowest)
+
+## Anti-patterns
+
+- Starting to code before elaborating.
+- Vague completion criteria.
+- Fighting the context reset instead of leaning on files.
+- Silent blockers — document them in `blockers.md`.
+- Running the same workflow in Cursor with a different state store. Both agents use `.ai-dlc/`.
+
+## Hand-off with Engram
+
+When an intent completes, save an Engram observation (see `engram-memory.mdc`) summarizing the outcome and linking the intent slug. AI-DLC state is per-intent; Engram is cross-intent memory.

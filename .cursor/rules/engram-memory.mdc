@@ -1,0 +1,46 @@
+---
+description: Engram MCP memory protocol — use proactively for cross-session persistence
+alwaysApply: true
+---
+
+# Engram Memory Protocol
+
+Engram (`plugin-engram-engram` MCP) is persistent memory shared across Cursor, Claude Code, and future sessions. Use it as an external brain, not an afterthought.
+
+## When to act (no prompting needed)
+
+| Trigger | Tool | Why |
+|---|---|---|
+| Start of non-trivial session / after `/clear` or compaction | `mem_context` | Load recent decisions and open threads |
+| Before assuming something isn't written down | `mem_search` | Past bugs, conventions, preferences may exist |
+| Right after a decision, bug fix, discovery, or stated preference | `mem_save` | Persist while context is fresh — do not batch |
+| Before declaring a multi-step task "done" | `mem_session_summary` | Mandatory end-of-session snapshot |
+| Need full content of a truncated search hit | `mem_get_observation` | Retrieve the full observation by ID |
+
+## What to save
+
+Save observations that the next agent (or you after `/clear`) would wish existed:
+
+- **Decisions** — "We chose X over Y because Z."
+- **Bugs** — root cause + fix location, not just the symptom.
+- **Conventions** — project rules, naming, code style enforced here.
+- **Discoveries** — non-obvious things about the codebase or toolchain.
+- **Preferences** — how the user wants things done.
+
+Do **not** save: chat pleasantries, trivial lookups, restatements of files, or anything the code itself already makes obvious.
+
+## How to write observations
+
+- Scope to the project slug (`simple-templete`). The MCP auto-detects, but be explicit in the body if multi-repo context matters.
+- Front-load the **What / Why / Where** pattern. One observation = one concept.
+- Tag with a type hint in the body (`[decision]`, `[bug]`, `[convention]`, `[discovery]`, `[preference]`).
+- Write as if the reader has zero context — Engram is searchable text.
+
+## Hand-off with AI-DLC
+
+Engram and `.ai-dlc/{slug}/` are complementary, not redundant:
+
+- **`.ai-dlc/{slug}/`** — structured state for the current intent (plans, blockers, iteration.json). Versioned in git.
+- **Engram** — unstructured cross-intent knowledge (decisions, gotchas, preferences). Not in git.
+
+When finishing an intent, save a summary observation to Engram linking to the intent slug so future agents can cross-reference.

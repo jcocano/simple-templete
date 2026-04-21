@@ -1,0 +1,29 @@
+---
+description: Simple Templete core agent contract — points to AGENTS.md and enforces non-negotiables
+alwaysApply: true
+---
+
+# Simple Templete — Core
+
+Read `AGENTS.md` (symlink to `CLAUDE.md`) as the single source of truth for this repo. Don't duplicate project context here.
+
+## Non-negotiables (from AGENTS.md)
+
+- **Presentation / logic split**: `.tsx` files in the renderer hold no business logic. Extract to `lib/` (or future `src/lib/`, `src/services/`).
+- **Single Responsibility** per function. No 3-in-1 helpers.
+- **DRY rule of three** — abstract on the third repetition, not before.
+- **Persistence** belongs in SQLite, not scattered `localStorage` keys. Current `mc:*` localStorage usage is prototype-only.
+- **Cross-platform** (macOS / Linux / Windows). No hard-coded platform assumptions.
+- **Spanish UI copy** throughout. User-facing agent conversations are in Spanish.
+
+## Renderer loading quirks (don't break this)
+
+- `src/main.tsx` imports files in a specific order; each file attaches exports to `window` (`window.I.*`, `window.App`, `window.TEMPLATES`, etc.). New files must `Object.assign(window, { ... })` and be registered at the right position.
+- `React` is auto-injected via `vite.config.js` (`jsxInject`). Never `import React` in renderer files.
+- `/*EDITMODE-BEGIN*/ ... /*EDITMODE-END*/` markers in `index.html` are parsed by external tooling — preserve them.
+
+## Do not
+
+- Don't add `Co-Authored-By` lines to commits.
+- Don't create docs/READMEs proactively; only when asked.
+- Don't migrate to ES modules partially — load order will break.
