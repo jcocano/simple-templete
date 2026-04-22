@@ -1,6 +1,9 @@
 const electron = require("electron");
 const { app, BrowserWindow } = electron;
 const path = require("path");
+const db = require("./storage/db");
+const storageIpc = require("./ipc/storage");
+const secretsIpc = require("./ipc/secrets");
 
 if (!app || !BrowserWindow) {
   console.error(
@@ -33,7 +36,9 @@ function createWindow() {
       : {}),
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: true,
+      preload: path.join(__dirname, "preload.js")
     }
   });
 
@@ -49,6 +54,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  db.init();
+  storageIpc.register();
+  secretsIpc.register();
   createWindow();
 
   app.on("activate", () => {
