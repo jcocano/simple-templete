@@ -740,20 +740,102 @@ function AccountSection({ onChange }) {
 }
 
 // ───────────────────────────── Storage ─────────────────────────────
+
+// Hook: loads a sensitive CDN field from workspace secrets on mount. If the
+// field is missing from secrets but present in the legacy plaintext config,
+// migrates it transparently. Mirrors the `AISection` API-key pattern.
+function useCDNSecret(provider, field) {
+  const [value, setValue] = React.useState('');
+  const [loaded, setLoaded] = React.useState(false);
+  React.useEffect(() => {
+    let alive = true;
+    setLoaded(false);
+    (async () => {
+      const wsKey = window.stStorage.secrets.wsKey(`cdn:${provider}:${field}`);
+      try {
+        const stored = await window.stStorage.secrets.get(wsKey);
+        if (!alive) return;
+        if (stored) { setValue(stored); setLoaded(true); return; }
+        // Legacy: older builds kept this inside the storage settings JSON.
+        // Move it to secrets and wipe the plaintext copy.
+        const legacy = (window.stStorage.getWSSetting('storage', {}) || {})?.[provider]?.[field];
+        if (legacy) {
+          try { await window.stStorage.secrets.set(wsKey, legacy); } catch {}
+          if (!alive) return;
+          setValue(legacy);
+          const cur = window.stStorage.getWSSetting('storage', {}) || {};
+          const next = { ...cur, [provider]: { ...(cur[provider] || {}) } };
+          delete next[provider][field];
+          window.stStorage.setWSSetting('storage', next);
+        }
+      } catch {}
+      if (alive) setLoaded(true);
+    })();
+    return () => { alive = false; };
+  }, [provider, field]);
+
+  const save = async (v) => {
+    setValue(v);
+    const wsKey = window.stStorage.secrets.wsKey(`cdn:${provider}:${field}`);
+    try {
+      if (v) await window.stStorage.secrets.set(wsKey, v);
+      else await window.stStorage.secrets.remove(wsKey);
+    } catch (err) {
+      console.error(`[cdn] save secret ${provider}.${field}`, err);
+    }
+  };
+
+  return [value, save, loaded];
+}
+
 function StorageSection({ onChange }) {
   const [s, setS] = React.useState(() => ({
     mode: 'base64',
-    s3: { endpoint:'https://s3.amazonaws.com', region:'us-east-1', bucket:'', key:'', secret:'', publicUrl:'' },
-    r2: { accountId:'', bucket:'', key:'', secret:'', publicUrl:'' },
-    cloudinary: { cloudName:'', uploadPreset:'', apiKey:'' },
-    imgbb: { apiKey:'' },
-    github: { repo:'', branch:'main', token:'', path:'assets/' },
-    ftp: { host:'', port:'21', user:'', password:'', path:'/public_html/img/', publicUrl:'' },
+    s3: { endpoint:'https://s3.amazonaws.com', region:'us-east-1', bucket:'', key:'', publicUrl:'' },
+    r2: { accountId:'', bucket:'', key:'', publicUrl:'' },
+    cloudinary: { cloudName:'', uploadPreset:'' },
+    imgbb: {},
+    github: { repo:'', branch:'main', path:'assets/' },
+    ftp: { host:'', port:'21', user:'', path:'/public_html/img/', publicUrl:'' },
     ...window.stStorage.getWSSetting('storage', {}),
   }));
   const save = (next) => { setS(next); window.stStorage.setWSSetting('storage', next); onChange(); };
   const setMode = (mode) => save({...s, mode});
   const setField = (provider, k, v) => save({...s, [provider]: {...s[provider], [k]:v}});
+
+  // Sensitive fields live in safeStorage-encrypted secrets, one per (provider, field).
+  const [s3Secret, setS3Secret] = useCDNSecret('s3', 'secret');
+  const [imgbbKey, setImgbbKey] = useCDNSecret('imgbb', 'apiKey');
+  const [cloudinaryKey, setCloudinaryKey] = useCDNSecret('cloudinary', 'apiKey');
+  const [githubToken, setGithubToken] = useCDNSecret('github', 'token');
+  const [ftpPassword, setFtpPassword] = useCDNSecret('ftp', 'password');
+
+  // "Probar conexión" state per provider: idle | testing | ok | err (+ message).
+  const [testState, setTestState] = React.useState({});
+  const doTest = async (providerId) => {
+    setTestState(t => ({ ...t, [providerId]: { state: 'testing' } }));
+    try {
+      // Persist config first so stCDN can read fresh values.
+      const result = await window.stCDN.testConnection(providerId);
+      setTestState(t => ({
+        ...t,
+        [providerId]: result.ok
+          ? { state: 'ok', url: result.url }
+          : { state: 'err', msg: result.error || 'Falló la prueba.' },
+      }));
+    } catch (err) {
+      setTestState(t => ({ ...t, [providerId]: { state: 'err', msg: err?.message || 'Error desconocido.' } }));
+    }
+  };
+
+  const testIndicator = (providerId) => {
+    const t = testState[providerId];
+    if (!t) return null;
+    if (t.state === 'testing') return <span style={{fontSize:11,color:'var(--fg-3)'}}>Probando…</span>;
+    if (t.state === 'ok') return <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> Subida OK</span>;
+    if (t.state === 'err') return <span style={{fontSize:11,color:'var(--danger)',lineHeight:1.4,flex:1}}>{t.msg}</span>;
+    return null;
+  };
 
   const providers = [
     { id:'base64',     name:'Base64 embebido',  tag:'Por defecto', icon:'code',     desc:'Incrusta las imágenes dentro del HTML del correo. Funciona sin configurar nada, pero algunos clientes las bloquean o limitan el tamaño.' },
@@ -895,14 +977,16 @@ function StorageSection({ onChange }) {
             <input className="field" value={s.s3.key} onChange={e=>setField('s3','key',e.target.value)} placeholder="AKIA…"/>
           </SRow>
           <SRow label="Secret Access Key" hint="Se guarda cifrada en tu equipo. Nunca sale de tu disco.">
-            <input className="field" type="password" value={s.s3.secret} onChange={e=>setField('s3','secret',e.target.value)} placeholder="••••••••••••••••"/>
+            <input className="field" type="password" value={s3Secret} onChange={e=>setS3Secret(e.target.value)} placeholder="••••••••••••••••"/>
           </SRow>
           <SRow label="URL pública base" hint="Opcional. Dominio desde el que se servirán las imágenes (ej: cdn.tudominio.com).">
             <input className="field" value={s.s3.publicUrl} onChange={e=>setField('s3','publicUrl',e.target.value)} placeholder="https://cdn.tudominio.com"/>
           </SRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
-            <button className="btn"><I.check size={12}/> Probar conexión</button>
-            <button className="btn ghost"><I.external size={12}/> Ver guía</button>
+          <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
+            <button className="btn" onClick={() => doTest('s3')} disabled={testState.s3?.state === 'testing'}>
+              <I.check size={12}/> Probar conexión
+            </button>
+            {testIndicator('s3')}
           </div>
         </SGroup>
       )}
@@ -916,11 +1000,13 @@ function StorageSection({ onChange }) {
             <input className="field" value={s.cloudinary.uploadPreset} onChange={e=>setField('cloudinary','uploadPreset',e.target.value)} placeholder="simple_template_unsigned"/>
           </SRow>
           <SRow label="API key" hint="Opcional. Solo necesario si usas presets firmados.">
-            <input className="field" value={s.cloudinary.apiKey} onChange={e=>setField('cloudinary','apiKey',e.target.value)} placeholder="1234567890"/>
+            <input className="field" type="password" value={cloudinaryKey} onChange={e=>setCloudinaryKey(e.target.value)} placeholder="1234567890"/>
           </SRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
-            <button className="btn"><I.check size={12}/> Probar conexión</button>
-            <button className="btn ghost"><I.external size={12}/> Crear cuenta gratuita</button>
+          <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
+            <button className="btn" onClick={() => doTest('cloudinary')} disabled={testState.cloudinary?.state === 'testing'}>
+              <I.check size={12}/> Probar conexión
+            </button>
+            {testIndicator('cloudinary')}
           </div>
         </SGroup>
       )}
@@ -928,19 +1014,13 @@ function StorageSection({ onChange }) {
       {s.mode==='imgbb' && (
         <SGroup title="Configuración · imgbb">
           <SRow label="API key" hint="Obtén una clave gratuita en api.imgbb.com. Se guarda cifrada en tu equipo.">
-            <input className="field" type="password" value={s.imgbb.apiKey} onChange={e=>setField('imgbb','apiKey',e.target.value)} placeholder="••••••••••••••••"/>
+            <input className="field" type="password" value={imgbbKey} onChange={e=>setImgbbKey(e.target.value)} placeholder="••••••••••••••••"/>
           </SRow>
-          <SRow label="Expiración" hint="Tiempo antes de que las imágenes se eliminen automáticamente. 'Nunca' es lo recomendado para correos.">
-            <select className="field">
-              <option>Nunca expirar</option>
-              <option>180 días</option>
-              <option>90 días</option>
-              <option>30 días</option>
-            </select>
-          </SRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
-            <button className="btn"><I.check size={12}/> Probar conexión</button>
-            <button className="btn ghost"><I.external size={12}/> Obtener API key</button>
+          <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
+            <button className="btn" onClick={() => doTest('imgbb')} disabled={testState.imgbb?.state === 'testing'}>
+              <I.check size={12}/> Probar conexión
+            </button>
+            {testIndicator('imgbb')}
           </div>
         </SGroup>
       )}
@@ -956,51 +1036,56 @@ function StorageSection({ onChange }) {
           <SRow label="Carpeta destino" hint="Ruta relativa dentro del repo donde se subirán las imágenes.">
             <input className="field" value={s.github.path} onChange={e=>setField('github','path',e.target.value)} placeholder="assets/img/"/>
           </SRow>
-          <SRow label="Personal Access Token" hint="Token con permiso 'repo'. Se guarda cifrado en tu equipo.">
-            <input className="field" type="password" value={s.github.token} onChange={e=>setField('github','token',e.target.value)} placeholder="ghp_••••••••••••"/>
+          <SRow label="Personal Access Token" hint="Token con permiso 'repo' (o fine-grained 'contents:write'). Se guarda cifrado en tu equipo.">
+            <input className="field" type="password" value={githubToken} onChange={e=>setGithubToken(e.target.value)} placeholder="ghp_••••••••••••"/>
           </SRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
-            <button className="btn"><I.check size={12}/> Probar conexión</button>
-            <button className="btn ghost"><I.external size={12}/> Generar token</button>
+          <SRow label="URL pública base (opcional)" hint="Dominio desde el que se servirán las imágenes. Si no lo pones, se usa la URL cruda de GitHub.">
+            <input className="field" value={s.github.publicUrl||''} onChange={e=>setField('github','publicUrl',e.target.value)} placeholder="https://miusuario.github.io/mi-repo/assets"/>
+          </SRow>
+          <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
+            <button className="btn" onClick={() => doTest('github')} disabled={testState.github?.state === 'testing'}>
+              <I.check size={12}/> Probar conexión
+            </button>
+            {testIndicator('github')}
           </div>
         </SGroup>
       )}
 
       {s.mode==='ftp' && (
-        <SGroup title="Configuración · FTP / SFTP">
-          <SRow label="Host" hint="Dirección del servidor (ej: ftp.tudominio.com).">
+        <SGroup title="Configuración · FTP / FTPS">
+          <SRow label="Host" hint="Dirección del servidor (ej: ftp.tudominio.com). SFTP (SSH) no está soportado — usá FTP o FTPS.">
             <input className="field" value={s.ftp.host} onChange={e=>setField('ftp','host',e.target.value)} placeholder="ftp.tudominio.com"/>
           </SRow>
-          <SRow label="Puerto" hint="21 para FTP, 22 para SFTP.">
+          <SRow label="Puerto" hint="21 para FTP normal, 990 para FTPS implícito.">
             <input className="field" value={s.ftp.port} onChange={e=>setField('ftp','port',e.target.value)} placeholder="21"/>
+          </SRow>
+          <SRow label="Usar FTPS (TLS)" hint="Activá si el servidor requiere conexión cifrada.">
+            <Switch checked={!!s.ftp.secure} onChange={v=>setField('ftp','secure',v)}/>
           </SRow>
           <SRow label="Usuario" hint="Nombre de usuario con permiso de escritura en la carpeta destino.">
             <input className="field" value={s.ftp.user} onChange={e=>setField('ftp','user',e.target.value)} placeholder="mi-usuario"/>
           </SRow>
           <SRow label="Contraseña" hint="Se guarda cifrada en tu equipo.">
-            <input className="field" type="password" value={s.ftp.password} onChange={e=>setField('ftp','password',e.target.value)} placeholder="••••••••••••"/>
+            <input className="field" type="password" value={ftpPassword} onChange={e=>setFtpPassword(e.target.value)} placeholder="••••••••••••"/>
           </SRow>
           <SRow label="Carpeta destino" hint="Ruta absoluta en el servidor donde se subirán las imágenes.">
             <input className="field" value={s.ftp.path} onChange={e=>setField('ftp','path',e.target.value)} placeholder="/public_html/img/"/>
           </SRow>
-          <SRow label="URL pública base" hint="Dominio desde el que se servirán las imágenes.">
+          <SRow label="URL pública base" hint="Dominio desde el que se servirán las imágenes. Requerido.">
             <input className="field" value={s.ftp.publicUrl} onChange={e=>setField('ftp','publicUrl',e.target.value)} placeholder="https://tudominio.com/img/"/>
           </SRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
-            <button className="btn"><I.check size={12}/> Probar conexión</button>
+          <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
+            <button className="btn" onClick={() => doTest('ftp')} disabled={testState.ftp?.state === 'testing'}>
+              <I.check size={12}/> Probar conexión
+            </button>
+            {testIndicator('ftp')}
           </div>
         </SGroup>
       )}
 
       <SGroup title="Comportamiento">
-        <SRow label="Optimizar imágenes antes de subir" hint="Convierte a WebP y reduce resolución a máx 1440px de ancho.">
-          <label className="switch"><input type="checkbox" defaultChecked/><span/></label>
-        </SRow>
-        <SRow label="Reemplazar imágenes locales al exportar" hint="Al exportar el HTML, las rutas file:// se reemplazan por las URLs públicas.">
-          <label className="switch"><input type="checkbox" defaultChecked/><span/></label>
-        </SRow>
-        <SRow label="Limpiar imágenes no usadas" hint="Busca y elimina del CDN imágenes que ya no están referenciadas en ninguna plantilla.">
-          <button className="btn sm"><I.trash size={12}/> Limpiar ahora</button>
+        <SRow label="Optimizar imágenes antes de subir" hint="Reduce a máx 2000px y re-comprime a WebP (o mantiene PNG si tiene transparencia). Ahorra ancho de banda y tamaño del correo.">
+          <Switch checked={s.optimize === true} onChange={v => save({...s, optimize: v})}/>
         </SRow>
       </SGroup>
     </>
@@ -1421,15 +1506,114 @@ function AISection({ onChange }) {
   const [ai, setAi] = React.useState(() => window.stStorage.getSetting('ai', {}));
   const set = (k,v) => { const next = {...ai, [k]:v}; setAi(next); window.stStorage.setSetting('ai', next); onChange(); };
 
+  // Model lists intentionally not hardcoded — they rot. Models are fetched
+  // live from each provider's /models endpoint (or Ollama's /api/tags) via
+  // stAI.listModels, with a free-text input so the user can always type a
+  // newly-released model name we don't know about yet.
   const PROVIDERS = [
-    { id:'anthropic', name:'Anthropic Claude', models:['claude-sonnet-4-5','claude-opus-4-1','claude-haiku-4-5'], hint:'Mejores resultados para copy y HTML.', url:'https://console.anthropic.com' },
-    { id:'openai',    name:'OpenAI',           models:['gpt-5','gpt-5-mini','gpt-4.1'],                          hint:'Versátil y con buen ecosistema.',       url:'https://platform.openai.com' },
-    { id:'google',    name:'Google Gemini',    models:['gemini-2.5-pro','gemini-2.5-flash'],                     hint:'Generoso con tokens; rápido.',         url:'https://aistudio.google.com' },
-    { id:'ollama',    name:'Ollama (local)',   models:['llama3.3','qwen2.5-coder','mistral-nemo'],               hint:'Corre en tu máquina. Sin API key.',    url:'http://localhost:11434' },
+    { id:'anthropic', name:'Anthropic Claude', hint:'Mejores resultados para copy y HTML.', url:'https://console.anthropic.com' },
+    { id:'openai',    name:'OpenAI',           hint:'Versátil y con buen ecosistema.',       url:'https://platform.openai.com' },
+    { id:'google',    name:'Google Gemini',    hint:'Generoso con tokens; rápido.',          url:'https://aistudio.google.com' },
+    { id:'ollama',    name:'Ollama (local)',   hint:'Corre en tu máquina. Sin API key.',     url:'http://localhost:11434' },
   ];
   const provider = PROVIDERS.find(p => p.id === (ai.provider||'anthropic'));
   const enabled = ai.enabled !== false;
-  const keyOk = !!ai.key && ai.key.length > 15;
+
+  // API key lives in workspace secrets (encrypted via safeStorage), keyed per
+  // provider so switching providers doesn't clobber another's key. The flag
+  // `ai.keyConfigured` is the public signal other UIs (dashboard, editor)
+  // read to decide whether to enable the AI buttons — the actual key never
+  // leaves this section unless explicitly loaded.
+  const [apiKey, setApiKey] = React.useState('');
+  const [apiKeyLoaded, setApiKeyLoaded] = React.useState(false);
+  const keyOk = !!apiKey && apiKey.length > 15;
+
+  React.useEffect(() => {
+    let alive = true;
+    setApiKeyLoaded(false);
+    (async () => {
+      const secretKey = `ai:${provider.id}:key`;
+      try {
+        const stored = await window.stStorage.secrets.get(secretKey);
+        if (!alive) return;
+        // Legacy migration: if older builds left the key inside ai.key, move
+        // it to secrets the first time we see it.
+        if (!stored && ai.key) {
+          await window.stStorage.secrets.set(secretKey, ai.key);
+          if (!alive) return;
+          setApiKey(ai.key);
+          const next = { ...ai };
+          delete next.key;
+          next.keyConfigured = ai.key.length > 15;
+          setAi(next);
+          window.stStorage.setSetting('ai', next);
+        } else {
+          setApiKey(stored || '');
+        }
+      } catch {}
+      if (alive) setApiKeyLoaded(true);
+    })();
+    return () => { alive = false; };
+  }, [provider.id]);
+
+  const setApiKeyValue = async (value) => {
+    setApiKey(value);
+    const secretKey = `ai:${provider.id}:key`;
+    try {
+      if (value) await window.stStorage.secrets.set(secretKey, value);
+      else await window.stStorage.secrets.remove(secretKey);
+    } catch (err) {
+      console.error('[ai] save key', err);
+    }
+    const next = { ...ai, keyConfigured: !!value && value.length > 15 };
+    setAi(next);
+    window.stStorage.setSetting('ai', next);
+    onChange();
+  };
+
+  // Live-fetched models from the provider's /models endpoint. We never
+  // hardcode a list because providers (Anthropic, OpenAI, Google) ship new
+  // models constantly and Ollama models are whatever the user has pulled
+  // locally. The input is free-text so the user can always type a model
+  // name we don't know about yet.
+  const [models, setModels] = React.useState([]);
+  const [modelsLoading, setModelsLoading] = React.useState(false);
+  const [modelsError, setModelsError] = React.useState(null);
+
+  const refreshModels = async () => {
+    setModelsLoading(true);
+    setModelsError(null);
+    try {
+      const result = await window.stAI.listModels(provider.id);
+      if (result.ok) {
+        setModels(result.models || []);
+        if ((result.models || []).length === 0 && provider.id === 'ollama') {
+          setModelsError('No hay modelos instalados. Descargá uno con "ollama pull llama3.3" en tu terminal.');
+        }
+      } else {
+        setModels([]);
+        setModelsError(result.error);
+      }
+    } catch (err) {
+      setModels([]);
+      setModelsError(err?.message || 'Error inesperado al listar modelos.');
+    } finally {
+      setModelsLoading(false);
+    }
+  };
+
+  // Auto-fetch when provider or key availability changes. Only after the
+  // initial key load settles — avoids duplicate fetches on first mount.
+  React.useEffect(() => {
+    if (!apiKeyLoaded) return;
+    const canFetch = provider.id === 'ollama' || !!apiKey;
+    if (!canFetch) {
+      setModels([]);
+      setModelsError(null);
+      return;
+    }
+    refreshModels();
+  }, [provider.id, apiKeyLoaded]);
 
   const Switch = ({checked, onChange:oc}) => (
     <label className="switch"><input type="checkbox" checked={!!checked} onChange={e=>oc(e.target.checked)}/><span/></label>
@@ -1450,7 +1634,7 @@ function AISection({ onChange }) {
         <div>
           <div style={{fontSize:13,fontWeight:500}}>Generar y mejorar plantillas con IA</div>
           <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:2,lineHeight:1.5}}>
-            {enabled && keyOk ? <>Activo con <b style={{color:'var(--fg)'}}>{provider.name}</b> · modelo <b style={{color:'var(--fg)'}}>{ai.model||provider.models[0]}</b></> :
+            {enabled && keyOk ? <>Activo con <b style={{color:'var(--fg)'}}>{provider.name}</b>{ai.model ? <> · modelo <b style={{color:'var(--fg)'}}>{ai.model}</b></> : null}</> :
              enabled && !keyOk ? <>Te falta añadir la API key de <b style={{color:'var(--fg)'}}>{provider.name}</b> para poder usarla.</> :
              <>Desactivada. Activa el interruptor para usar “✨ Generar con IA” y “✨ Mejorar”.</>}
           </div>
@@ -1458,7 +1642,7 @@ function AISection({ onChange }) {
         <Switch checked={enabled} onChange={v=>set('enabled',v)}/>
       </div>
 
-      <SGroup title="Proveedor y modelo">
+      <SGroup title="Proveedor">
         <SRow label="Proveedor" hint="Elige el servicio que quieres usar. Puedes cambiarlo cuando quieras; las API keys se guardan por separado.">
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             {PROVIDERS.map(p => {
@@ -1481,18 +1665,20 @@ function AISection({ onChange }) {
             })}
           </div>
         </SRow>
-        <SRow label="Modelo" hint={`Modelos disponibles en ${provider.name}. Los más grandes dan mejor copy; los pequeños son más rápidos y baratos.`}>
-          <select className="field" value={ai.model||provider.models[0]} onChange={e=>set('model', e.target.value)}>
-            {provider.models.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </SRow>
       </SGroup>
 
       <SGroup title="Credenciales">
         {provider.id !== 'ollama' && (
           <SRow label="API key" hint={<>Se guarda cifrada en tu disco local. Nunca se envía a ningún servidor salvo al del propio proveedor. <a href={provider.url} target="_blank" rel="noreferrer" style={{color:'var(--accent)'}}>Conseguir una en {provider.name} →</a></>}>
             <div style={{display:'flex',gap:6,alignItems:'center'}}>
-              <input className="field" type="password" value={ai.key||''} onChange={e=>set('key',e.target.value)} placeholder={provider.id==='anthropic'?'sk-ant-…':provider.id==='openai'?'sk-…':'AIza…'} style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}/>
+              <input
+                className="field"
+                type="password"
+                value={apiKey}
+                onChange={e=>setApiKeyValue(e.target.value)}
+                disabled={!apiKeyLoaded}
+                placeholder={provider.id==='anthropic'?'sk-ant-…':provider.id==='openai'?'sk-…':'AIza…'}
+                style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}/>
               {keyOk && <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> Válida</span>}
             </div>
           </SRow>
@@ -1510,6 +1696,70 @@ function AISection({ onChange }) {
           </div>
         </SRow>
       </SGroup>
+
+      {/* Model picker hidden until credentials are in place. For password
+          providers we gate on keyOk (len > 15); Ollama has no key so always
+          shows once the group renders. Avoids showing an empty/failing
+          picker before the user has set up access. */}
+      {(keyOk || provider.id === 'ollama') && (
+        <SGroup title="Modelo">
+          <SRow label="Modelo" hint={`Los modelos disponibles se actualizan contra ${provider.name}. Podés tipear el nombre de uno nuevo aunque no aparezca en la lista.`}>
+            <div>
+              <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                <input
+                  className="field"
+                  list={`ai-models-${provider.id}`}
+                  value={ai.model || ''}
+                  onChange={e => set('model', e.target.value)}
+                  placeholder={provider.id === 'ollama' ? 'llama3.3' : provider.id === 'anthropic' ? 'claude-sonnet-4-5' : provider.id === 'openai' ? 'gpt-4.1' : 'gemini-2.5-flash'}
+                  style={{flex:1, fontFamily:'var(--font-mono)', fontSize:12}}/>
+                <button
+                  type="button"
+                  className="btn sm ghost"
+                  onClick={refreshModels}
+                  disabled={modelsLoading}
+                  title="Refrescar lista de modelos">
+                  {modelsLoading ? 'Cargando…' : 'Refrescar'}
+                </button>
+              </div>
+              <datalist id={`ai-models-${provider.id}`}>
+                {models.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}{m.createdAt ? ` · ${String(m.createdAt).slice(0,10)}` : ''}
+                  </option>
+                ))}
+              </datalist>
+              {modelsError && (
+                <div style={{fontSize:11,color:'var(--fg-3)',marginTop:6,lineHeight:1.4}}>
+                  {modelsError} Podés tipear el nombre igual si ya lo conocés.
+                </div>
+              )}
+              {!modelsError && !modelsLoading && models.length > 0 && (
+                <div style={{marginTop:8,display:'flex',flexWrap:'wrap',gap:4}}>
+                  {models.map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => set('model', m.id)}
+                      title={m.createdAt ? `Disponible desde ${String(m.createdAt).slice(0,10)}` : m.id}
+                      style={{
+                        fontSize:10.5,padding:'3px 8px',
+                        fontFamily:'var(--font-mono)',
+                        border: ai.model === m.id ? '1px solid var(--accent)' : '1px solid var(--line)',
+                        borderRadius:999,
+                        background: ai.model === m.id ? 'var(--accent-soft)' : 'var(--surface)',
+                        color: ai.model === m.id ? 'var(--accent)' : 'var(--fg-2)',
+                        cursor:'pointer',
+                      }}>
+                      {m.id}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </SRow>
+        </SGroup>
+      )}
 
       <SGroup title="¿Para qué usarla?">
         <SRow label="Generar plantillas desde un prompt" hint="Activa el botón ✨ Generar con IA en la galería. Describes el correo en lenguaje natural y la IA arma los bloques por ti.">
@@ -1555,14 +1805,182 @@ function AISection({ onChange }) {
         <SRow label="No mandar mi contenido si contiene datos sensibles" hint="Detecta patrones de tarjetas, RFC, CURP, correos privados, y bloquea el envío automáticamente.">
           <Switch checked={ai.pii!==false} onChange={v=>set('pii',v)}/>
         </SRow>
-        <SRow label="Registrar las conversaciones con la IA" hint="Guarda el prompt y la respuesta en un historial local, por si quieres revisarlos. Nunca se suben a la nube.">
+        <SRow label="Registrar las conversaciones con la IA" hint="Guarda el prompt y la respuesta en un historial local por espacio, por si querés revisarlos. Nunca se suben a la nube.">
           <Switch checked={!!ai.log} onChange={v=>set('log',v)}/>
         </SRow>
-        <SRow label="Borrar historial de IA" hint="Elimina todos los prompts y respuestas guardados. No afecta las plantillas generadas." danger>
-          <button className="btn sm" style={{color:'var(--danger)'}}><I.trash size={12}/> Borrar 14 conversaciones</button>
-        </SRow>
       </SGroup>
+
+      {ai.log && <AIHistoryGroup/>}
     </>
+  );
+}
+
+// Workspace-scoped AI history viewer. Only renders when ai.log is on.
+// Keeps the last 500 prompts+responses per workspace in SQLite (pruned
+// automatically on insert). Never touches the network.
+function AIHistoryGroup() {
+  const [entries, setEntries] = React.useState([]);
+  const [count, setCount] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(null);
+  const [confirmClear, setConfirmClear] = React.useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [rows, total] = await Promise.all([
+        window.stAI.log.list({ limit: 50 }),
+        window.stAI.log.count(),
+      ]);
+      setEntries(rows);
+      setCount(total);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => { load(); }, []);
+
+  const doClear = async () => {
+    await window.stAI.log.clear();
+    setConfirmClear(false);
+    await load();
+  };
+
+  const doExport = () => {
+    const json = JSON.stringify(entries, null, 2);
+    const ts = new Date().toISOString().slice(0, 10);
+    window.stExport.downloadFile(`ai-history-${ts}.json`, json, 'application/json');
+  };
+
+  return (
+    <SGroup title={`Historial de IA${count ? ` · ${count}` : ''}`}>
+      <SRow
+        label="Conversaciones guardadas"
+        hint={`${count === 0 ? 'Todavía no hay ninguna.' : count === 1 ? '1 conversación local.' : `${count} conversaciones locales.`} Se guardan las últimas 500 por espacio; las viejas se borran automáticamente.`}>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          <button type="button" className="btn sm ghost" onClick={load} disabled={loading}>
+            {loading ? 'Cargando…' : 'Refrescar'}
+          </button>
+          <button type="button" className="btn sm ghost" onClick={doExport} disabled={entries.length === 0}>
+            <I.download size={12}/> Exportar JSON
+          </button>
+          {!confirmClear ? (
+            <button
+              type="button"
+              className="btn sm"
+              style={{color:'var(--danger)'}}
+              onClick={() => setConfirmClear(true)}
+              disabled={count === 0}>
+              <I.trash size={12}/> Borrar todo
+            </button>
+          ) : (
+            <>
+              <button type="button" className="btn sm ghost" onClick={() => setConfirmClear(false)}>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn sm"
+                style={{background:'var(--danger)',color:'#fff'}}
+                onClick={doClear}>
+                Sí, borrar {count}
+              </button>
+            </>
+          )}
+        </div>
+      </SRow>
+
+      {entries.length > 0 && (
+        <div style={{padding:'12px 0 4px'}}>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            {entries.map(e => (
+              <AIHistoryEntry
+                key={e.id}
+                entry={e}
+                expanded={expanded === e.id}
+                onToggle={() => setExpanded(expanded === e.id ? null : e.id)}
+              />
+            ))}
+          </div>
+          {count > entries.length && (
+            <div style={{fontSize:11,color:'var(--fg-3)',padding:'8px 0 0',textAlign:'center'}}>
+              Mostrando {entries.length} de {count}. Exportá el JSON para ver todas.
+            </div>
+          )}
+        </div>
+      )}
+    </SGroup>
+  );
+}
+
+function AIHistoryEntry({ entry, expanded, onToggle }) {
+  const when = new Date(entry.createdAt).toLocaleString('es-MX', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  });
+  const opLabel = entry.op === 'improve' ? 'Mejorar texto'
+    : entry.op === 'generate' ? 'Generar plantilla'
+    : entry.op;
+  const providerShort = entry.provider === 'anthropic' ? 'Claude'
+    : entry.provider === 'openai' ? 'OpenAI'
+    : entry.provider === 'google' ? 'Gemini'
+    : entry.provider === 'ollama' ? 'Ollama'
+    : entry.provider;
+
+  return (
+    <div style={{
+      border:'1px solid var(--line)',borderRadius:'var(--r-sm)',
+      background:'var(--surface)',
+      overflow:'hidden',
+    }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width:'100%',padding:'8px 12px',
+          background:'transparent',border:'none',cursor:'pointer',
+          display:'flex',alignItems:'center',gap:10,
+          textAlign:'left',
+        }}>
+        <div style={{
+          width:18,height:18,borderRadius:4,flexShrink:0,
+          background: entry.ok ? 'color-mix(in oklab, var(--ok) 15%, transparent)' : 'color-mix(in oklab, var(--danger) 15%, transparent)',
+          color: entry.ok ? 'var(--ok)' : 'var(--danger)',
+          display:'grid',placeItems:'center',
+        }}>
+          {entry.ok ? <I.check size={11}/> : <I.x size={11}/>}
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:12,fontWeight:500,display:'flex',gap:6,alignItems:'center'}}>
+            <span>{opLabel}</span>
+            <span style={{color:'var(--fg-3)',fontWeight:400}}>·</span>
+            <span style={{color:'var(--fg-3)',fontWeight:400}}>{providerShort}{entry.model ? ` · ${entry.model}` : ''}</span>
+          </div>
+          <div style={{fontSize:10.5,color:'var(--fg-3)',marginTop:2}}>{when}</div>
+        </div>
+        <div style={{fontSize:10.5,color:'var(--fg-3)'}}>{expanded ? '▾' : '▸'}</div>
+      </button>
+      {expanded && (
+        <div style={{padding:'0 12px 12px',borderTop:'1px solid var(--line)'}}>
+          <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',margin:'10px 0 4px'}}>Prompt</div>
+          <pre style={{margin:0,padding:10,background:'var(--surface-2)',borderRadius:'var(--r-sm)',fontSize:11,fontFamily:'var(--font-mono)',whiteSpace:'pre-wrap',wordBreak:'break-word',maxHeight:240,overflow:'auto'}}>
+            {entry.prompt || '(vacío)'}
+          </pre>
+          <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',margin:'12px 0 4px'}}>
+            {entry.ok ? 'Respuesta' : 'Error'}
+          </div>
+          <pre style={{margin:0,padding:10,background:'var(--surface-2)',borderRadius:'var(--r-sm)',fontSize:11,fontFamily:'var(--font-mono)',whiteSpace:'pre-wrap',wordBreak:'break-word',maxHeight:240,overflow:'auto',color: entry.ok ? undefined : 'var(--danger)'}}>
+            {entry.ok ? (entry.response || '(vacío)') : (entry.error || 'Sin detalle')}
+          </pre>
+          {entry.usage && (
+            <div style={{marginTop:8,fontSize:10.5,color:'var(--fg-3)'}}>
+              Tokens: {Object.entries(entry.usage).map(([k,v]) => `${k}=${v}`).join(' · ')}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

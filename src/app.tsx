@@ -179,7 +179,6 @@ function App() {
       <TweaksPanel tweaks={tweaks} setTweaks={setTweaks} visible={tweaksVisible}/>
 
       <Toasts/>
-      <AIImproveModal/>
       <UnsavedChangesModal/>
       {paletteOpen && <CommandPalette
         onClose={()=>setPaletteOpen(false)}

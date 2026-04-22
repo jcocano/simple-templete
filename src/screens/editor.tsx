@@ -860,6 +860,7 @@ function ImproveAIModal({ block, onClose, onApply }) {
   const [extra, setExtra] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [variants, setVariants] = React.useState([]);
+  const [error, setError] = React.useState(null);
 
   const ACTIONS = [
     {id:'rewrite', t:'Reescribir', d:'Manteniendo el sentido, con otras palabras', icon:'wand'},
@@ -872,17 +873,20 @@ function ImproveAIModal({ block, onClose, onApply }) {
 
   const currentText = block.data?.content?.text || block.data?.content?.label || block.data?.text || block.data?.label || '(sin texto)';
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setLoading(true);
-    setTimeout(() => {
-      // mock variantes
-      setVariants([
-        {t: currentText.replace(/\./g,' de verdad.') + ' ✨', label:'Variante 1'},
-        {t: currentText.split(' ').slice(0, Math.max(5, Math.floor(currentText.split(' ').length*0.7))).join(' ')+'.', label:'Variante 2 (más corta)'},
-        {t: currentText + ' Te va a encantar.', label:'Variante 3 (más cálida)'},
-      ]);
-      setLoading(false);
-    }, 1400);
+    setError(null);
+    const result = await window.stAI.improveText({ block, action, extra });
+    setLoading(false);
+    if (!result.ok) {
+      setError(result.error || 'No se pudo generar variantes.');
+      setVariants([]);
+      return;
+    }
+    setVariants(result.variants.map((t, i) => ({
+      t,
+      label: `Variante ${i + 1}`,
+    })));
   };
 
   const applyVariant = (t) => {
@@ -937,6 +941,19 @@ function ImproveAIModal({ block, onClose, onApply }) {
 
           <div className="prop-label" style={{marginBottom:6}}>Instrucción extra (opcional)</div>
           <input className="field" value={extra} onChange={e=>setExtra(e.target.value)} placeholder={action==='tone'?'Ej.: más cálido, como un amigo':action==='translate'?'Ej.: al portugués':'Ej.: mencionar envío gratis'}/>
+
+          {error && (
+            <div style={{
+              marginTop:14,padding:12,
+              background:'color-mix(in oklab, var(--danger) 12%, transparent)',
+              borderRadius:'var(--r-md)',
+              fontSize:12,color:'var(--danger)',
+              display:'flex',gap:8,
+            }}>
+              <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
+              <div><b>No pudimos generar.</b> {error}</div>
+            </div>
+          )}
 
           {variants.length > 0 && (
             <>

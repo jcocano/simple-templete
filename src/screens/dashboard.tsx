@@ -702,7 +702,7 @@ function Dashboard({ onOpen, onNew }) {
           ))}
         </div>
       </main>
-      {aiOpen && <AIGenerateModal onClose={()=>setAiOpen(false)} onGenerate={(prompt)=>{ setAiOpen(false); onNew && onNew({ai:true, prompt}); }}/>}
+      {aiOpen && <AIGenerateModal onClose={()=>setAiOpen(false)} onGenerated={(tpl)=>{ setAiOpen(false); onOpen && onOpen('editor', tpl); }}/>}
     </div>
   );
 }
@@ -710,14 +710,15 @@ function Dashboard({ onOpen, onNew }) {
 // ════════════════════════════════════════════════════════════════
 // AI Generate Modal — prompt para generar plantilla desde cero
 // ════════════════════════════════════════════════════════════════
-function AIGenerateModal({ onClose, onGenerate }) {
+function AIGenerateModal({ onClose, onGenerated }) {
   const aiCfg = window.stStorage.getSetting('ai', {});
-  const configured = aiCfg.enabled !== false && (aiCfg.key || aiCfg.provider === 'ollama');
+  const configured = aiCfg.enabled !== false && (aiCfg.keyConfigured || aiCfg.key || aiCfg.provider === 'ollama');
   const [prompt, setPrompt] = React.useState('');
   const [tone, setTone] = React.useState(aiCfg.tone || 'neutral');
   const [length, setLength] = React.useState('medio');
   const [blocks, setBlocks] = React.useState(['cabecera','titulo','texto','boton','footer']);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   const IDEAS = [
     { t:'Newsletter mensual', d:'Resumen de novedades, 3 artículos destacados, CTA a blog' },
@@ -744,11 +745,47 @@ function AIGenerateModal({ onClose, onGenerate }) {
 
   const toggleBlock = (id) => setBlocks(b => b.includes(id) ? b.filter(x=>x!==id) : [...b, id]);
 
-  const handleGen = () => {
+  const handleGen = async () => {
     if (!prompt.trim() || !configured) return;
     setLoading(true);
-    setTimeout(() => { setLoading(false); onGenerate(prompt); }, 1600);
+    setError(null);
+    const result = await window.stAI.generateTemplate({ prompt, tone, length, blocks });
+    if (!result.ok) {
+      setLoading(false);
+      setError(result.error || 'No se pudo generar la plantilla.');
+      return;
+    }
+    // Create a real template from the generated doc and open it in the editor.
+    try {
+      const newTpl = await window.stTemplates.create({
+        name: promptToName(prompt),
+        folder: 'Sin carpeta',
+        variant: 'newsletter',
+        color: '#e8e7fe',
+        status: 'draft',
+        starred: false,
+        doc: result.doc,
+      });
+      setLoading(false);
+      if (!newTpl) {
+        setError('No se pudo guardar la plantilla generada.');
+        return;
+      }
+      onGenerated && onGenerated(newTpl);
+    } catch (err) {
+      setLoading(false);
+      setError(err?.message || 'Error al crear la plantilla.');
+    }
   };
+
+  // Derive a short template name from the user's prompt. Trims to the first
+  // sentence / 60 chars and capitalizes, so the dashboard card has a label
+  // that's more descriptive than "Plantilla sin título".
+  function promptToName(p) {
+    const first = String(p).split(/[.\n]/)[0].trim();
+    const clipped = first.length > 60 ? first.slice(0, 57) + '…' : first;
+    return clipped.charAt(0).toUpperCase() + clipped.slice(1) || 'Plantilla con IA';
+  }
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -834,6 +871,19 @@ function AIGenerateModal({ onClose, onGenerate }) {
               );
             })}
           </div>
+
+          {error && (
+            <div style={{
+              marginTop:16,padding:12,
+              background:'color-mix(in oklab, var(--danger) 12%, transparent)',
+              borderRadius:'var(--r-md)',
+              fontSize:12,color:'var(--danger)',
+              display:'flex',gap:8,
+            }}>
+              <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
+              <div><b>No pudimos generar la plantilla.</b> {error}</div>
+            </div>
+          )}
         </div>
         <div className="modal-foot">
           <div style={{fontSize:11,color:'var(--fg-3)',flex:1}}>
