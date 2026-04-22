@@ -7,7 +7,8 @@ const platform = ua.includes("Mac") ? "darwin" : ua.includes("Win") ? "win32" : 
 document.documentElement.setAttribute("data-platform", platform);
 
 import "./lib/storage.tsx";
-import "./lib/migrate-legacy.tsx";
+import "./lib/workspaces.tsx";
+import "./lib/templates.tsx";
 import "./icons.tsx";
 import "./data.tsx";
 import "./ui.tsx";
@@ -34,7 +35,6 @@ import "./app.tsx";
 
 (async () => {
   await window.stStorage.boot();
-  await window.stMigrateLegacy();
   const root = ReactDOM.createRoot(document.getElementById("root"));
   root.render(<window.App />);
 })();

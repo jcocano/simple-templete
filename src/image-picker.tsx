@@ -85,7 +85,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
     .filter(i => folder==='all' || i.folder===folder)
     .filter(i => i.name.toLowerCase().includes(q.toLowerCase()));
 
-  const cdnConfig = window.stStorage.getSetting('storage', {}).mode || 'base64';
+  const cdnConfig = window.stStorage.getWSSetting('storage', {}).mode || 'base64';
 
   return (
     <div style={{

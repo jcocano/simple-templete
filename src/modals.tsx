@@ -1,5 +1,50 @@
 // Modals — Enviar/Exportar, Enviar prueba, Etiquetas
 
+// Variables now live INSIDE each template (see Bundle G.1 / template.vars).
+// Resolution order:
+//   1. If the editor is mounted, read/write its current template's vars via
+//      window.__stEditor.{getVars,setVars}.
+//   2. Otherwise (modal opened from dashboard / no template open), fall back
+//      to the workspace defaults so the user can still browse them — but the
+//      modal becomes read-only and points to Settings for edits.
+function useTemplateVars() {
+  const fromEditor = () => {
+    const ed = window.__stEditor;
+    return ed && typeof ed.getVars === 'function' ? ed.getVars() : null;
+  };
+  const fromWorkspace = () => window.stStorage.getWSSetting('vars', null) || VARIABLES;
+  const get = () => fromEditor() || fromWorkspace();
+  const [list, setList] = React.useState(get);
+  const [hasEditor, setHasEditor] = React.useState(() => !!fromEditor());
+
+  React.useEffect(() => {
+    const refresh = () => {
+      const ed = !!fromEditor();
+      setHasEditor(ed);
+      setList(get());
+    };
+    refresh();
+    window.addEventListener('st:template-change', refresh);
+    window.addEventListener('st:workspace-change', refresh);
+    window.addEventListener('st:settings-change', refresh);
+    return () => {
+      window.removeEventListener('st:template-change', refresh);
+      window.removeEventListener('st:workspace-change', refresh);
+      window.removeEventListener('st:settings-change', refresh);
+    };
+  }, []);
+
+  const setVars = (next) => {
+    const ed = window.__stEditor;
+    if (ed && typeof ed.setVars === 'function') {
+      ed.setVars(next);
+      setList(next);
+    }
+  };
+
+  return { vars: list, setVars, editable: hasEditor };
+}
+
 function Modal({ title, sub, onClose, children, footer, size }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -122,7 +167,7 @@ function SendTab({ onClose }) {
             Añadir <b>[PRUEBA]</b> al asunto para distinguirlo
           </label>
           <div style={{fontSize:11,color:'var(--fg-3)',lineHeight:1.5}}>
-            Usa la cuenta SMTP configurada en Ajustes → Envío de pruebas. Las etiquetas <code style={{fontFamily:'var(--font-mono)'}}>@nombre</code> aparecen con los valores de ejemplo.
+            Usa la cuenta SMTP configurada en Ajustes → Envío de pruebas. Las etiquetas <code style={{fontFamily:'var(--font-mono)'}}>{`{{nombre}}`}</code> aparecen con los valores de ejemplo.
           </div>
         </div>
       )}
@@ -142,7 +187,7 @@ function SendTab({ onClose }) {
           </div>
           <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12}}>
             <input type="checkbox" defaultChecked/>
-            Los datos de etiquetas aparecen con ejemplos (@nombre → "Carmen")
+            Los datos de etiquetas aparecen con ejemplos ({`{{nombre}}`} → "Carmen")
           </label>
         </div>
       )}
@@ -151,7 +196,7 @@ function SendTab({ onClose }) {
       <div className="row" style={{justifyContent:'flex-end',paddingTop:8,borderTop:'1px solid var(--line)',marginTop:4}}>
         <button className="btn ghost" onClick={onClose}>Cancelar</button>
         {action==='test' && <button className="btn primary" onClick={()=>{
-          window.toast && window.toast({ kind:'ok', title:`Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`, msg:'Suele tardar un par de minutos en llegar.' });
+          window.notify && window.notify('testDone', { kind:'ok', title:`Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`, msg:'Suele tardar un par de minutos en llegar.' });
           onClose();
         }}><I.send size={13}/> Mandar {emails.length} prueba{emails.length>1?'s':''}</button>}
         {action==='copy' && <button className="btn primary" onClick={onClose}><I.check size={13}/> Listo</button>}
@@ -186,24 +231,24 @@ function DevsTab({ onClose }) {
     <mj-section background-color="#e8eddd" padding="40px 32px">
       <mj-column>
         <mj-text font-size="28px" font-weight="600">
-          Hola, @nombre 👋
+          Hola, {{nombre}} 👋
         </mj-text>
-        <mj-text>Gracias por ser parte de @empresa.</mj-text>
+        <mj-text>Gracias por ser parte de {{empresa}}.</mj-text>
       </mj-column>
     </mj-section>
     ...
   </mj-body>
 </mjml>`,
-    txt: `Hola, @nombre
+    txt: `Hola, {{nombre}}
 
-Gracias por ser parte de @empresa.
+Gracias por ser parte de {{empresa}}.
 
 Estas son 3 novedades de noviembre:
 1. ...
 2. ...
 3. ...
 
-Desuscribir: @link_baja`,
+Desuscribir: {{link_baja}}`,
     amp: `<!doctype html>
 <html ⚡4email>
 <head><meta charset="utf-8">
@@ -276,7 +321,7 @@ Desuscribir: @link_baja`,
             window.toast && window.toast({ kind:'ok', title:`${fmt.toUpperCase()} copiado al portapapeles`, msg:'Ya lo puedes pegar donde quieras.' });
           }}><I.copy size={13}/> Copiar</button>
           <button className="btn primary" onClick={()=>{
-            window.toast && window.toast({ kind:'ok', title:`Descarga iniciada`, msg:`correo-noviembre.${fmt}` });
+            window.notify && window.notify('exportDone', { kind:'ok', title:`Descarga iniciada`, msg:`correo-noviembre.${fmt}` });
           }}><I.download size={13}/> Descargar {fmt.toUpperCase()}</button>
         </div>
       </div>
@@ -290,6 +335,7 @@ Desuscribir: @link_baja`,
 function TestSendModal({ onClose }) {
   const [emails, setEmails] = React.useState(['carmen@acme.com']);
   const [input, setInput] = React.useState('');
+  const { vars } = useTemplateVars();
   const add = () => {
     if (input && input.includes('@')) {
       setEmails(e => [...e, input.trim()]);
@@ -301,7 +347,7 @@ function TestSendModal({ onClose }) {
       footer={<>
         <button className="btn ghost" onClick={onClose}>Cancelar</button>
         <button className="btn primary" onClick={()=>{
-          window.toast && window.toast({ kind:'ok', title:`Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`, msg:'Suele tardar un par de minutos en llegar.' });
+          window.notify && window.notify('testDone', { kind:'ok', title:`Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`, msg:'Suele tardar un par de minutos en llegar.' });
           onClose();
         }}><I.send size={13}/> Mandar {emails.length} prueba{emails.length>1?'s':''}</button>
       </>}>
@@ -318,11 +364,11 @@ function TestSendModal({ onClose }) {
         </div>
         <div className="divider"/>
         <div className="prop-label">Datos de ejemplo para las etiquetas</div>
-        <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:6}}>Los valores que aparecerán en lugar de @nombre, @empresa, etc.</div>
+        <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:6}}>Los valores que aparecerán en lugar de {`{{nombre}}`}, {`{{empresa}}`}, etc.</div>
         <div style={{background:'var(--surface-2)',padding:12,borderRadius:'var(--r-md)',display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-          {VARIABLES.slice(0,6).map(v => (
+          {vars.slice(0,6).map(v => (
             <div key={v.key} style={{display:'flex',flexDirection:'column',gap:2}}>
-              <div style={{fontSize:11,color:'var(--fg-3)'}}><b style={{color:'var(--accent)',fontWeight:600}}>@{v.key}</b> — {v.label}</div>
+              <div style={{fontSize:11,color:'var(--fg-3)'}}><b style={{color:'var(--accent)',fontWeight:600,fontFamily:'var(--font-mono)'}}>{`{{${v.key}}}`}</b> — {v.label}</div>
               <input className="field" defaultValue={v.sample} style={{height:28,fontSize:12}}/>
             </div>
           ))}
@@ -347,35 +393,93 @@ function TestSendModal({ onClose }) {
 // VARIABLES / TAGS MODAL
 // ════════════════════════════════════════════════════════════════
 function VariablesModal({ onClose }) {
+  const { vars, setVars, editable } = useTemplateVars();
+  const [creating, setCreating] = React.useState(false);
+  const [draft, setDraft] = React.useState({ key:'', label:'', sample:'' });
+
+  const updateVar = (i, patch) => {
+    if (!editable) return;
+    setVars(vars.map((v, vi) => vi === i ? { ...v, ...patch } : v));
+  };
+  const removeVar = (i) => {
+    if (!editable) return;
+    setVars(vars.filter((_, vi) => vi !== i));
+  };
+  const submitNew = () => {
+    const key = draft.key.trim().replace(/^@/,'').replace(/\s+/g,'_');
+    if (!key) return;
+    if (vars.some(v => v.key === key)) {
+      window.toast && window.toast({ kind:'err', title:'Ya existe una etiqueta @'+key });
+      return;
+    }
+    setVars([...vars, { key, label: draft.label.trim() || key, sample: draft.sample.trim() || '', type:'texto' }]);
+    setCreating(false);
+    setDraft({ key:'', label:'', sample:'' });
+  };
+
   return (
-    <Modal title="Etiquetas que se rellenan solas"
-      sub="Escribe @nombre en cualquier texto y cada persona verá el suyo. Nosotros hacemos el trabajo."
+    <Modal title="Etiquetas de esta plantilla"
+      sub={editable
+        ? 'Escribe {{nombre}} (con dobles llaves) en cualquier bloque y se reemplaza por el valor de cada destinatario. Cada plantilla tiene sus propias etiquetas.'
+        : 'Abre una plantilla para editar sus etiquetas. Aquí ves los valores por defecto del workspace.'}
       size="wide" onClose={onClose}
       footer={<>
         <button className="btn ghost" onClick={onClose}>Cerrar</button>
-        <button className="btn primary" onClick={()=>{
-          window.toast && window.toast({ kind:'ok', title:'Etiqueta nueva creada', msg:'Ya puedes usarla en cualquier bloque de texto.' });
-        }}><I.plus size={13}/> Crear etiqueta nueva</button>
+        {editable && !creating && (
+          <button className="btn primary" onClick={()=>setCreating(true)}>
+            <I.plus size={13}/> Crear etiqueta nueva
+          </button>
+        )}
       </>}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
         <div>
           <div className="prop-label">Etiquetas disponibles</div>
-          <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8,lineHeight:1.5}}>Haz clic en cualquiera para copiarla, o arrástrala a un bloque de texto.</div>
+          <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8,lineHeight:1.5}}>
+            {editable
+              ? 'Haz clic para copiar la etiqueta tal cual va en el texto. Edita el valor de ejemplo para ajustar lo que verá el destinatario en la vista previa.'
+              : 'Solo lectura — abre una plantilla del dashboard para modificar.'}
+          </div>
+          {creating && (
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 28px',gap:6,padding:10,marginBottom:10,background:'var(--accent-soft)',borderRadius:'var(--r-md)',alignItems:'center'}}>
+              <input className="field" value={draft.key} onChange={e=>setDraft(d=>({...d,key:e.target.value}))} onKeyDown={e=>{if(e.key==='Enter')submitNew();if(e.key==='Escape')setCreating(false);}} placeholder="curso (sin {{}})" autoFocus style={{fontSize:12,padding:'4px 6px'}}/>
+              <input className="field" value={draft.label} onChange={e=>setDraft(d=>({...d,label:e.target.value}))} placeholder="Etiqueta" style={{fontSize:12,padding:'4px 6px'}}/>
+              <input className="field" value={draft.sample} onChange={e=>setDraft(d=>({...d,sample:e.target.value}))} placeholder="Ejemplo" style={{fontSize:12,padding:'4px 6px'}}/>
+              <button className="btn icon sm" onClick={submitNew} disabled={!draft.key.trim()} title="Crear"><I.check size={11}/></button>
+            </div>
+          )}
           <div style={{border:'1px solid var(--line)',borderRadius:'var(--r-md)',overflow:'hidden'}}>
-            {VARIABLES.map((v,i) => (
-              <div key={v.key} style={{display:'grid',gridTemplateColumns:'1fr 1fr 20px',gap:10,padding:'10px 12px',borderBottom:i<VARIABLES.length-1?'1px solid var(--line)':'none',alignItems:'center',fontSize:12,cursor:'pointer'}}>
+            {vars.length === 0 && (
+              <div style={{padding:'18px 14px',fontSize:12,color:'var(--fg-3)',textAlign:'center'}}>
+                Esta plantilla aún no tiene etiquetas. {editable && 'Usa "Crear etiqueta nueva" para empezar.'}
+              </div>
+            )}
+            {vars.map((v,i) => (
+              <div key={v.key+'_'+i} style={{display:'grid',gridTemplateColumns:'1fr 1.2fr 20px 20px',gap:10,padding:'10px 12px',borderBottom:i<vars.length-1?'1px solid var(--line)':'none',alignItems:'center',fontSize:12}}>
                 <div>
-                  <div style={{fontSize:13,fontWeight:600,color:'var(--accent)'}}>@{v.key}</div>
-                  <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>{v.label}</div>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--accent)',fontFamily:'var(--font-mono)'}}>{`{{${v.key}}}`}</div>
+                  <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>{v.label || v.key}</div>
                 </div>
-                <div style={{fontSize:11,color:'var(--fg-2)'}}>
-                  <span style={{fontSize:10,color:'var(--fg-3)'}}>Se verá como: </span>
-                  <b>{v.sample}</b>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <span style={{fontSize:10,color:'var(--fg-3)',flexShrink:0}}>Se verá:</span>
+                  {editable ? (
+                    <input className="field" value={v.sample||''} onChange={e=>updateVar(i,{sample:e.target.value})} style={{fontSize:12,padding:'2px 6px',height:24,fontWeight:500}}/>
+                  ) : (
+                    <b>{v.sample}</b>
+                  )}
                 </div>
-                <button className="btn icon sm ghost" title="Copiar" onClick={()=>{
-                  try { navigator.clipboard?.writeText('@'+v.key); } catch(e){}
-                  window.toast && window.toast({ kind:'ok', title:`@${v.key} copiada`, msg:'Pégala en cualquier bloque de texto.' });
-                }}><I.copy size={12}/></button>
+                <button className="btn icon sm ghost" title={`Copiar {{${v.key}}}`} onClick={()=>{
+                  const tag = `{{${v.key}}}`;
+                  try { navigator.clipboard?.writeText(tag); } catch(e){}
+                  window.toast && window.toast({ kind:'ok', title:`${tag} copiada` });
+                }}><I.copy size={11}/></button>
+                {editable ? (
+                  <button className="btn icon sm ghost" title="Eliminar etiqueta" style={{color:'var(--err,#e04f4f)'}}
+                    onClick={()=>{
+                      if (window.confirm(`Eliminar {{${v.key}}} de esta plantilla?`)) removeVar(i);
+                    }}>
+                    <I.trash size={11}/>
+                  </button>
+                ) : <span/>}
               </div>
             ))}
           </div>
@@ -406,7 +510,7 @@ function VariablesModal({ onClose }) {
           <div className="prop-label">Cómo se verá</div>
           <div style={{padding:14,background:'var(--surface-2)',borderRadius:'var(--r-md)',fontSize:13}}>
             <div style={{color:'var(--fg-3)',fontSize:11,marginBottom:6}}>
-              Tú escribiste: <span style={{color:'var(--accent)',fontWeight:600}}>Hola <b>@nombre</b>, aquí está tu pedido <b>@pedido</b></span>
+              Tú escribiste: <span style={{color:'var(--accent)',fontWeight:600,fontFamily:'var(--font-mono)'}}>Hola {`{{nombre}}`}, aquí está tu pedido {`{{pedido}}`}</span>
             </div>
             <div style={{color:'var(--fg)',fontWeight:500,padding:'6px 0',borderTop:'1px dashed var(--line)'}}>
               Carmen verá: <b>Hola Carmen, aquí está tu pedido #A-4821</b>

@@ -2,6 +2,7 @@ const electron = require("electron");
 const { app, BrowserWindow } = electron;
 const path = require("path");
 const db = require("./storage/db");
+const seed = require("./storage/seed");
 const storageIpc = require("./ipc/storage");
 const secretsIpc = require("./ipc/secrets");
 
@@ -55,6 +56,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   db.init();
+  seed.ensureFirstWorkspace();
   storageIpc.register();
   secretsIpc.register();
   createWindow();

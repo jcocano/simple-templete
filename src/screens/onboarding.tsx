@@ -21,7 +21,7 @@ function Onboarding({ onDone }) {
             <div className="step-n">2</div>
             <div>
               <div className="step-t">Personaliza con el nombre de cada persona</div>
-              <div className="step-d">Escribe <code style={{fontFamily:'var(--font-mono)',fontSize:12,background:'var(--surface-3)',padding:'1px 5px',borderRadius:3}}>@nombre</code> y cada destinatario verá el suyo. Nosotros nos encargamos del resto.</div>
+              <div className="step-d">Escribe <code style={{fontFamily:'var(--font-mono)',fontSize:12,background:'var(--surface-3)',padding:'1px 5px',borderRadius:3}}>{`{{nombre}}`}</code> y cada destinatario verá el suyo. Nosotros nos encargamos del resto.</div>
             </div>
           </li>
           <li>

@@ -12,26 +12,33 @@ const DELIVERY_PROVIDERS = [
 const MAX_RECIPIENTS = 5;
 
 function DeliveryModal({ onClose, embedded = false }) {
+  // Defaults pulled from the user's global account profile so the SMTP form
+  // arrives pre-filled with the right "from" name/email instead of hardcoded
+  // demo values. Per-workspace SMTP credentials still live in safeStorage.
+  const account = window.stStorage.getSetting('account', {}) || {};
+  const accountEmail = account.email || '';
+  const accountName = account.name || '';
   const DEFAULT_CFG = {
-    fromName:'Carmen Luna',
-    fromEmail:'carmen@acme.com',
-    recipients:['carmen@acme.com'],
+    fromName: accountName,
+    fromEmail: accountEmail,
+    recipients: accountEmail ? [accountEmail] : [],
     host:'', port:587, user:'', pass:'', security:'tls',
   };
 
-  const [provider, setProvider] = React.useState(() => window.stStorage.getSetting('delivery:provider', null));
+  const [provider, setProvider] = React.useState(() => window.stStorage.getWSSetting('delivery:provider', null));
   const [cfg, setCfg] = React.useState(DEFAULT_CFG);
   const [state, setState] = React.useState('idle'); // idle | sending | sent | err
-  const [connected, setConnected] = React.useState(() => window.stStorage.getSetting('delivery:connected', false));
+  const [connected, setConnected] = React.useState(() => window.stStorage.getWSSetting('delivery:connected', false));
   const [recipInput, setRecipInput] = React.useState('');
 
-  // Credentials live in safeStorage (encrypted); load async when the provider changes.
+  // Credentials live in safeStorage (encrypted) and are scoped to the
+  // current workspace via the `ws:<id>:` key prefix from secrets.wsKey().
   React.useEffect(() => {
     let alive = true;
     (async () => {
       const id = provider || 'gmail';
       try {
-        const raw = await window.stStorage.secrets.get(`delivery:cfg:${id}`);
+        const raw = await window.stStorage.secrets.get(window.stStorage.secrets.wsKey(`delivery:cfg:${id}`));
         if (!alive) return;
         if (raw) { try { setCfg(JSON.parse(raw)); return; } catch {} }
         setCfg(DEFAULT_CFG);
@@ -72,20 +79,25 @@ function DeliveryModal({ onClose, embedded = false }) {
     setTimeout(async () => {
       setState('sent');
       setConnected(true);
-      window.stStorage.setSetting('delivery:connected', true);
-      window.stStorage.setSetting('delivery:provider', provider);
+      window.stStorage.setWSSetting('delivery:connected', true);
+      window.stStorage.setWSSetting('delivery:provider', provider);
       try {
-        await window.stStorage.secrets.set(`delivery:cfg:${provider}`, JSON.stringify(cfg));
+        await window.stStorage.secrets.set(window.stStorage.secrets.wsKey(`delivery:cfg:${provider}`), JSON.stringify(cfg));
       } catch (err) {
         console.error('[delivery] save secret', err);
       }
+      window.notify && window.notify('testDone', {
+        kind: 'ok',
+        title: `Prueba enviada a ${(cfg.recipients || []).length || 1} destinatario${((cfg.recipients||[]).length||1)>1?'s':''}`,
+        msg: 'Suele tardar un par de minutos en llegar.',
+      });
     }, 1400);
   };
   const disconnect = () => {
     setConnected(false);
     setProvider(null);
     setState('idle');
-    window.stStorage.setSetting('delivery:connected', false);
+    window.stStorage.setWSSetting('delivery:connected', false);
   };
 
   // ── Step 1 body ──
@@ -264,7 +276,7 @@ function DeliveryModal({ onClose, embedded = false }) {
                 className="field"
                 value={cfg.fromName}
                 onChange={e=>update('fromName',e.target.value)}
-                placeholder="Carmen Luna"/>
+                placeholder={accountName || 'Tu nombre'}/>
             </div>
           )}
 

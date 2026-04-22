@@ -1,64 +1,113 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { templatesDir, ensureDirs } = require('./paths');
+const { workspaceTemplatesDir, ensureDirs } = require('./paths');
 const db = require('./db');
 
 const ID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
 
-function filePath(id) {
+function filePath(workspaceId, id) {
+  if (!ID_RE.test(workspaceId)) throw new Error(`invalid workspace id: ${workspaceId}`);
   if (!ID_RE.test(id)) throw new Error(`invalid template id: ${id}`);
-  return path.join(templatesDir(), `${id}.json`);
+  return path.join(workspaceTemplatesDir(workspaceId), `${id}.json`);
 }
 
-function list() {
+function list(workspaceId) {
   return db
     .get()
     .prepare(
       `SELECT id, name, created_at, updated_at
        FROM templates_index
+       WHERE workspace_id = ? AND deleted_at IS NULL
        ORDER BY updated_at DESC`
     )
-    .all();
+    .all(workspaceId);
 }
 
-function read(id) {
-  const p = filePath(id);
+function listTrashed(workspaceId) {
+  return db
+    .get()
+    .prepare(
+      `SELECT id, name, created_at, updated_at, deleted_at
+       FROM templates_index
+       WHERE workspace_id = ? AND deleted_at IS NOT NULL
+       ORDER BY deleted_at DESC`
+    )
+    .all(workspaceId);
+}
+
+function read(workspaceId, id) {
+  const p = filePath(workspaceId, id);
   if (!fs.existsSync(p)) return null;
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
-function write(id, doc) {
-  ensureDirs();
-  const p = filePath(id);
+function write(workspaceId, id, doc) {
+  // Guard: if the workspace was deleted in a race with a debounced write
+  // from the editor, skip instead of resurrecting an orphan index row.
+  const ws = db.get().prepare('SELECT id FROM workspaces WHERE id = ?').get(workspaceId);
+  if (!ws) return null;
+
+  ensureDirs(workspaceId);
+  const p = filePath(workspaceId, id);
   const tmp = `${p}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(doc, null, 2), 'utf8');
   fs.renameSync(tmp, p);
   const name = doc && typeof doc.name === 'string' ? doc.name : 'Sin título';
+  // Writes preserve existing deleted_at — restoring is an explicit op.
   db.get()
     .prepare(
-      `INSERT INTO templates_index (id, name, updated_at) VALUES (?, ?, datetime('now'))
+      `INSERT INTO templates_index (id, workspace_id, name, updated_at)
+       VALUES (?, ?, ?, datetime('now'))
        ON CONFLICT(id) DO UPDATE SET name = excluded.name, updated_at = excluded.updated_at`
     )
-    .run(id, name);
-  return { id, name };
+    .run(id, workspaceId, name);
+  return { id, workspaceId, name };
 }
 
-function remove(id) {
-  const p = filePath(id);
+// Soft-delete: keep the JSON file and the index row, just mark deleted_at.
+// Hard deletion happens via purge() or on workspace delete cascade.
+function remove(workspaceId, id) {
+  db.get()
+    .prepare(
+      `UPDATE templates_index
+       SET deleted_at = datetime('now')
+       WHERE workspace_id = ? AND id = ?`
+    )
+    .run(workspaceId, id);
+  return true;
+}
+
+function restore(workspaceId, id) {
+  db.get()
+    .prepare(
+      `UPDATE templates_index
+       SET deleted_at = NULL
+       WHERE workspace_id = ? AND id = ?`
+    )
+    .run(workspaceId, id);
+  return true;
+}
+
+// Hard delete: removes the JSON file and the index row unconditionally.
+function purge(workspaceId, id) {
+  const p = filePath(workspaceId, id);
   if (fs.existsSync(p)) fs.unlinkSync(p);
-  db.get().prepare('DELETE FROM templates_index WHERE id = ?').run(id);
+  db.get()
+    .prepare('DELETE FROM templates_index WHERE id = ? AND workspace_id = ?')
+    .run(id, workspaceId);
+  return true;
 }
 
-function rename(id, name) {
-  const doc = read(id);
+function rename(workspaceId, id, name) {
+  const doc = read(workspaceId, id);
   if (!doc) return null;
   doc.name = name;
-  return write(id, doc);
+  return write(workspaceId, id, doc);
 }
 
 function newId() {
   return `tpl_${crypto.randomBytes(8).toString('hex')}`;
 }
 
-module.exports = { list, read, write, remove, rename, newId };
+module.exports = { list, listTrashed, read, write, remove, restore, purge, rename, newId };

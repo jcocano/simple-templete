@@ -4,11 +4,14 @@ const invoke = (channel, ...args) => ipcRenderer.invoke(channel, ...args);
 
 contextBridge.exposeInMainWorld('storage', {
   templates: {
-    list: () => invoke('storage:templates:list'),
-    read: (id) => invoke('storage:templates:read', id),
-    write: (id, doc) => invoke('storage:templates:write', id, doc),
-    remove: (id) => invoke('storage:templates:remove', id),
-    rename: (id, name) => invoke('storage:templates:rename', id, name),
+    list: (workspaceId) => invoke('storage:templates:list', workspaceId),
+    listTrashed: (workspaceId) => invoke('storage:templates:listTrashed', workspaceId),
+    read: (workspaceId, id) => invoke('storage:templates:read', workspaceId, id),
+    write: (workspaceId, id, doc) => invoke('storage:templates:write', workspaceId, id, doc),
+    remove: (workspaceId, id) => invoke('storage:templates:remove', workspaceId, id),
+    restore: (workspaceId, id) => invoke('storage:templates:restore', workspaceId, id),
+    purge: (workspaceId, id) => invoke('storage:templates:purge', workspaceId, id),
+    rename: (workspaceId, id, name) => invoke('storage:templates:rename', workspaceId, id, name),
     newId: () => invoke('storage:templates:newId')
   },
   settings: {
@@ -16,6 +19,19 @@ contextBridge.exposeInMainWorld('storage', {
     set: (key, value) => invoke('storage:settings:set', key, value),
     remove: (key) => invoke('storage:settings:remove', key),
     list: () => invoke('storage:settings:list')
+  },
+  workspaces: {
+    list: () => invoke('storage:workspaces:list'),
+    create: (name) => invoke('storage:workspaces:create', name),
+    rename: (id, name) => invoke('storage:workspaces:rename', id, name),
+    remove: (id) => invoke('storage:workspaces:remove', id),
+    countTemplates: (id) => invoke('storage:workspaces:countTemplates', id)
+  },
+  wsSettings: {
+    get: (workspaceId, key) => invoke('storage:wsSettings:get', workspaceId, key),
+    set: (workspaceId, key, value) => invoke('storage:wsSettings:set', workspaceId, key, value),
+    remove: (workspaceId, key) => invoke('storage:wsSettings:remove', workspaceId, key),
+    list: (workspaceId) => invoke('storage:wsSettings:list', workspaceId)
   }
 });
 

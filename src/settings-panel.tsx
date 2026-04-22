@@ -2,12 +2,15 @@
 // Section 3 (Envío de pruebas) reuses DeliveryInner from smtp-modal.jsx
 
 const SETTINGS_SECTIONS = [
+  { id:'workspace',  label:'Espacios',                    icon:'layers',   desc:'Crea, renombra o borra espacios de trabajo' },
   { id:'account',    label:'Perfil',                      icon:'user',     desc:'Tu nombre y cómo apareces en las plantillas' },
   { id:'brand',      label:'Marca',                       icon:'palette',  desc:'Colores, fuentes, logo, footer legal' },
   { id:'appearance', label:'Apariencia',                  icon:'sun',      desc:'Tema, densidad, esquinas y tipografía de la app' },
+  { id:'editor',     label:'Editor',                      icon:'edit',     desc:'Autoguardado, grid y regla del canvas' },
   { id:'storage',    label:'Almacenamiento de imágenes',  icon:'image',    desc:'Dónde se alojan las imágenes de tus correos' },
   { id:'delivery',   label:'Envío de pruebas',            icon:'send',     desc:'Cuenta desde la que envías pruebas' },
-  { id:'variables',  label:'Variables globales',          icon:'braces',   desc:'Valores de ejemplo para el preview' },
+  { id:'variables',  label:'Variables por defecto',       icon:'braces',   desc:'Etiquetas que se copian a las plantillas nuevas' },
+  { id:'export',     label:'Exportación',                 icon:'download', desc:'Formato por defecto al exportar el correo' },
   { id:'ai',         label:'Inteligencia artificial',     icon:'sparkles', desc:'Proveedor, API key y modelo para generar o mejorar plantillas' },
   { id:'notif',      label:'Notificaciones',              icon:'bell',     desc:'Avisos internos de la app: guardado, exportación, pruebas, actualizaciones' },
 ];
@@ -15,6 +18,7 @@ const SETTINGS_SECTIONS = [
 function SettingsPanel({ onClose, initialSection='account' }) {
   const [section, setSection] = React.useState(initialSection);
   const [saved, setSaved] = React.useState(false);
+  const currentWorkspace = useCurrentWorkspace();
 
   // Flash "Guardado" on any field change
   const flashSaved = () => {
@@ -68,7 +72,9 @@ function SettingsPanel({ onClose, initialSection='account' }) {
             }}>A</div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:12.5,fontWeight:500}}>Ajustes</div>
-              <div style={{fontSize:10.5,color:'var(--fg-3)'}}>Espacio Acme</div>
+              <div style={{fontSize:10.5,color:'var(--fg-3)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+                Espacio {currentWorkspace?.name || '…'}
+              </div>
             </div>
           </div>
 
@@ -136,15 +142,19 @@ function SettingsPanel({ onClose, initialSection='account' }) {
 
           {/* Body */}
           <div style={{flex:1,overflow:'auto',padding:'24px 28px 32px'}}>
+            {section==='workspace'   && <WorkspaceSection onChange={flashSaved}/>}
             {section==='account'     && <AccountSection onChange={flashSaved}/>}
-            {section==='brand'       && <BrandSection onChange={flashSaved}/>}
             {section==='appearance'  && <AppearanceSection onChange={flashSaved}/>}
-            {section==='storage'     && <StorageSection onChange={flashSaved}/>}
-            {section==='delivery'    && <DeliveryInner/>}
-            {section==='editor'      && <EditorSection onChange={flashSaved}/>}
-            {section==='variables'   && <VariablesSection onChange={flashSaved}/>}
             {section==='ai'          && <AISection onChange={flashSaved}/>}
-            {section==='notif'       && <NotifSection onChange={flashSaved}/>}
+            {/* Per-workspace sections: key bump forces remount on workspace switch
+                so each section re-reads its state from the new workspace. */}
+            {section==='brand'       && <BrandSection key={currentWorkspace?.id} onChange={flashSaved}/>}
+            {section==='storage'     && <StorageSection key={currentWorkspace?.id} onChange={flashSaved}/>}
+            {section==='delivery'    && <div key={currentWorkspace?.id}><DeliveryInner/></div>}
+            {section==='editor'      && <EditorSection key={currentWorkspace?.id} onChange={flashSaved}/>}
+            {section==='variables'   && <VariablesSection key={currentWorkspace?.id} onChange={flashSaved}/>}
+            {section==='export'      && <ExportSection key={currentWorkspace?.id} onChange={flashSaved}/>}
+            {section==='notif'       && <NotifSection key={currentWorkspace?.id} onChange={flashSaved}/>}
           </div>
         </section>
       </div>
@@ -183,6 +193,260 @@ function SGroup({ title, children }) {
       }}>{title}</div>}
       {children}
     </div>
+  );
+}
+
+// Banner used by sections whose values persist correctly per-workspace but
+// don't have a consumer wired yet. Promised to the user as P1 work.
+function SoonBanner({ msg }) {
+  return (
+    <div style={{
+      padding:'10px 14px',marginBottom:18,
+      borderRadius:'var(--r-md)',
+      background:'color-mix(in oklab, #f0b042 12%, transparent)',
+      border:'1px solid color-mix(in oklab, #f0b042 40%, var(--line))',
+      display:'flex',gap:10,alignItems:'flex-start',
+      fontSize:12,lineHeight:1.55,color:'var(--fg-2)',
+    }}>
+      <I.info size={14} style={{color:'#b87a18',flexShrink:0,marginTop:1}}/>
+      <div>
+        <b style={{color:'var(--fg-1)'}}>Pronto en una versión próxima.</b> {msg || 'Tus cambios se guardan en el espacio actual, pero la app aún no los está aplicando.'}
+      </div>
+    </div>
+  );
+}
+
+// ───────────────────────────── Workspace ─────────────────────────────
+function WorkspaceSection({ onChange }) {
+  const workspaces = useWorkspaces();
+  const current = useCurrentWorkspace();
+  const [creating, setCreating] = React.useState(false);
+  const [newName, setNewName] = React.useState('');
+  const [renaming, setRenaming] = React.useState(null); // {id, name}
+  const [counts, setCounts] = React.useState({});
+  const [confirmDelete, setConfirmDelete] = React.useState(null); // {id, name, count}
+  const [deleteWord, setDeleteWord] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
+
+  // Template counts per workspace, refreshed when the workspace list or any
+  // template mutates.
+  React.useEffect(() => {
+    let alive = true;
+    const refresh = async () => {
+      const entries = await Promise.all(
+        workspaces.map(async (w) => [w.id, await window.stWorkspaces.countTemplates(w.id)])
+      );
+      if (alive) setCounts(Object.fromEntries(entries));
+    };
+    refresh();
+    window.addEventListener('st:template-change', refresh);
+    return () => {
+      alive = false;
+      window.removeEventListener('st:template-change', refresh);
+    };
+  }, [workspaces]);
+
+  const submitCreate = async () => {
+    const nm = newName.trim();
+    if (!nm) { setCreating(false); return; }
+    const ws = await window.stWorkspaces.create(nm);
+    if (ws?.id) await window.stWorkspaces.switch(ws.id);
+    setCreating(false);
+    setNewName('');
+    onChange && onChange();
+  };
+
+  const submitRename = async () => {
+    if (!renaming) return;
+    const nm = renaming.name.trim();
+    const currentName = workspaces.find((w) => w.id === renaming.id)?.name;
+    if (nm && nm !== currentName) {
+      await window.stWorkspaces.rename(renaming.id, nm);
+      onChange && onChange();
+    }
+    setRenaming(null);
+  };
+
+  const openDelete = async (w) => {
+    const count = await window.stWorkspaces.countTemplates(w.id);
+    setConfirmDelete({ id: w.id, name: w.name, count });
+    setDeleteWord('');
+  };
+
+  const runDelete = async () => {
+    if (!confirmDelete || deleteWord !== 'BORRAR') return;
+    setBusy(true);
+    try {
+      const result = await window.stWorkspaces.remove(confirmDelete.id);
+      if (!result || !result.error) {
+        onChange && onChange();
+        setConfirmDelete(null);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const isLast = workspaces.length <= 1;
+
+  return (
+    <>
+      <SGroup title={`Mis espacios · ${workspaces.length}`}>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {workspaces.map((w) => {
+            const isCurrent = w.id === current?.id;
+            const count = counts[w.id];
+            const isRenaming = renaming?.id === w.id;
+            return (
+              <div key={w.id} style={{
+                display:'flex',alignItems:'center',gap:12,
+                padding:'12px 14px',
+                borderRadius:'var(--r-md)',
+                border:'1px solid var(--line)',
+                background: isCurrent ? 'color-mix(in oklab, var(--accent) 6%, var(--surface))' : 'var(--surface)',
+              }}>
+                <div style={{
+                  width:32,height:32,borderRadius:'var(--r-sm)',
+                  background:'var(--accent-soft)',color:'var(--accent)',
+                  display:'grid',placeItems:'center',
+                  fontFamily:'var(--font-display)',fontWeight:600,fontSize:14,
+                  flexShrink:0,
+                }}>
+                  {(w.name || '?').slice(0,1).toUpperCase()}
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  {isRenaming ? (
+                    <input
+                      autoFocus
+                      className="field"
+                      value={renaming.name}
+                      onChange={e=>setRenaming({...renaming, name:e.target.value})}
+                      onKeyDown={e=>{
+                        if (e.key === 'Enter') submitRename();
+                        if (e.key === 'Escape') setRenaming(null);
+                      }}
+                      onBlur={submitRename}
+                      style={{fontSize:13,padding:'4px 8px'}}
+                    />
+                  ) : (
+                    <div style={{fontSize:13,fontWeight:500,display:'flex',alignItems:'center',gap:6}}>
+                      <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{w.name}</span>
+                      {isCurrent && <span className="chip" style={{fontSize:10,background:'var(--accent-soft)',color:'var(--accent)',flexShrink:0}}>Activo</span>}
+                    </div>
+                  )}
+                  <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>
+                    {count == null ? '…' : `${count} plantilla${count===1?'':'s'}`}
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:4,flexShrink:0}}>
+                  {!isCurrent && !isRenaming && (
+                    <button className="btn sm ghost" onClick={()=>window.stWorkspaces.switch(w.id)}>Cambiar aquí</button>
+                  )}
+                  {!isRenaming && (
+                    <button className="btn icon sm ghost" title="Renombrar"
+                      onClick={()=>setRenaming({id:w.id, name:w.name})}>
+                      <I.edit size={12}/>
+                    </button>
+                  )}
+                  <button
+                    className="btn icon sm ghost"
+                    title={isLast ? 'No puedes borrar tu único espacio — crea otro antes.' : 'Eliminar'}
+                    disabled={isLast}
+                    onClick={()=>openDelete(w)}
+                    style={{
+                      opacity: isLast ? 0.4 : 1,
+                      color: isLast ? undefined : 'var(--err, #e04f4f)',
+                      cursor: isLast ? 'not-allowed' : 'pointer',
+                    }}>
+                    <I.trash size={12}/>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </SGroup>
+
+      <SGroup title="Crear espacio nuevo">
+        {creating ? (
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input
+              autoFocus
+              className="field"
+              value={newName}
+              onChange={e=>setNewName(e.target.value)}
+              onKeyDown={e=>{
+                if (e.key === 'Enter') submitCreate();
+                if (e.key === 'Escape') { setCreating(false); setNewName(''); }
+              }}
+              placeholder="Ej. Marca B, Cliente X, Personal…"
+              style={{flex:1}}
+            />
+            <button className="btn primary sm" onClick={submitCreate} disabled={!newName.trim()}>Crear</button>
+            <button className="btn ghost sm" onClick={()=>{ setCreating(false); setNewName(''); }}>Cancelar</button>
+          </div>
+        ) : (
+          <button className="btn" onClick={()=>setCreating(true)}><I.plus size={13}/> Crear espacio nuevo</button>
+        )}
+      </SGroup>
+
+      <SGroup title="Cómo funcionan los espacios">
+        <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.6,padding:12,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)'}}>
+          Cada espacio tiene sus propias plantillas, marca, variables, envío de pruebas y preferencias.
+          Los ajustes globales (tu perfil, apariencia de la app, clave de IA) se comparten entre todos.
+          Borrar un espacio elimina sus plantillas para siempre — incluidas las que estén en la papelera.
+        </div>
+      </SGroup>
+
+      {confirmDelete && (
+        <div className="modal-backdrop" onClick={busy ? undefined : ()=>setConfirmDelete(null)}>
+          <div className="modal pop" onClick={e=>e.stopPropagation()} style={{maxWidth:460}}>
+            <div className="modal-head">
+              <div style={{
+                width:32,height:32,borderRadius:'var(--r-sm)',
+                background:'color-mix(in oklab, #e04f4f 15%, transparent)',
+                color:'#e04f4f',display:'grid',placeItems:'center',flexShrink:0,
+              }}>
+                <I.trash size={15}/>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <h3>Eliminar «{confirmDelete.name}»</h3>
+                <div className="sub">
+                  Vas a borrar este espacio{confirmDelete.count>0 ? ` y sus ${confirmDelete.count} plantilla${confirmDelete.count===1?'':'s'}` : ''}. No se puede deshacer.
+                </div>
+              </div>
+            </div>
+            <div className="modal-body">
+              <div style={{fontSize:12.5,color:'var(--fg-2)',marginBottom:10}}>
+                Para confirmar, escribe <b style={{fontFamily:'var(--font-mono)'}}>BORRAR</b> abajo:
+              </div>
+              <input
+                autoFocus
+                className="field"
+                value={deleteWord}
+                onChange={e=>setDeleteWord(e.target.value)}
+                onKeyDown={e=>{ if (e.key === 'Enter' && deleteWord === 'BORRAR') runDelete(); }}
+                placeholder="BORRAR"
+                style={{fontFamily:'var(--font-mono)',letterSpacing:'0.08em'}}
+              />
+            </div>
+            <div className="modal-foot">
+              <button className="btn ghost" onClick={()=>setConfirmDelete(null)} disabled={busy}>Cancelar</button>
+              <button
+                className="btn primary"
+                onClick={runDelete}
+                disabled={busy || deleteWord !== 'BORRAR'}
+                style={{
+                  background: deleteWord==='BORRAR' ? '#e04f4f' : undefined,
+                  borderColor: deleteWord==='BORRAR' ? '#e04f4f' : undefined,
+                }}>
+                {busy ? 'Eliminando…' : 'Eliminar definitivamente'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -390,10 +654,16 @@ function AccountSection({ onChange }) {
     <>
       <SGroup title="Tu perfil">
         <SRow label="Nombre" hint="Aparece como remitente por defecto en los correos de prueba.">
-          <input className="field" value={acc.name||'Carmen Luna'} onChange={e=>set('name',e.target.value)}/>
+          <input className="field"
+            value={acc.name||''}
+            placeholder="Tu nombre"
+            onChange={e=>set('name',e.target.value)}/>
         </SRow>
         <SRow label="Correo" hint="Se usa como remitente por defecto en pruebas.">
-          <input className="field" type="email" value={acc.email||'carmen@estudio.com'} onChange={e=>set('email',e.target.value)}/>
+          <input className="field" type="email"
+            value={acc.email||''}
+            placeholder="tu@correo.com"
+            onChange={e=>set('email',e.target.value)}/>
         </SRow>
         <SRow label="Avatar" hint="Imagen local. Se muestra solo dentro de la app.">
           <div style={{display:'flex',gap:12,alignItems:'center'}}>
@@ -402,7 +672,7 @@ function AccountSection({ onChange }) {
               background:'linear-gradient(135deg,#5b5bf0,#8b5cf6)',
               color:'#fff',display:'grid',placeItems:'center',
               fontFamily:'var(--font-display)',fontWeight:700,fontSize:22,
-            }}>{(acc.name||'CL').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()}</div>
+            }}>{((acc.name||'').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()) || '?'}</div>
             <div className="col" style={{gap:4}}>
               <button className="btn sm"><I.upload size={12}/> Subir imagen</button>
               <button className="btn sm ghost" style={{color:'var(--fg-3)'}}>Quitar</button>
@@ -479,9 +749,9 @@ function StorageSection({ onChange }) {
     imgbb: { apiKey:'' },
     github: { repo:'', branch:'main', token:'', path:'assets/' },
     ftp: { host:'', port:'21', user:'', password:'', path:'/public_html/img/', publicUrl:'' },
-    ...window.stStorage.getSetting('storage', {}),
+    ...window.stStorage.getWSSetting('storage', {}),
   }));
-  const save = (next) => { setS(next); window.stStorage.setSetting('storage', next); onChange(); };
+  const save = (next) => { setS(next); window.stStorage.setWSSetting('storage', next); onChange(); };
   const setMode = (mode) => save({...s, mode});
   const setField = (provider, k, v) => save({...s, [provider]: {...s[provider], [k]:v}});
 
@@ -738,36 +1008,100 @@ function StorageSection({ onChange }) {
 }
 
 // ───────────────────────────── Brand ─────────────────────────────
+// Single swatch with native color picker + remove-on-hover. Used by BrandSection.
+function ColorSwatch({ value, onChange, onRemove }) {
+  const inputRef = React.useRef(null);
+  const [hover, setHover] = React.useState(false);
+  return (
+    <div
+      style={{position:'relative'}}
+      onMouseEnter={()=>setHover(true)}
+      onMouseLeave={()=>setHover(false)}
+    >
+      <div
+        onClick={()=>inputRef.current?.click()}
+        title="Cambiar color"
+        style={{
+          width:40,height:40,borderRadius:'var(--r-sm)',
+          background:value,
+          border:'1px solid var(--line)',
+          cursor:'pointer',
+        }}
+      />
+      <input
+        ref={inputRef}
+        type="color"
+        value={value}
+        onChange={e=>onChange(e.target.value)}
+        style={{position:'absolute',inset:0,opacity:0,pointerEvents:'none',width:0,height:0}}
+        aria-hidden="true"
+      />
+      <div style={{fontSize:10,color:'var(--fg-3)',fontFamily:'var(--font-mono)',textAlign:'center',marginTop:4}}>{value}</div>
+      {onRemove && hover && (
+        <button
+          onClick={(e)=>{ e.stopPropagation(); onRemove(); }}
+          title="Eliminar color"
+          aria-label="Eliminar color"
+          style={{
+            position:'absolute',top:-6,right:-6,
+            width:18,height:18,borderRadius:'50%',
+            background:'#e04f4f',color:'#fff',border:'none',
+            display:'grid',placeItems:'center',cursor:'pointer',
+            fontSize:12,lineHeight:1,padding:0,
+            boxShadow:'0 1px 4px rgba(0,0,0,.25)',
+          }}>×</button>
+      )}
+    </div>
+  );
+}
+
 function BrandSection({ onChange }) {
-  const [brand, setBrand] = React.useState(() => window.stStorage.getSetting('brand', {}));
-  const set = (k,v) => { const n = {...brand, [k]:v}; setBrand(n); window.stStorage.setSetting('brand', n); onChange(); };
+  const [brand, setBrand] = React.useState(() => window.stStorage.getWSSetting('brand', {}));
+  const set = (k,v) => { const n = {...brand, [k]:v}; setBrand(n); window.stStorage.setWSSetting('brand', n); onChange(); };
 
   const colors = brand.colors || ['#5b5bf0','#1a1a2e','#f6f5f1','#e8eddd','#d97757'];
   const fonts  = ['Inter','Söhne','Fraunces','DM Serif Display','Instrument Serif','Playfair Display','Space Grotesk','IBM Plex Sans'];
 
+  const addRef = React.useRef(null);
+  const setColors = (next) => set('colors', next);
+  const updateColorAt = (i, v) => setColors(colors.map((c, ci) => ci===i ? v : c));
+  const removeColorAt = (i) => setColors(colors.filter((_, ci) => ci !== i));
+  const appendColor = (v) => setColors([...colors, v]);
+
   return (
     <>
       <SGroup title="Identidad visual">
-        <SRow label="Paleta de colores" hint="Los primeros 5 aparecen en el editor como accesos rápidos.">
-          <div style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
-            {colors.map((c,i) => (
-              <div key={i} style={{position:'relative'}}>
-                <div style={{
-                  width:40,height:40,borderRadius:'var(--r-sm)',
-                  background:c,
-                  border:'1px solid var(--line)',
-                  cursor:'pointer',
-                }}/>
-                <div style={{fontSize:10,color:'var(--fg-3)',fontFamily:'var(--font-mono)',textAlign:'center',marginTop:4}}>{c}</div>
-              </div>
+        <SRow label="Paleta de colores" hint="Los primeros 5 aparecen en el editor como accesos rápidos. Pasa el mouse sobre uno para borrarlo, o haz clic para cambiarlo.">
+          <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'flex-start',paddingTop:6}}>
+            {colors.map((c, i) => (
+              <ColorSwatch
+                key={i}
+                value={c}
+                onChange={(v)=>updateColorAt(i, v)}
+                onRemove={colors.length > 1 ? ()=>removeColorAt(i) : null}
+              />
             ))}
-            <button style={{
-              width:40,height:40,borderRadius:'var(--r-sm)',
-              border:'1px dashed var(--line)',
-              background:'transparent',
-              color:'var(--fg-3)',cursor:'pointer',
-              display:'grid',placeItems:'center',
-            }}><I.plus size={14}/></button>
+            <div style={{position:'relative'}}>
+              <button
+                onClick={()=>addRef.current?.click()}
+                title="Añadir color"
+                aria-label="Añadir color"
+                style={{
+                  width:40,height:40,borderRadius:'var(--r-sm)',
+                  border:'1px dashed var(--line)',
+                  background:'transparent',
+                  color:'var(--fg-3)',cursor:'pointer',
+                  display:'grid',placeItems:'center',
+                }}><I.plus size={14}/></button>
+              <input
+                ref={addRef}
+                type="color"
+                defaultValue="#888888"
+                onChange={e=>appendColor(e.target.value)}
+                style={{position:'absolute',inset:0,opacity:0,pointerEvents:'none',width:0,height:0}}
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </SRow>
 
@@ -802,13 +1136,22 @@ function BrandSection({ onChange }) {
 
       <SGroup title="Footer legal (requerido por ley)">
         <SRow label="Dirección física" hint="CAN-SPAM / RGPD exigen una dirección postal real en todos los correos comerciales.">
-          <textarea className="field" rows="2" placeholder="Ej. Acme SA · Av. Reforma 123, CDMX 06600, México" defaultValue={brand.address||'Acme SA · Av. Reforma 123, CDMX 06600'}/>
+          <textarea className="field" rows="2"
+            placeholder="Ej. Acme SA · Av. Reforma 123, CDMX 06600, México"
+            value={brand.address || ''}
+            onChange={e=>set('address', e.target.value)}/>
         </SRow>
         <SRow label="Enlace de baja" hint="URL a la que lleva el botón 'Darme de baja' en el footer.">
-          <input className="field" placeholder="https://acme.com/unsubscribe" defaultValue={brand.unsubscribe||'https://acme.com/baja'}/>
+          <input className="field"
+            placeholder="https://acme.com/unsubscribe"
+            value={brand.unsubscribe || ''}
+            onChange={e=>set('unsubscribe', e.target.value)}/>
         </SRow>
         <SRow label="Texto del footer" hint="Aparece debajo del botón de baja en todos los envíos.">
-          <textarea className="field" rows="3" defaultValue={brand.footer||'Recibes este correo porque te suscribiste en acme.com. Puedes actualizar tus preferencias o darte de baja cuando quieras.'}/>
+          <textarea className="field" rows="3"
+            placeholder="Recibes este correo porque te suscribiste en acme.com. Puedes actualizar tus preferencias o darte de baja cuando quieras."
+            value={brand.footer || ''}
+            onChange={e=>set('footer', e.target.value)}/>
         </SRow>
       </SGroup>
     </>
@@ -823,8 +1166,8 @@ function DeliveryInner() {
 
 // ───────────────────────────── Editor ─────────────────────────────
 function EditorSection({ onChange }) {
-  const [ed, setEd] = React.useState(() => window.stStorage.getSetting('editor', {}));
-  const set = (k,v) => { const n = {...ed, [k]:v}; setEd(n); window.stStorage.setSetting('editor', n); onChange(); };
+  const [ed, setEd] = React.useState(() => window.stStorage.getWSSetting('editor', {}));
+  const set = (k,v) => { const n = {...ed, [k]:v}; setEd(n); window.stStorage.setWSSetting('editor', n); onChange(); };
 
   const Seg = ({value, options, onPick}) => (
     <div style={{display:'inline-flex',background:'var(--surface-2)',padding:3,borderRadius:'var(--r-sm)',gap:2,border:'1px solid var(--line)'}}>
@@ -847,6 +1190,7 @@ function EditorSection({ onChange }) {
 
   return (
     <>
+      <SoonBanner msg="Las preferencias del editor se guardan en este espacio, pero el editor aún no las consulta. Está en cola para una próxima versión."/>
       <SGroup title="Apariencia">
         <SRow label="Tema" hint="Claro, oscuro o sincronizado con el sistema operativo.">
           <Seg value={ed.theme||'system'} onPick={v=>set('theme',v)} options={[
@@ -927,15 +1271,28 @@ function EditorSection({ onChange }) {
 
 // ───────────────────────────── Variables ─────────────────────────────
 function VariablesSection({ onChange }) {
-  const [vars, setVars] = React.useState(() => window.stStorage.getSetting('vars', null) || VARIABLES);
-  const save = (next) => { setVars(next); window.stStorage.setSetting('vars', next); onChange(); };
+  const [vars, setVars] = React.useState(() => window.stStorage.getWSSetting('vars', null) || VARIABLES);
+  const save = (next) => { setVars(next); window.stStorage.setWSSetting('vars', next); onChange(); };
   const setVal = (i,v) => save(vars.map((x,j)=>j===i?{...x,sample:v}:x));
 
   return (
     <>
-      <SGroup title="Valores de ejemplo para el preview">
+      <div style={{
+        padding:'10px 14px',marginBottom:18,
+        borderRadius:'var(--r-md)',
+        background:'var(--accent-soft)',
+        border:'1px solid color-mix(in oklab, var(--accent) 30%, var(--line))',
+        display:'flex',gap:10,alignItems:'flex-start',
+        fontSize:12,lineHeight:1.55,color:'var(--fg-2)',
+      }}>
+        <I.info size={14} style={{color:'var(--accent)',flexShrink:0,marginTop:1}}/>
+        <div>
+          <b style={{color:'var(--fg-1)'}}>Defaults para plantillas nuevas.</b> Cada plantilla nueva hereda esta lista. Cambiarla aquí NO afecta a las que ya existen — esas se editan con el botón «Etiquetas» del editor.
+        </div>
+      </div>
+      <SGroup title="Etiquetas que heredan las plantillas nuevas">
         <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.55,paddingBottom:16}}>
-          Estos valores sustituyen las variables <code style={{fontFamily:'var(--font-mono)',fontSize:11.5,background:'var(--surface-2)',padding:'1px 6px',borderRadius:4}}>{'{{nombre}}'}</code> cuando ves el preview o envías una prueba. En envíos reales se reemplazan por los datos de cada destinatario.
+          Cuando creas una plantilla, se le copia esta lista. Desde ahí cada plantilla evoluciona independiente.
         </div>
         <div style={{border:'1px solid var(--line)',borderRadius:'var(--r-md)',overflow:'hidden'}}>
           {vars.map((v,i) => (
@@ -959,11 +1316,12 @@ function VariablesSection({ onChange }) {
 
 // ───────────────────────────── Export ─────────────────────────────
 function ExportSection({ onChange }) {
-  const [ex, setEx] = React.useState(() => window.stStorage.getSetting('export', {}));
-  const set = (k,v) => { const n = {...ex, [k]:v}; setEx(n); window.stStorage.setSetting('export', n); onChange(); };
+  const [ex, setEx] = React.useState(() => window.stStorage.getWSSetting('export', {}));
+  const set = (k,v) => { const n = {...ex, [k]:v}; setEx(n); window.stStorage.setWSSetting('export', n); onChange(); };
 
   return (
     <>
+      <SoonBanner msg="La preferencia de formato de exportación se guarda en este espacio, pero el flujo de exportar todavía es mock. Está en cola para una próxima versión."/>
       <SGroup title="Formato por defecto">
         <SRow label="Formato de descarga" hint="Se usa al elegir 'Exportar' sin abrir el modal.">
           <div className="col" style={{gap:6}}>
@@ -1012,8 +1370,8 @@ function ExportSection({ onChange }) {
 
 // ───────────────────────────── Notifications ─────────────────────────────
 function NotifSection({ onChange }) {
-  const [n, setN] = React.useState(() => window.stStorage.getSetting('notif', {}));
-  const set = (k,v) => { const nn = {...n, [k]:v}; setN(nn); window.stStorage.setSetting('notif', nn); onChange(); };
+  const [n, setN] = React.useState(() => window.stStorage.getWSSetting('notif', {}));
+  const set = (k,v) => { const nn = {...n, [k]:v}; setN(nn); window.stStorage.setWSSetting('notif', nn); onChange(); };
 
   const Switch = ({k, def=true}) => (
     <label className="switch"><input type="checkbox" defaultChecked={n[k]!==false && (n[k]===undefined?def:n[k])} onChange={e=>set(k,e.target.checked)}/><span/></label>
@@ -1021,9 +1379,10 @@ function NotifSection({ onChange }) {
 
   return (
     <>
+      <SoonBanner msg="«Recordar autoguardado», «Aviso de exportación lista» y «Resultado del envío de prueba» ya respetan tu preferencia. El resto (imagen pesada, sonidos, actualizaciones, beta) se guardan en este espacio pero todavía no se aplican."/>
       <SGroup title="Avisos dentro de la app">
-        <SRow label="Recordar autoguardado" hint="Te avisa en la esquina inferior cada vez que Simple Template guarda tu trabajo automáticamente.">
-          <Switch k="saved"/>
+        <SRow label="Recordar autoguardado" hint="Te avisa en la esquina inferior cada vez que Simple Template guarda tu trabajo automáticamente. Apagado por defecto porque puede ser ruidoso si editas mucho.">
+          <Switch k="saved" def={false}/>
         </SRow>
         <SRow label="Aviso de imagen muy pesada" hint="Cuando arrastras una imagen mayor al límite recomendado para correo.">
           <Switch k="heavyImg"/>
