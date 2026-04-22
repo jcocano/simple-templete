@@ -6,6 +6,8 @@ const ua = navigator.userAgent;
 const platform = ua.includes("Mac") ? "darwin" : ua.includes("Win") ? "win32" : "linux";
 document.documentElement.setAttribute("data-platform", platform);
 
+import "./lib/storage.tsx";
+import "./lib/migrate-legacy.tsx";
 import "./icons.tsx";
 import "./data.tsx";
 import "./ui.tsx";
@@ -30,5 +32,9 @@ import "./settings-panel.tsx";
 import "./tweaks.tsx";
 import "./app.tsx";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<window.App />);
+(async () => {
+  await window.stStorage.boot();
+  await window.stMigrateLegacy();
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<window.App />);
+})();
