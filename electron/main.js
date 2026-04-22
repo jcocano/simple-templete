@@ -5,6 +5,11 @@ const db = require("./storage/db");
 const seed = require("./storage/seed");
 const storageIpc = require("./ipc/storage");
 const secretsIpc = require("./ipc/secrets");
+const smtpIpc = require("./ipc/smtp");
+const shellIpc = require("./ipc/shell");
+const oauthIpc = require("./ipc/oauth");
+const aiIpc = require("./ipc/ai");
+const cdnIpc = require("./ipc/cdn");
 
 if (!app || !BrowserWindow) {
   console.error(
@@ -59,6 +64,11 @@ app.whenReady().then(() => {
   seed.ensureFirstWorkspace();
   storageIpc.register();
   secretsIpc.register();
+  smtpIpc.register();
+  shellIpc.register();
+  oauthIpc.register();
+  aiIpc.register();
+  cdnIpc.register();
   createWindow();
 
   app.on("activate", () => {

@@ -41,3 +41,31 @@ contextBridge.exposeInMainWorld('secrets', {
   remove: (key) => invoke('secrets:remove', key),
   backend: () => invoke('secrets:backend')
 });
+
+contextBridge.exposeInMainWorld('smtp', {
+  send: (payload) => invoke('smtp:send', payload)
+});
+
+contextBridge.exposeInMainWorld('shell', {
+  openExternal: (url) => invoke('shell:openExternal', url)
+});
+
+contextBridge.exposeInMainWorld('oauth', {
+  authorize: (providerConfig) => invoke('oauth:authorize', providerConfig),
+  refresh: (providerConfig, refreshToken) => invoke('oauth:refresh', providerConfig, refreshToken)
+});
+
+contextBridge.exposeInMainWorld('ai', {
+  complete: (payload) => invoke('ai:complete', payload),
+  listModels: (payload) => invoke('ai:listModels', payload),
+  log: {
+    add: (workspaceId, entry) => invoke('ai:log:add', workspaceId, entry),
+    list: (workspaceId, opts) => invoke('ai:log:list', workspaceId, opts),
+    count: (workspaceId) => invoke('ai:log:count', workspaceId),
+    clear: (workspaceId) => invoke('ai:log:clear', workspaceId)
+  }
+});
+
+contextBridge.exposeInMainWorld('cdn', {
+  upload: (payload) => invoke('cdn:upload', payload)
+});
