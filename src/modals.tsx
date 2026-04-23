@@ -276,9 +276,28 @@ function SendTab({ onClose }) {
 function DevsTab({ onClose }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();
-  const [fmt, setFmt] = React.useState('html');
-  const [minify, setMinify] = React.useState(true);
-  const [includeTxt, setIncludeTxt] = React.useState(false);
+  // Lectura inicial desde Settings → Export (`getWSSetting('export', {})`).
+  // Sólo en mount; no re-sincronizamos si el user cambia Settings con el modal
+  // abierto (overkill para un caso borde).
+  const [fmt, setFmt] = React.useState(() => {
+    const ex = window.stStorage?.getWSSetting?.('export', {}) || {};
+    // `zip` aún no está implementado en el modal (follow-up Fix #6). Si Settings
+    // dice zip, caemos a html para no romper el render.
+    const f = ex.format;
+    return (f === 'html' || f === 'mjml' || f === 'txt') ? f : 'html';
+  });
+  const [minify, setMinify] = React.useState(() => {
+    const ex = window.stStorage?.getWSSetting?.('export', {}) || {};
+    return ex.minify !== false; // default ON, igual que Settings
+  });
+  const [includeTxt, setIncludeTxt] = React.useState(() => {
+    const ex = window.stStorage?.getWSSetting?.('export', {}) || {};
+    // Opt-in explícito: sólo ON si el user lo marcó `true` en Settings.
+    // Settings UI lo trata como `!== false` (ON por default), pero el modal
+    // históricamente arranca OFF — no cambiamos el comportamiento para users
+    // que nunca tocaron Settings.
+    return ex.plaintext === true;
+  });
   // R5 · Dialect selector for merge tags. Applies only to HTML fmt.
   const [dialect, setDialect] = React.useState('native'); // native | sendgrid | mailgun | mailchimp
   const [template, setTemplate] = React.useState(null);
