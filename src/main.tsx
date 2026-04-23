@@ -7,6 +7,7 @@ const platform = ua.includes("Mac") ? "darwin" : ua.includes("Win") ? "win32" : 
 document.documentElement.setAttribute("data-platform", platform);
 
 import "./lib/storage.tsx";
+import "./lib/style-override.tsx";
 import "./lib/i18n/en.tsx";
 import "./lib/i18n/es.tsx";
 import "./lib/i18n/pt.tsx";
@@ -28,8 +29,14 @@ import "./icons.tsx";
 import "./data.tsx";
 import "./ui.tsx";
 import "./email-blocks.tsx";
+import "./lib/html-minify.tsx";
+import "./lib/export-html.tsx";
 import "./block-controls.tsx";
 import "./image-picker.tsx";
+import "./modals/map-picker-modal.tsx";
+import "./modals/countdown-timer-modal.tsx";
+import "./device-panel-context.tsx";
+import "./device-field.tsx";
 import "./block-props.tsx";
 import "./screens/onboarding.tsx";
 import "./screens/dashboard.tsx";
