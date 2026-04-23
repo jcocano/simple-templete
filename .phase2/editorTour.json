@@ -1,0 +1,8 @@
+{
+  "editorTour.close":     { "en": "Skip tour",     "es": "Saltar recorrido", "pt": "Pular tour",    "fr": "Passer la visite", "ja": "ツアーをスキップ", "zh": "跳过引导" },
+  "editorTour.finish":    { "en": "Finish!",       "es": "¡Terminar!",       "pt": "Concluir!",     "fr": "Terminer !",       "ja": "完了！",           "zh": "完成！" },
+  "editorTour.next":      { "en": "Next →",        "es": "Siguiente →",      "pt": "Próximo →",     "fr": "Suivant →",        "ja": "次へ →",           "zh": "下一步 →" },
+  "editorTour.prev":      { "en": "← Previous",    "es": "← Anterior",       "pt": "← Anterior",    "fr": "← Précédent",      "ja": "← 前へ",           "zh": "← 上一步" },
+  "editorTour.skip":      { "en": "Skip",          "es": "Saltar",           "pt": "Pular",         "fr": "Passer",           "ja": "スキップ",         "zh": "跳过" },
+  "editorTour.stepCount": { "en": "{current} / {total}", "es": "{current} / {total}", "pt": "{current} / {total}", "fr": "{current} / {total}", "ja": "{current} / {total}", "zh": "{current} / {total}" }
+}

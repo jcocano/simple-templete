@@ -1,0 +1,11 @@
+{
+  "common.cancel":    { "en": "Cancel",        "es": "Cancelar",      "pt": "Cancelar",     "fr": "Annuler",       "ja": "キャンセル", "zh": "取消" },
+  "common.close":     { "en": "Close",         "es": "Cerrar",        "pt": "Fechar",       "fr": "Fermer",        "ja": "閉じる",     "zh": "关闭" },
+  "common.copy":      { "en": "Copy",          "es": "Copiar",        "pt": "Copiar",       "fr": "Copier",        "ja": "コピー",     "zh": "复制" },
+  "common.create":    { "en": "Create",        "es": "Crear",         "pt": "Criar",        "fr": "Créer",         "ja": "作成",       "zh": "创建" },
+  "common.delete":    { "en": "Delete",        "es": "Borrar",        "pt": "Excluir",      "fr": "Supprimer",     "ja": "削除",       "zh": "删除" },
+  "common.duplicate": { "en": "Duplicate",     "es": "Duplicar",      "pt": "Duplicar",     "fr": "Dupliquer",     "ja": "複製",       "zh": "复制" },
+  "common.moveDown":  { "en": "Move down",     "es": "Bajar",         "pt": "Mover abaixo", "fr": "Descendre",     "ja": "下に移動",   "zh": "下移" },
+  "common.moveUp":    { "en": "Move up",       "es": "Subir",         "pt": "Mover acima",  "fr": "Monter",        "ja": "上に移動",   "zh": "上移" },
+  "common.select":    { "en": "Select…",       "es": "Seleccionar…",  "pt": "Selecionar…",  "fr": "Sélectionner…", "ja": "選択…",      "zh": "选择…" }
+}

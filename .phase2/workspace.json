@@ -1,0 +1,10 @@
+{
+  "ws.noName":           { "en": "Unnamed",          "es": "Sin nombre",        "pt": "Sem nome",           "fr": "Sans nom",           "ja": "名前なし",             "zh": "未命名" },
+  "ws.currentPrefix":    { "en": "Workspace {name}", "es": "Espacio {name}",    "pt": "Espaço {name}",      "fr": "Espace {name}",      "ja": "ワークスペース {name}", "zh": "工作区 {name}" },
+  "ws.settings.tooltip": { "en": "Settings",         "es": "Ajustes",           "pt": "Ajustes",            "fr": "Réglages",           "ja": "設定",                 "zh": "设置" },
+  "ws.switch":           { "en": "Switch workspace", "es": "Cambiar de espacio","pt": "Trocar de espaço",   "fr": "Changer d’espace",   "ja": "ワークスペースを切り替え","zh": "切换工作区" },
+  "ws.name.placeholder": { "en": "Workspace name",   "es": "Nombre del espacio","pt": "Nome do espaço",     "fr": "Nom de l’espace",    "ja": "ワークスペース名",      "zh": "工作区名称" },
+  "ws.create":           { "en": "Create",           "es": "Crear",             "pt": "Criar",              "fr": "Créer",              "ja": "作成",                 "zh": "创建" },
+  "ws.createNew":        { "en": "Create new workspace…", "es": "Crear nuevo espacio…", "pt": "Criar novo espaço…", "fr": "Créer un nouvel espace…", "ja": "新しいワークスペースを作成…", "zh": "新建工作区…" },
+  "ws.settingsEntry":    { "en": "Workspace settings…", "es": "Ajustes del espacio…", "pt": "Ajustes do espaço…", "fr": "Réglages de l’espace…", "ja": "ワークスペース設定…", "zh": "工作区设置…" }
+}
