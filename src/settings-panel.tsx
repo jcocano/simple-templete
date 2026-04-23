@@ -1401,6 +1401,10 @@ function EditorSection({ onChange }) {
 }
 
 // ───────────────────────────── Variables ─────────────────────────────
+// Source data in src/data.tsx stores `type` as a Spanish slug (e.g. 'número',
+// 'enlace'). i18n keys can only contain ASCII, so map the non-ASCII ones.
+const VAR_TYPE_KEY = { 'número': 'numero' };
+
 function VariablesSection({ onChange }) {
   window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -1436,7 +1440,7 @@ function VariablesSection({ onChange }) {
             }}>
               <code style={{fontFamily:'var(--font-mono)',fontSize:11.5,color:'var(--accent)'}}>{`{{${v.key}}}`}</code>
               <input className="field" value={v.sample} onChange={e=>setVal(i,e.target.value)} style={{height:30,fontSize:12.5}}/>
-              <span style={{fontSize:11,color:'var(--fg-3)'}}>{v.type}</span>
+              <span style={{fontSize:11,color:'var(--fg-3)'}}>{t(`settings.variables.type.${VAR_TYPE_KEY[v.type] || v.type}`)}</span>
               <button className="btn icon sm ghost"><I.dotsV size={12}/></button>
             </div>
           ))}
@@ -1642,7 +1646,7 @@ function AISection({ onChange }) {
       if (result.ok) {
         setModels(result.models || []);
         if ((result.models || []).length === 0 && provider.id === 'ollama') {
-          setModelsError('No hay modelos instalados. Descargá uno con "ollama pull llama3.3" en tu terminal.');
+          setModelsError(t('settings.ai.model.ollama.empty'));
         }
       } else {
         setModels([]);
@@ -1650,7 +1654,7 @@ function AISection({ onChange }) {
       }
     } catch (err) {
       setModels([]);
-      setModelsError(err?.message || 'Error inesperado al listar modelos.');
+      setModelsError(err?.message || t('settings.ai.model.error.unexpected'));
     } finally {
       setModelsLoading(false);
     }
@@ -1686,18 +1690,20 @@ function AISection({ onChange }) {
           <I.sparkles size={18}/>
         </div>
         <div>
-          <div style={{fontSize:13,fontWeight:500}}>Generar y mejorar plantillas con IA</div>
+          <div style={{fontSize:13,fontWeight:500}}>{t('settings.ai.hero.title')}</div>
           <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:2,lineHeight:1.5}}>
-            {enabled && keyOk ? <>Activo con <b style={{color:'var(--fg)'}}>{provider.name}</b>{ai.model ? <> · modelo <b style={{color:'var(--fg)'}}>{ai.model}</b></> : null}</> :
-             enabled && !keyOk ? <>Te falta añadir la API key de <b style={{color:'var(--fg)'}}>{provider.name}</b> para poder usarla.</> :
-             <>Desactivada. Activa el interruptor para usar “✨ Generar con IA” y “✨ Mejorar”.</>}
+            {enabled && keyOk
+              ? t(ai.model ? 'settings.ai.hero.activeWithModel' : 'settings.ai.hero.active', { provider: provider.name, model: ai.model || '' })
+              : enabled && !keyOk
+              ? t('settings.ai.hero.nokey', { provider: provider.name })
+              : t('settings.ai.hero.disabled')}
           </div>
         </div>
         <Switch checked={enabled} onChange={v=>set('enabled',v)}/>
       </div>
 
-      <SGroup title="Proveedor">
-        <SRow label="Proveedor" hint="Elige el servicio que quieres usar. Puedes cambiarlo cuando quieras; las API keys se guardan por separado.">
+      <SGroup title={t('settings.ai.provider.group.title')}>
+        <SRow label={t('settings.ai.provider.label')} hint={t('settings.ai.provider.hint')}>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             {PROVIDERS.map(p => {
               const on = (ai.provider||'anthropic') === p.id;
@@ -1721,9 +1727,9 @@ function AISection({ onChange }) {
         </SRow>
       </SGroup>
 
-      <SGroup title="Credenciales">
+      <SGroup title={t('settings.ai.credentials.group.title')}>
         {provider.id !== 'ollama' && (
-          <SRow label="API key" hint={<>Se guarda cifrada en tu disco local. Nunca se envía a ningún servidor salvo al del propio proveedor. <a href={provider.url} target="_blank" rel="noreferrer" style={{color:'var(--accent)'}}>Conseguir una en {provider.name} →</a></>}>
+          <SRow label={t('settings.ai.apikey.label')} hint={<>{t('settings.ai.apikey.hint')} <a href={provider.url} target="_blank" rel="noreferrer" style={{color:'var(--accent)'}}>{t('settings.ai.apikey.getLink', { provider: provider.name })}</a></>}>
             <div style={{display:'flex',gap:6,alignItems:'center'}}>
               <input
                 className="field"
@@ -1733,20 +1739,20 @@ function AISection({ onChange }) {
                 disabled={!apiKeyLoaded}
                 placeholder={provider.id==='anthropic'?'sk-ant-…':provider.id==='openai'?'sk-…':'AIza…'}
                 style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}/>
-              {keyOk && <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> Válida</span>}
+              {keyOk && <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> {t('settings.ai.apikey.valid')}</span>}
             </div>
           </SRow>
         )}
         {provider.id === 'ollama' && (
-          <SRow label="URL del servidor" hint="La dirección donde está corriendo Ollama en tu máquina o red local.">
+          <SRow label={t('settings.ai.ollama.url.label')} hint={t('settings.ai.ollama.url.hint')}>
             <input className="field" value={ai.ollamaUrl||'http://localhost:11434'} onChange={e=>set('ollamaUrl',e.target.value)} style={{fontFamily:'var(--font-mono)',fontSize:12}}/>
           </SRow>
         )}
-        <SRow label="Límite mensual de gasto" hint="Avísame cuando me acerque a este tope (solo estimación local). 0 = sin límite.">
+        <SRow label={t('settings.ai.cap.label')} hint={t('settings.ai.cap.hint')}>
           <div style={{display:'flex',gap:6,alignItems:'center'}}>
-            <span style={{color:'var(--fg-3)',fontSize:12}}>USD</span>
+            <span style={{color:'var(--fg-3)',fontSize:12}}>{t('settings.ai.cap.currency')}</span>
             <input className="field" type="number" min="0" step="5" value={ai.cap??20} onChange={e=>set('cap', Number(e.target.value))} style={{width:100}}/>
-            <span style={{color:'var(--fg-3)',fontSize:11.5,marginLeft:8}}>Este mes: <b style={{color:'var(--fg)'}}>$3.48</b></span>
+            <span style={{color:'var(--fg-3)',fontSize:11.5,marginLeft:8}}>{t('settings.ai.cap.thisMonth')} <b style={{color:'var(--fg)'}}>$3.48</b></span>
           </div>
         </SRow>
       </SGroup>
@@ -1756,8 +1762,8 @@ function AISection({ onChange }) {
           shows once the group renders. Avoids showing an empty/failing
           picker before the user has set up access. */}
       {(keyOk || provider.id === 'ollama') && (
-        <SGroup title="Modelo">
-          <SRow label="Modelo" hint={`Los modelos disponibles se actualizan contra ${provider.name}. Podés tipear el nombre de uno nuevo aunque no aparezca en la lista.`}>
+        <SGroup title={t('settings.ai.model.group.title')}>
+          <SRow label={t('settings.ai.model.label')} hint={t('settings.ai.model.hint', { provider: provider.name })}>
             <div>
               <div style={{display:'flex',gap:6,alignItems:'center'}}>
                 <input
@@ -1772,8 +1778,8 @@ function AISection({ onChange }) {
                   className="btn sm ghost"
                   onClick={refreshModels}
                   disabled={modelsLoading}
-                  title="Refrescar lista de modelos">
-                  {modelsLoading ? 'Cargando…' : 'Refrescar'}
+                  title={t('settings.ai.model.refresh.title')}>
+                  {modelsLoading ? t('settings.ai.model.loading') : t('settings.ai.model.refresh')}
                 </button>
               </div>
               <datalist id={`ai-models-${provider.id}`}>
@@ -1785,7 +1791,7 @@ function AISection({ onChange }) {
               </datalist>
               {modelsError && (
                 <div style={{fontSize:11,color:'var(--fg-3)',marginTop:6,lineHeight:1.4}}>
-                  {modelsError} Podés tipear el nombre igual si ya lo conocés.
+                  {modelsError} {t('settings.ai.model.error.suffix')}
                 </div>
               )}
               {!modelsError && !modelsLoading && models.length > 0 && (
@@ -1795,7 +1801,7 @@ function AISection({ onChange }) {
                       key={m.id}
                       type="button"
                       onClick={() => set('model', m.id)}
-                      title={m.createdAt ? `Disponible desde ${String(m.createdAt).slice(0,10)}` : m.id}
+                      title={m.createdAt ? t('settings.ai.model.available.title', { date: String(m.createdAt).slice(0,10) }) : m.id}
                       style={{
                         fontSize:10.5,padding:'3px 8px',
                         fontFamily:'var(--font-mono)',
@@ -1815,51 +1821,51 @@ function AISection({ onChange }) {
         </SGroup>
       )}
 
-      <SGroup title="¿Para qué usarla?">
-        <SRow label="Generar plantillas desde un prompt" hint="Activa el botón ✨ Generar con IA en la galería. Describes el correo en lenguaje natural y la IA arma los bloques por ti.">
+      <SGroup title={t('settings.ai.features.group.title')}>
+        <SRow label={t('settings.ai.features.genTpl.label')} hint={t('settings.ai.features.genTpl.hint')}>
           <Switch checked={ai.genTpl!==false} onChange={v=>set('genTpl',v)}/>
         </SRow>
-        <SRow label="Mejorar textos de un bloque" hint="Activa el botón ✨ Mejorar cuando seleccionas un bloque: reescribir, acortar, cambiar tono, traducir.">
+        <SRow label={t('settings.ai.features.improve.label')} hint={t('settings.ai.features.improve.hint')}>
           <Switch checked={ai.improve!==false} onChange={v=>set('improve',v)}/>
         </SRow>
-        <SRow label="Sugerir asunto y preview text" hint="Cuando estás por exportar, propone 3 asuntos y 3 previews basados en el contenido del correo.">
+        <SRow label={t('settings.ai.features.subject.label')} hint={t('settings.ai.features.subject.hint')}>
           <Switch checked={ai.subject!==false} onChange={v=>set('subject',v)}/>
         </SRow>
-        <SRow label="Revisar antes de enviar" hint="Chequeo rápido de ortografía, tono, y consistencia con tu marca. No modifica nada sin tu permiso.">
+        <SRow label={t('settings.ai.features.review.label')} hint={t('settings.ai.features.review.hint')}>
           <Switch checked={!!ai.review} onChange={v=>set('review',v)}/>
         </SRow>
       </SGroup>
 
-      <SGroup title="Tono y estilo por defecto">
-        <SRow label="Tono preferido" hint="La IA intentará mantener este registro cuando genere o reescriba texto.">
+      <SGroup title={t('settings.ai.tone.group.title')}>
+        <SRow label={t('settings.ai.tone.label')} hint={t('settings.ai.tone.hint')}>
           <select className="field" value={ai.tone||'neutral'} onChange={e=>set('tone',e.target.value)}>
-            <option value="neutral">Neutral y claro</option>
-            <option value="calido">Cálido y cercano</option>
-            <option value="profesional">Profesional y serio</option>
-            <option value="divertido">Divertido e informal</option>
-            <option value="directo">Directo y breve</option>
-            <option value="narrativo">Narrativo y editorial</option>
+            <option value="neutral">{t('settings.ai.tone.opt.neutral')}</option>
+            <option value="calido">{t('settings.ai.tone.opt.calido')}</option>
+            <option value="profesional">{t('settings.ai.tone.opt.profesional')}</option>
+            <option value="divertido">{t('settings.ai.tone.opt.divertido')}</option>
+            <option value="directo">{t('settings.ai.tone.opt.directo')}</option>
+            <option value="narrativo">{t('settings.ai.tone.opt.narrativo')}</option>
           </select>
         </SRow>
-        <SRow label="Idioma principal" hint="Si escribes en otro idioma te lo respeta; este es el default cuando no queda claro.">
+        <SRow label={t('settings.ai.lang.label')} hint={t('settings.ai.lang.hint')}>
           <select className="field" value={ai.lang||'es-MX'} onChange={e=>set('lang',e.target.value)}>
-            <option value="es-MX">Español (México)</option>
-            <option value="es-ES">Español (España)</option>
-            <option value="es-AR">Español (Argentina)</option>
-            <option value="en-US">English (US)</option>
-            <option value="pt-BR">Português (Brasil)</option>
+            <option value="es-MX">{t('settings.ai.lang.opt.es-MX')}</option>
+            <option value="es-ES">{t('settings.ai.lang.opt.es-ES')}</option>
+            <option value="es-AR">{t('settings.ai.lang.opt.es-AR')}</option>
+            <option value="en-US">{t('settings.ai.lang.opt.en-US')}</option>
+            <option value="pt-BR">{t('settings.ai.lang.opt.pt-BR')}</option>
           </select>
         </SRow>
-        <SRow label="Instrucciones de marca" hint="Texto libre: cómo hablar a tus suscriptores, qué palabras usar o evitar. Se añade al prompt de cada generación.">
-          <textarea className="field" rows={4} value={ai.brandRules||''} onChange={e=>set('brandRules',e.target.value)} placeholder={`Ej.: Hablamos de tú, no de usted. Evitamos "estimado" y "cordial saludo". Siempre cerramos con "Con cariño, el equipo".`}/>
+        <SRow label={t('settings.ai.brand.label')} hint={t('settings.ai.brand.hint')}>
+          <textarea className="field" rows={4} value={ai.brandRules||''} onChange={e=>set('brandRules',e.target.value)} placeholder={t('settings.ai.brand.placeholder')}/>
         </SRow>
       </SGroup>
 
-      <SGroup title="Privacidad">
-        <SRow label="No mandar mi contenido si contiene datos sensibles" hint="Detecta patrones de tarjetas, RFC, CURP, correos privados, y bloquea el envío automáticamente.">
+      <SGroup title={t('settings.ai.privacy.group.title')}>
+        <SRow label={t('settings.ai.pii.label')} hint={t('settings.ai.pii.hint')}>
           <Switch checked={ai.pii!==false} onChange={v=>set('pii',v)}/>
         </SRow>
-        <SRow label="Registrar las conversaciones con la IA" hint="Guarda el prompt y la respuesta en un historial local por espacio, por si querés revisarlos. Nunca se suben a la nube.">
+        <SRow label={t('settings.ai.log.label')} hint={t('settings.ai.log.hint')}>
           <Switch checked={!!ai.log} onChange={v=>set('log',v)}/>
         </SRow>
       </SGroup>
@@ -1873,6 +1879,8 @@ function AISection({ onChange }) {
 // Keeps the last 500 prompts+responses per workspace in SQLite (pruned
 // automatically on insert). Never touches the network.
 function AIHistoryGroup() {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [entries, setEntries] = React.useState([]);
   const [count, setCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
@@ -1907,17 +1915,21 @@ function AIHistoryGroup() {
     window.stExport.downloadFile(`ai-history-${ts}.json`, json, 'application/json');
   };
 
+  const hintKey = count === 0 ? 'settings.ai.history.hint.zero'
+    : count === 1 ? 'settings.ai.history.hint.one'
+    : 'settings.ai.history.hint.other';
+
   return (
-    <SGroup title={`Historial de IA${count ? ` · ${count}` : ''}`}>
+    <SGroup title={count ? t('settings.ai.history.titleCount', { n: count }) : t('settings.ai.history.title')}>
       <SRow
-        label="Conversaciones guardadas"
-        hint={`${count === 0 ? 'Todavía no hay ninguna.' : count === 1 ? '1 conversación local.' : `${count} conversaciones locales.`} Se guardan las últimas 500 por espacio; las viejas se borran automáticamente.`}>
+        label={t('settings.ai.history.label')}
+        hint={t(hintKey, { n: count })}>
         <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
           <button type="button" className="btn sm ghost" onClick={load} disabled={loading}>
-            {loading ? 'Cargando…' : 'Refrescar'}
+            {loading ? t('settings.ai.history.btn.loading') : t('settings.ai.history.btn.refresh')}
           </button>
           <button type="button" className="btn sm ghost" onClick={doExport} disabled={entries.length === 0}>
-            <I.download size={12}/> Exportar JSON
+            <I.download size={12}/> {t('settings.ai.history.btn.export')}
           </button>
           {!confirmClear ? (
             <button
@@ -1926,19 +1938,19 @@ function AIHistoryGroup() {
               style={{color:'var(--danger)'}}
               onClick={() => setConfirmClear(true)}
               disabled={count === 0}>
-              <I.trash size={12}/> Borrar todo
+              <I.trash size={12}/> {t('settings.ai.history.btn.clearAll')}
             </button>
           ) : (
             <>
               <button type="button" className="btn sm ghost" onClick={() => setConfirmClear(false)}>
-                Cancelar
+                {t('settings.ai.history.btn.cancel')}
               </button>
               <button
                 type="button"
                 className="btn sm"
                 style={{background:'var(--danger)',color:'#fff'}}
                 onClick={doClear}>
-                Sí, borrar {count}
+                {t('settings.ai.history.btn.confirmClear', { n: count })}
               </button>
             </>
           )}
@@ -1959,7 +1971,7 @@ function AIHistoryGroup() {
           </div>
           {count > entries.length && (
             <div style={{fontSize:11,color:'var(--fg-3)',padding:'8px 0 0',textAlign:'center'}}>
-              Mostrando {entries.length} de {count}. Exportá el JSON para ver todas.
+              {t('settings.ai.history.pagination', { shown: entries.length, total: count })}
             </div>
           )}
         </div>
@@ -1969,12 +1981,14 @@ function AIHistoryGroup() {
 }
 
 function AIHistoryEntry({ entry, expanded, onToggle }) {
-  const when = new Date(entry.createdAt).toLocaleString('es-MX', {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
+  const when = new Date(entry.createdAt).toLocaleString(lang, {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit',
   });
-  const opLabel = entry.op === 'improve' ? 'Mejorar texto'
-    : entry.op === 'generate' ? 'Generar plantilla'
+  const opLabel = entry.op === 'improve' ? t('settings.ai.history.op.improve')
+    : entry.op === 'generate' ? t('settings.ai.history.op.generate')
     : entry.op;
   const providerShort = entry.provider === 'anthropic' ? 'Claude'
     : entry.provider === 'openai' ? 'OpenAI'
@@ -2017,19 +2031,19 @@ function AIHistoryEntry({ entry, expanded, onToggle }) {
       </button>
       {expanded && (
         <div style={{padding:'0 12px 12px',borderTop:'1px solid var(--line)'}}>
-          <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',margin:'10px 0 4px'}}>Prompt</div>
+          <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',margin:'10px 0 4px'}}>{t('settings.ai.history.promptLabel')}</div>
           <pre style={{margin:0,padding:10,background:'var(--surface-2)',borderRadius:'var(--r-sm)',fontSize:11,fontFamily:'var(--font-mono)',whiteSpace:'pre-wrap',wordBreak:'break-word',maxHeight:240,overflow:'auto'}}>
-            {entry.prompt || '(vacío)'}
+            {entry.prompt || t('settings.ai.history.empty')}
           </pre>
           <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',margin:'12px 0 4px'}}>
-            {entry.ok ? 'Respuesta' : 'Error'}
+            {entry.ok ? t('settings.ai.history.responseLabel') : t('settings.ai.history.errorLabel')}
           </div>
           <pre style={{margin:0,padding:10,background:'var(--surface-2)',borderRadius:'var(--r-sm)',fontSize:11,fontFamily:'var(--font-mono)',whiteSpace:'pre-wrap',wordBreak:'break-word',maxHeight:240,overflow:'auto',color: entry.ok ? undefined : 'var(--danger)'}}>
-            {entry.ok ? (entry.response || '(vacío)') : (entry.error || 'Sin detalle')}
+            {entry.ok ? (entry.response || t('settings.ai.history.empty')) : (entry.error || t('settings.ai.history.errorEmpty'))}
           </pre>
           {entry.usage && (
             <div style={{marginTop:8,fontSize:10.5,color:'var(--fg-3)'}}>
-              Tokens: {Object.entries(entry.usage).map(([k,v]) => `${k}=${v}`).join(' · ')}
+              {t('settings.ai.history.tokensLabel')} {Object.entries(entry.usage).map(([k,v]) => `${k}=${v}`).join(' · ')}
             </div>
           )}
         </div>
