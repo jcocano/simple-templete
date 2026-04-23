@@ -84,7 +84,7 @@ function BlockThumb({ section }) {
   );
 }
 
-function Library({ onBack }) {
+function Library({ onBack, onOpenBlock }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
 
@@ -155,11 +155,15 @@ function Library({ onBack }) {
       kind: filter.startsWith('kind:') ? filter.slice(5) : 'custom',
     });
     if (!created) return;
-    window.toast && window.toast({
-      kind: 'ok',
-      title: t('library.toast.created.title'),
-      msg: t('library.toast.created.msg'),
-    });
+    if (onOpenBlock) {
+      onOpenBlock(created);
+    } else {
+      window.toast && window.toast({
+        kind: 'ok',
+        title: t('library.toast.created.title'),
+        msg: t('library.toast.created.msg'),
+      });
+    }
   };
 
   const onRename = async (blk) => {
@@ -179,14 +183,9 @@ function Library({ onBack }) {
   const onDuplicate = async (id) => { await window.stBlocks.duplicate(id); };
   const onToggleStar = async (id) => { await window.stBlocks.toggleStar(id); };
 
-  // Edit-in-editor wiring lands in Bundle 3. Stub for now so the button
-  // shows intent without breaking.
-  const onEdit = () => {
-    window.toast && window.toast({
-      kind: 'info',
-      title: t('library.action.edit'),
-      msg: t('library.toast.createHint'),
-    });
+  const onEdit = (blk) => {
+    if (!blk || inTrash) return;
+    if (onOpenBlock) onOpenBlock(blk);
   };
 
   const onBulkRestore = async () => {
@@ -377,7 +376,7 @@ function Library({ onBack }) {
                   <div
                     key={blk.id}
                     className="tpl-card"
-                    onClick={inTrash ? () => toggleSelect(blk.id) : onEdit}
+                    onClick={inTrash ? () => toggleSelect(blk.id) : () => onEdit(blk)}
                     style={inTrash ? {
                       cursor: 'pointer',
                       opacity: isSelected ? 1 : 0.85,
@@ -490,7 +489,7 @@ function Library({ onBack }) {
                 return (
                   <div
                     key={blk.id}
-                    onClick={inTrash ? () => toggleSelect(blk.id) : onEdit}
+                    onClick={inTrash ? () => toggleSelect(blk.id) : () => onEdit(blk)}
                     style={{
                       display: 'grid',
                       gridTemplateColumns: '32px 1fr 160px 140px 140px',
