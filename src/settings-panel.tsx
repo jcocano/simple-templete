@@ -817,6 +817,10 @@ function StorageSection({ onChange }) {
   const setMode = (mode) => save({...s, mode});
   const setField = (provider, k, v) => save({...s, [provider]: {...s[provider], [k]:v}});
 
+  const Switch = ({checked, onChange:oc}) => (
+    <label className="switch"><input type="checkbox" checked={!!checked} onChange={e=>oc(e.target.checked)}/><span/></label>
+  );
+
   // Sensitive fields live in safeStorage-encrypted secrets, one per (provider, field).
   const [s3Secret, setS3Secret] = useCDNSecret('s3', 'secret');
   const [imgbbKey, setImgbbKey] = useCDNSecret('imgbb', 'apiKey');
