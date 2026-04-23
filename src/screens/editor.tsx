@@ -1129,16 +1129,15 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
                     ]}
                   />
                 </div>
-              ) : (<>
-              {!isBlockMode && (
-                <SectionInsertBtn
-                  onClick={()=>addBlankSection(0)}
-                  onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, 0); }}
-                  onDropSavedBlock={(id)=>addSavedBlock(id, 0)}
-                />
-              )}
-              {doc.map((s, si) => (
+              ) : doc.map((s, si) => (
                 <React.Fragment key={s.id}>
+                  {si === 0 && !isBlockMode && (
+                    <SectionInsertBtn
+                      onClick={()=>addBlankSection(0)}
+                      onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, 0); }}
+                      onDropSavedBlock={(id)=>addSavedBlock(id, 0)}
+                    />
+                  )}
                   <SectionView
                     section={s}
                     selected={sel?.type==='section' && sel.id===s.id}
@@ -1164,7 +1163,6 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
                   )}
                 </React.Fragment>
               ))}
-              </>)}
             </div>
           </div>
           <div className="canvas-foot">
