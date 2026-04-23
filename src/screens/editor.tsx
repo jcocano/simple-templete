@@ -61,7 +61,6 @@ function ContentPanel({ onAddBlock, onAddSection, onAddSavedBlock }) {
         <div style={{fontSize:11,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>{t('editor.contentPanel.hint')}</div>
       </div>
       <div className="side-body">
-        {onAddSavedBlock && <SavedBlocksPanel q={q} onAdd={onAddSavedBlock} />}
         {cats.map(c => {
           const items = f(c.items);
           if (!items.length) return null;
@@ -99,6 +98,7 @@ function ContentPanel({ onAddBlock, onAddSection, onAddSavedBlock }) {
             </div>
           );
         })}
+        {onAddSavedBlock && <SavedBlocksPanel q={q} onAdd={onAddSavedBlock} />}
       </div>
     </div>
   );
@@ -112,33 +112,96 @@ function SavedBlocksPanel({ q, onAdd }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
   const rows = window.useBlocks();
-  const filtered = React.useMemo(() => {
-    const needle = (q || '').toLowerCase().trim();
-    return rows.filter((r) => !needle || (r.name || '').toLowerCase().includes(needle));
-  }, [rows, q]);
+  const [open, setOpen] = React.useState(() => {
+    try { return localStorage.getItem('mc:editor:myBlocksOpen') === '1'; } catch { return false; }
+  });
+  const toggle = () => {
+    setOpen((v) => {
+      const next = !v;
+      try { localStorage.setItem('mc:editor:myBlocksOpen', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
+  const needle = (q || '').toLowerCase().trim();
+  const searching = needle.length > 0;
+  const filtered = React.useMemo(
+    () => rows.filter((r) => !needle || (r.name || '').toLowerCase().includes(needle)),
+    [rows, needle]
+  );
   if (rows.length === 0) return null;
+  const total = filtered.length;
+  if (searching && total === 0) return null;
   const grouped = filtered.reduce((acc, r) => {
     const key = r.kind || 'custom';
     (acc[key] = acc[key] || []).push(r);
     return acc;
   }, {});
   const order = ['header', 'footer', 'cta', 'testimonial', 'product', 'social', 'signature', 'custom'];
+  const expanded = open || searching;
   return (
-    <div className="block-cat">
-      <h4>{t('editor.category.savedBlocks')}</h4>
-      {order.map((k) => {
+    <div className="block-cat" style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={expanded}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '2px 0',
+          margin: '0 0 8px',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: 'var(--fg-3)',
+          textAlign: 'left',
+        }}
+      >
+        <span style={{
+          display: 'inline-flex',
+          transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+          transition: 'transform 120ms',
+        }}><I.chevronD size={12} /></span>
+        <span style={{
+          fontSize: 10.5,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          fontWeight: 600,
+          flex: 1,
+        }}>{t('editor.category.savedBlocks')}</span>
+        <span style={{
+          fontSize: 10,
+          color: 'var(--fg-3)',
+          background: 'var(--surface-2)',
+          border: '1px solid var(--line)',
+          borderRadius: 10,
+          padding: '1px 7px',
+          fontVariantNumeric: 'tabular-nums',
+          fontWeight: 500,
+        }}>{total}</span>
+      </button>
+      {expanded && order.map((k) => {
         const list = grouped[k];
         if (!list || list.length === 0) return null;
         return (
-          <div key={k} style={{ marginBottom: 8 }}>
+          <div key={k} style={{ marginBottom: 10 }}>
             <div style={{
-              fontSize: 10,
-              color: 'var(--fg-3)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              fontWeight: 600,
-              marginBottom: 4,
-            }}>{t(KIND_LABEL_KEY[k] || 'library.cat.custom')}</div>
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 11,
+              color: 'var(--fg-2)',
+              fontWeight: 500,
+              padding: '2px 0 4px',
+            }}>
+              <span style={{ flex: 1 }}>{t(KIND_LABEL_KEY[k] || 'library.cat.custom')}</span>
+              <span style={{
+                fontSize: 10,
+                color: 'var(--fg-3)',
+                fontVariantNumeric: 'tabular-nums',
+              }}>{list.length}</span>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 4 }}>
               {list.map((r) => (
                 <button
@@ -151,9 +214,15 @@ function SavedBlocksPanel({ q, onAdd }) {
                     e.dataTransfer.effectAllowed = 'copy';
                   }}
                   title={r.name}
-                  style={{ justifyContent: 'flex-start', height: 'auto', padding: '8px 10px' }}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'flex-start',
+                    height: 32,
+                    padding: '0 10px',
+                    gap: 8,
+                  }}
                 >
-                  <div className="block-ic"><I.layers size={14} /></div>
+                  <div className="block-ic"><I.layers size={13} /></div>
                   <div style={{
                     fontSize: 11,
                     fontWeight: 500,
@@ -161,8 +230,9 @@ function SavedBlocksPanel({ q, onAdd }) {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     textAlign: 'left',
+                    flex: 1,
                   }}>{r.name}</div>
-                  {r.starred && <I.star2 size={10} style={{ marginLeft: 'auto', color: 'var(--warn)' }} />}
+                  {r.starred && <I.star2 size={10} style={{ color: 'var(--warn)', flexShrink: 0 }} />}
                 </button>
               ))}
             </div>
