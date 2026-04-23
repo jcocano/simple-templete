@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const db = require('./db');
-const { workspaceTemplatesDir, workspaceImagesDir } = require('./paths');
+const { workspaceTemplatesDir, workspaceSavedBlocksDir, workspaceImagesDir } = require('./paths');
 
 function list() {
   return db
@@ -51,10 +51,15 @@ function remove(id) {
     throw new Error('LAST_WORKSPACE');
   }
 
-  // Snapshot template ids BEFORE the SQL cascade wipes them.
+  // Snapshot template + saved-block ids BEFORE the SQL cascade wipes them.
   const templateIds = db
     .get()
     .prepare('SELECT id FROM templates_index WHERE workspace_id = ?')
+    .all(id)
+    .map((r) => r.id);
+  const savedBlockIds = db
+    .get()
+    .prepare('SELECT id FROM saved_blocks_index WHERE workspace_id = ?')
     .all(id)
     .map((r) => r.id);
 
@@ -80,6 +85,19 @@ function remove(id) {
     if (fs.existsSync(wsDir)) fs.rmdirSync(wsDir);
   } catch {}
 
+  const blocksDir = workspaceSavedBlocksDir(id);
+  for (const bid of savedBlockIds) {
+    try {
+      const p = path.join(blocksDir, `${bid}.json`);
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    } catch (err) {
+      console.error('[workspaces] unlink saved block', bid, err);
+    }
+  }
+  try {
+    if (fs.existsSync(blocksDir)) fs.rmdirSync(blocksDir);
+  } catch {}
+
   // Carpeta de imágenes locales del workspace (mode='local'). La tabla
   // images ya se limpió por el CASCADE; acá borramos los archivos del disco.
   const imgDir = workspaceImagesDir(id);
@@ -89,7 +107,11 @@ function remove(id) {
     console.error('[workspaces] remove images dir', id, err);
   }
 
-  return { id, templatesRemoved: templateIds.length };
+  return {
+    id,
+    templatesRemoved: templateIds.length,
+    savedBlocksRemoved: savedBlockIds.length,
+  };
 }
 
 module.exports = { list, get, newId, create, rename, remove, countTemplates };

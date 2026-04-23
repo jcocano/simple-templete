@@ -17,6 +17,7 @@ import "./lib/i18n.tsx";
 import "./lib/workspaces.tsx";
 import "./lib/templates.tsx";
 import "./lib/occasions.tsx";
+import "./lib/blocks.tsx";
 import "./lib/export.tsx";
 import "./lib/oauth.tsx";
 import "./lib/test-send.tsx";

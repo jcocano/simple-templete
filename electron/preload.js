@@ -14,6 +14,17 @@ contextBridge.exposeInMainWorld('storage', {
     rename: (workspaceId, id, name) => invoke('storage:templates:rename', workspaceId, id, name),
     newId: () => invoke('storage:templates:newId')
   },
+  blocks: {
+    list: (workspaceId) => invoke('storage:blocks:list', workspaceId),
+    listTrashed: (workspaceId) => invoke('storage:blocks:listTrashed', workspaceId),
+    read: (workspaceId, id) => invoke('storage:blocks:read', workspaceId, id),
+    write: (workspaceId, id, doc) => invoke('storage:blocks:write', workspaceId, id, doc),
+    remove: (workspaceId, id) => invoke('storage:blocks:remove', workspaceId, id),
+    restore: (workspaceId, id) => invoke('storage:blocks:restore', workspaceId, id),
+    purge: (workspaceId, id) => invoke('storage:blocks:purge', workspaceId, id),
+    rename: (workspaceId, id, name) => invoke('storage:blocks:rename', workspaceId, id, name),
+    newId: () => invoke('storage:blocks:newId')
+  },
   settings: {
     get: (key) => invoke('storage:settings:get', key),
     set: (key, value) => invoke('storage:settings:set', key, value),

@@ -1,5 +1,6 @@
 const { ipcMain } = require('electron');
 const templates = require('../storage/templates');
+const savedBlocks = require('../storage/saved-blocks');
 const settings = require('../storage/settings');
 const workspaces = require('../storage/workspaces');
 const workspaceSettings = require('../storage/workspace-settings');
@@ -16,6 +17,17 @@ function register() {
   ipcMain.handle('storage:templates:purge', (_e, workspaceId, id) => templates.purge(workspaceId, id));
   ipcMain.handle('storage:templates:rename', (_e, workspaceId, id, name) => templates.rename(workspaceId, id, name));
   ipcMain.handle('storage:templates:newId', () => templates.newId());
+
+  // Saved blocks — reusable sections, always scoped by workspaceId
+  ipcMain.handle('storage:blocks:list', (_e, workspaceId) => savedBlocks.list(workspaceId));
+  ipcMain.handle('storage:blocks:listTrashed', (_e, workspaceId) => savedBlocks.listTrashed(workspaceId));
+  ipcMain.handle('storage:blocks:read', (_e, workspaceId, id) => savedBlocks.read(workspaceId, id));
+  ipcMain.handle('storage:blocks:write', (_e, workspaceId, id, doc) => savedBlocks.write(workspaceId, id, doc));
+  ipcMain.handle('storage:blocks:remove', (_e, workspaceId, id) => savedBlocks.remove(workspaceId, id));
+  ipcMain.handle('storage:blocks:restore', (_e, workspaceId, id) => savedBlocks.restore(workspaceId, id));
+  ipcMain.handle('storage:blocks:purge', (_e, workspaceId, id) => savedBlocks.purge(workspaceId, id));
+  ipcMain.handle('storage:blocks:rename', (_e, workspaceId, id, name) => savedBlocks.rename(workspaceId, id, name));
+  ipcMain.handle('storage:blocks:newId', () => savedBlocks.newId());
 
   // Global settings (user identity, appearance, ai, etc.)
   ipcMain.handle('storage:settings:get', (_e, key) => settings.get(key));
