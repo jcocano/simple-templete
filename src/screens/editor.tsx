@@ -765,8 +765,8 @@ function SectionProps({ section, onChange }) {
   const clearMobile = (k) => onChange({ ...section, mobile: window.setDeviceOverride(mob, k, undefined) });
   const upd = (k,v) => onChange({ ...section, [k]:v });
   return (
-    <div style={{display:'flex',flexDirection:'column',height:'100%'}}>
-      <div style={{padding:'10px 12px',borderBottom:'1px solid var(--line)',display:'flex',alignItems:'center',gap:8}}>
+    <div style={{display:'flex',flexDirection:'column',flex:1,minHeight:0,minWidth:0}}>
+      <div style={{padding:'10px 12px',borderBottom:'1px solid var(--line)',display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
         <div style={{width:24,height:24,borderRadius:'var(--r-sm)',background:'var(--accent-soft)',color:'var(--accent)',display:'grid',placeItems:'center'}}>
           <I.hero size={12}/>
         </div>
@@ -777,7 +777,7 @@ function SectionProps({ section, onChange }) {
         <button className="btn icon sm ghost" title={t('common.duplicate')}><I.copy size={13}/></button>
         <button className="btn icon sm ghost" title={t('common.delete')}><I.trash size={13}/></button>
       </div>
-      <div className="side-tabs">
+      <div className="side-tabs" style={{flexShrink:0}}>
         <Tab label={t('editor.sectionProps.tab.style')} active={tab==='style'} onClick={()=>setTab('style')}/>
         <Tab label={t('editor.sectionProps.tab.layout')} active={tab==='layout'} onClick={()=>setTab('layout')}/>
         <Tab label={t('editor.sectionProps.tab.type')} active={tab==='type'} onClick={()=>setTab('type')}/>
