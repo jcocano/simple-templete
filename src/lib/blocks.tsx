@@ -22,30 +22,41 @@ const VALID_KINDS = new Set([
 // the user sees realistic previews in the library without having to
 // craft every seed by hand. Styles mirror the defaults used by
 // DEFAULT_SECTIONS (Beefree-shaped outer/inner walls).
+// Shared id factory: stable prefix + random suffix. Kept local so this
+// file doesn't reach for window utilities that may not be loaded yet.
+function mkSectionId() {
+  return `s_${Math.random().toString(36).slice(2, 8)}`;
+}
+function mkBlockId() {
+  return `b_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function sectionForKind(kind) {
   const base = window.defaultSectionStyle || (() => ({}));
-  const mkId = (prefix) => `${prefix}_${Math.random().toString(36).slice(2, 8)}`;
   switch (kind) {
     case 'header':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 18 }),
-        columns: [{ w: 100, blocks: [{ id: mkId('b'), type: 'header' }] }],
+        columns: [{ w: 100, blocks: [{ id: mkBlockId(), type: 'header' }] }],
       };
     case 'footer':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#f3f1fa', text: '#6a6a8a', padding: 24, align: 'center' }),
-        columns: [{ w: 100, blocks: [{ id: mkId('b'), type: 'footer' }] }],
+        columns: [{ w: 100, blocks: [{ id: mkBlockId(), type: 'footer' }] }],
       };
     case 'cta':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 32, align: 'center' }),
         columns: [{
           w: 100,
           blocks: [{
-            id: mkId('b'),
+            id: mkBlockId(),
             type: 'button',
             data: { label: 'Comprar ahora', url: '#' },
           }],
@@ -53,45 +64,50 @@ function sectionForKind(kind) {
       };
     case 'testimonial':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 24, align: 'center' }),
         columns: [{
           w: 100,
           blocks: [
-            { id: mkId('b'), type: 'heading', data: { text: '"Gran servicio, muy recomendado."' } },
-            { id: mkId('b'), type: 'text',    data: { body: '— María G.' } },
+            { id: mkBlockId(), type: 'heading', data: { text: '"Gran servicio, muy recomendado."' } },
+            { id: mkBlockId(), type: 'text',    data: { body: '— María G.' } },
           ],
         }],
       };
     case 'product':
       return {
+        id: mkSectionId(),
         layout: '2col',
         style: base({ bg: '#ffffff', padding: 28 }),
         columns: [
-          { w: 50, blocks: [{ id: mkId('b'), type: 'product', data: { name: 'Producto 1', price: '$380 MXN' } }] },
-          { w: 50, blocks: [{ id: mkId('b'), type: 'product', data: { name: 'Producto 2', price: '$220 MXN' } }] },
+          { w: 50, blocks: [{ id: mkBlockId(), type: 'product', data: { name: 'Producto 1', price: '$380 MXN' } }] },
+          { w: 50, blocks: [{ id: mkBlockId(), type: 'product', data: { name: 'Producto 2', price: '$220 MXN' } }] },
         ],
       };
     case 'social':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 18, align: 'center' }),
-        columns: [{ w: 100, blocks: [{ id: mkId('b'), type: 'social' }] }],
+        columns: [{ w: 100, blocks: [{ id: mkBlockId(), type: 'social' }] }],
       };
     case 'signature':
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 20 }),
         columns: [{
           w: 100,
           blocks: [
-            { id: mkId('b'), type: 'heading', data: { text: 'Carmen Luna' } },
-            { id: mkId('b'), type: 'text',    data: { body: 'Acme · Fundadora' } },
+            { id: mkBlockId(), type: 'heading', data: { text: 'Carmen Luna' } },
+            { id: mkBlockId(), type: 'text',    data: { body: 'Acme · Fundadora' } },
           ],
         }],
       };
     default:
       return {
+        id: mkSectionId(),
         layout: '1col',
         style: base({ bg: '#ffffff', padding: 24 }),
         columns: [{ w: 100, blocks: [] }],
@@ -120,9 +136,19 @@ function normalizeDoc(blk) {
   const raw = blk.section;
   const section = raw && typeof raw === 'object'
     ? {
+        // Lazy id patch-up for sections saved before `id` was a required
+        // field on the section shape. Without an id, the editor's
+        // ColumnView couldn't route `sectionId` into click handlers,
+        // breaking the image-picker shortcut (and block selection).
+        id: raw.id || mkSectionId(),
         layout: raw.layout || '1col',
         style: raw.style || (window.defaultSectionStyle ? window.defaultSectionStyle() : {}),
-        columns: Array.isArray(raw.columns) ? raw.columns : [],
+        columns: Array.isArray(raw.columns)
+          ? raw.columns.map((col) => ({
+              ...col,
+              blocks: (col.blocks || []).map((b) => (b && b.id ? b : { ...b, id: mkBlockId() })),
+            }))
+          : [],
       }
     : sectionForKind(blk.kind);
   blk.section = section;

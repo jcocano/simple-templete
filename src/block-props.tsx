@@ -87,12 +87,16 @@ function BlockProps({ block, onChange, onDelete }) {
 
       <ImagePickerModal open={imgOpen} onClose={()=>setImgOpen(false)}
         onSelect={img => {
-          // Store both the public URL (used by canvas + export) and the
-          // display name for the properties panel. Mock library items from
-          // the seed data only have `name`, which still shows in the UI
-          // but won't render visually until the user uploads a real file.
-          if (img.url) upd('content.src', img.url);
-          if (img.name) upd('content.alt', img.alt || img.name);
+          // Build a single patched block so both src and alt land in the
+          // same dispatch. Two consecutive upd() calls would race — the
+          // second one clones from the still-stale `block` prop and
+          // overwrites the first (dropping the src).
+          const next = JSON.parse(JSON.stringify(block));
+          next.data = next.data || {};
+          next.data.content = next.data.content || {};
+          if (img.url) next.data.content.src = img.url;
+          if (img.name) next.data.content.alt = img.alt || img.name;
+          onChange && onChange(next);
         }}/>
     </div>
   );
