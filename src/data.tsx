@@ -76,19 +76,6 @@ const BLOCKS_ADV = [
   { id:'attachment', nameKey:'block.name.attachment', name:'Adjuntar archivo', icon:'upload' },
 ];
 
-const SAVED_BLOCKS = [
-  { id:'sb1', name:'Mi firma con foto',        kind:'signature', usedIn:12 },
-  { id:'sb2', name:'Footer legal con dirección', kind:'footer',  usedIn:24 },
-  { id:'sb3', name:'Mi header con logo',       kind:'header',    usedIn:18 },
-  { id:'sb4', name:'Botón grande — reservar',  kind:'cta',       usedIn:9  },
-  { id:'sb5', name:'Mis redes sociales',       kind:'social',    usedIn:21 },
-  { id:'sb6', name:'Reseña de cliente',        kind:'testimonial', usedIn:3 },
-  { id:'sb7', name:'Dos productos destacados', kind:'product',   usedIn:7  },
-  { id:'sb8', name:'Banner de oferta 40%',     kind:'cta',       usedIn:4  },
-  { id:'sb9', name:'Link a agendar (Calendly)',kind:'cta',       usedIn:6  },
-  { id:'sb10',name:'Aviso legal corto',        kind:'footer',    usedIn:14 },
-];
-
 // Variables: etiquetas tipo {{nombre}} — human-friendly keys
 const VARIABLES = [
   { key:'nombre',          label:'Nombre de la persona',      sample:'Carmen',              type:'texto' },
@@ -249,6 +236,6 @@ const FONT_OPTIONS = [
 Object.assign(window, {
   TEMPLATES, FOLDERS, CATS,
   BLOCKS_BASIC, BLOCKS_LAYOUT, BLOCKS_CONTENT, BLOCKS_SOCIAL, BLOCKS_ECOM, BLOCKS_MEDIA, BLOCKS_ADV,
-  SAVED_BLOCKS, VARIABLES, HISTORY, DEFAULT_DOC, BLANK_DOC,
+  VARIABLES, HISTORY, DEFAULT_DOC, BLANK_DOC,
   SECTION_PRESETS, SECTION_STYLE_PRESETS, FONT_OPTIONS, defaultSectionStyle,
 });
