@@ -1,108 +1,69 @@
-// Vista previa — un solo correo, 2 switches (dispositivo y tema)
+// Vista previa — iframe con HTML puro generado por docToEmailHtml (R5).
+// El contenido del iframe es EXACTAMENTE lo que saldrá exportado (dialect
+// 'native'), con substitución de variables al vuelo para que se vean los
+// valores sample. El chrome simulado (Gmail-like) queda fuera del iframe.
 
 function Preview({ template, onBack }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
   const [device, setDevice] = React.useState('desktop'); // desktop | mobile
   const [theme, setTheme]   = React.useState('light');   // light | dark
-  const [doc, setDoc] = React.useState([]);
+  const [doc, setDoc] = React.useState({ sections: [] });
   const [tplMeta, setTplMeta] = React.useState(null);
 
   React.useEffect(() => {
-    if (!template?.id) { setDoc([]); return; }
+    if (!template?.id) { setDoc({ sections: [] }); return; }
     let cancelled = false;
     (async () => {
       const tpl = await window.stTemplates.read(template.id);
       if (cancelled) return;
-      setDoc(Array.isArray(tpl?.doc?.sections) ? tpl.doc.sections : []);
+      setDoc(tpl?.doc && Array.isArray(tpl.doc.sections) ? tpl.doc : { sections: [] });
       setTplMeta(tpl || null);
     })();
     return () => { cancelled = true; };
   }, [template?.id]);
 
-  // Expose this template's vars so email-blocks' renderForDisplay can
-  // substitute {{nombre}} → "Carmen" etc. Set synchronously in the render
-  // body (NOT inside useEffect) so the value is available BEFORE the children
-  // run their renderForDisplay — otherwise the first render uses stale data
-  // from the previous mount and newly added vars don't appear until a
-  // forced re-render. Cleared on unmount so the editor keeps the
-  // {{var}} highlight behaviour.
-  window.__stPreviewVars = Array.isArray(tplMeta?.vars) ? tplMeta.vars : (window.VARIABLES || []);
-  React.useEffect(() => () => { window.__stPreviewVars = null; }, []);
-
   const isMobile = device === 'mobile';
   const isDark   = theme === 'dark';
 
-  // El card del cliente debe alojar la sección más ancha del documento + slack
-  // para que se aprecien los fondos exteriores que ocupan todo lo ancho.
-  const docMaxWidth = doc.reduce((m, s) => Math.max(m, s.style?.width || 600), 600);
-  const emailWidth = isMobile ? 390 : Math.max(640, docMaxWidth + 40);
+  const previewVars = Array.isArray(tplMeta?.vars) ? tplMeta.vars : (window.VARIABLES || []);
+  const lang = (window.stI18n && window.stI18n.getLang) ? window.stI18n.getLang() : 'en';
 
-  // Colores del cliente (la app/cliente simulado, no el correo)
+  // Generate email HTML via the same path as export. Using `previewVars`
+  // substitutes {{key}} with sample values; dialect stays 'native' so the
+  // preview reflects the editor-level document shape.
+  const { html } = React.useMemo(() => {
+    const fn = window.docToEmailHtml;
+    if (!fn) return { html: '<!doctype html><html><body></body></html>', warnings: [] };
+    return fn(doc, {
+      lang,
+      mergeDialect: 'native',
+      subject: tplMeta?.meta?.subject || tplMeta?.name || '',
+      preheader: tplMeta?.meta?.preheader || '',
+      previewVars,
+    });
+  }, [doc, lang, previewVars, tplMeta?.meta?.subject, tplMeta?.meta?.preheader, tplMeta?.name]);
+
+  // Ancho del card del cliente: en desktop, lo suficientemente ancho para ver
+  // la sección más grande con slack; en mobile, 390px fijo.
+  const docMaxWidth = (doc.sections || []).reduce((m, s) => Math.max(m, s.style?.width || 600), 600);
+  const emailWidth = isMobile ? 390 : Math.max(640, docMaxWidth + 40);
+  const iframeWidth = isMobile ? 375 : docMaxWidth;
+
+  // Chrome del cliente
   const clientBg     = isDark ? '#0b0b0d' : '#edece6';
   const chromeBg     = isDark ? '#17171a' : '#ffffff';
   const chromeFg     = isDark ? '#e7e7ea' : '#1a1a17';
   const chromeSub    = isDark ? '#8a8a92' : '#6b6b72';
   const chromeLine   = isDark ? '#26262b' : '#e8e7e1';
 
-  // Render de una sección — Beefree-shaped: outer band a todo el ancho con
-  // outerBg + outerPadY, contenido centrado a `style.width` con bg interior.
-  const renderSection = (section) => {
-    const st = section.style || {};
-    const pad = st.padding ?? 24;
-    const cols = section.columns || [];
-    const totalW = cols.reduce((s,c)=>s+(c.w||0),0) || 100;
-    const outerBg = st.outerBg || 'transparent';
-    const outerPadY = st.outerPadY || 0;
-    const innerWidth = st.width || 600;
-
-    return (
-      <div key={section.id} style={{
-        background: outerBg,
-        padding: `${outerPadY}px 0`,
-      }}>
-        <div style={{
-          background: st.bg || '#ffffff',
-          color: st.text || '#1a1a17',
-          padding: isMobile ? `${Math.min(pad,20)}px 14px` : `${pad}px ${Math.max(pad-4,16)}px`,
-          textAlign: st.align || 'left',
-          fontFamily: st.font ? `var(--font-${st.font}, var(--font-sans))` : 'var(--font-sans)',
-          maxWidth: isMobile ? '100%' : innerWidth,
-          margin: '0 auto',
-        }}>
-          <div style={{
-            display: isMobile ? 'block' : 'flex',
-            gap: isMobile ? 0 : 16,
-            alignItems:'flex-start',
-          }}>
-            {cols.map((col, ci) => (
-              <div key={ci} style={{
-                flex: isMobile ? 'none' : `0 0 ${(col.w/totalW)*100 - 2}%`,
-                width: isMobile ? '100%' : undefined,
-                marginBottom: isMobile && ci<cols.length-1 ? 20 : 0,
-              }}>
-                {(col.blocks||[]).map(b => {
-                  const R = EB_RENDERERS[b.type];
-                  return R ? <R key={b.id} data={b.data}/> : null;
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Chrome del cliente de correo (cabecera que simula Gmail/Mail)
   const EmailChrome = (
     <div style={{
       background: chromeBg,
       borderBottom:`1px solid ${chromeLine}`,
       padding: isMobile ? '14px 16px' : '16px 22px',
     }}>
-      <div style={{
-        display:'flex',alignItems:'center',gap:12,marginBottom:10,
-      }}>
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:10}}>
         <div style={{
           width: isMobile?34:40, height: isMobile?34:40, borderRadius:'50%',
           background:'linear-gradient(135deg,#5b5bf0,#8b5cf6)',
@@ -133,7 +94,6 @@ function Preview({ template, onBack }) {
     </div>
   );
 
-  // Status bar superior del "dispositivo"
   const StatusBar = isMobile ? (
     <div style={{
       background: chromeBg, borderBottom:`1px solid ${chromeLine}`,
@@ -231,18 +191,26 @@ function Preview({ template, onBack }) {
           {StatusBar}
           {EmailChrome}
 
-          {/* Cuerpo del correo — cada sección pinta su propio outerBg a todo
-              lo ancho del card, así que aquí solo apilamos sin wrapper. */}
-          <div style={{
-            background:'transparent',
-            color:'#1a1a17',
-            fontFamily:'var(--font-sans)',
-            boxShadow: isDark ? '0 8px 32px -12px rgba(0,0,0,.8)' : 'none',
-          }}>
-            {doc.length === 0
-              ? <div style={{padding:'40px 24px',textAlign:'center',color:'#8e8b7e',fontSize:13}}>{t('preview.empty')}</div>
-              : doc.map(renderSection)}
-          </div>
+          {/* Iframe con el HTML email real — nada fuera del generador. */}
+          {doc.sections.length === 0 ? (
+            <div style={{padding:'40px 24px',textAlign:'center',color:'#8e8b7e',fontSize:13,background:'#ffffff'}}>
+              {t('preview.empty')}
+            </div>
+          ) : (
+            <iframe
+              title="email-preview"
+              srcDoc={html}
+              sandbox="allow-same-origin"
+              style={{
+                display:'block',
+                width: iframeWidth,
+                maxWidth:'100%',
+                height: 780,
+                border:0,
+                background:'#ffffff',
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

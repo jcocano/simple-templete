@@ -299,66 +299,25 @@ ${parts.join(' · ')}
 function renderHTML(template, opts = {}) {
   const { minify = false, includeTxt = false, resolveVars: doResolve = false } = opts;
   if (!template) return '';
-  const sections = template.doc?.sections || [];
+  if (!template.doc) return '';
+  if (typeof window === 'undefined' || typeof window.docToEmailHtml !== 'function') {
+    throw new Error('docToEmailHtml no está disponible');
+  }
 
-  const brand = (typeof window !== 'undefined' && window.stStorage)
-    ? (window.stStorage.getWSSetting('brand', {}) || {})
-    : {};
+  const previewVars = doResolve ? (template.vars || []) : null;
+  const lang = window.stI18n?.getLang?.() || 'es';
+  const result = window.docToEmailHtml(template.doc, {
+    lang,
+    mergeDialect: 'native',
+    subject: template.meta?.subject || template.name || '',
+    preheader: template.meta?.preview || '',
+    minify,
+    previewVars,
+  });
 
-  const vars = template.vars || [];
-  // V: escape text value for HTML context. U: same for URL/href context.
-  // When `resolveVars` is true, substitute `{{key}}` with `vars[key].sample`
-  // first (used by Preview and Test Send). When false (default — Export),
-  // keep `{{key}}` literal so mailing platforms (Mailchimp/Sendgrid/Klaviyo…)
-  // can handle the substitution at send time.
-  const V = doResolve
-    ? (t) => escapeHtml(resolveVars(t || '', vars))
-    : (t) => escapeHtml(t || '');
-  const U = doResolve
-    ? (t) => escapeHtml(resolveVars(t || '', vars))
-    : (t) => escapeHtml(t || '');
-
-  const ctx = {
-    vars,
-    font: brand.fontBody || 'inter',
-    brand,
-    V,
-    U,
-  };
-
-  const sectionsHTML = sections.map(sec => renderHTMLSection(sec, ctx)).join('\n');
-  const legalFooter = renderLegalFooterHTML(brand, ctx);
-
-  const subject = escapeHtml(template.meta?.subject || template.name || 'Correo');
-  const preview = escapeHtml(template.meta?.preview || '');
-  const bodyFont = fontStack(brand.fontBody || 'inter');
-
-  // No global wall: <body> is transparent and the outer table just stacks each
-  // section as a full-width row. Each section provides its own outer bg + the
-  // centered fixed-width content card (see renderHTMLSection).
-  let html = `<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>${subject}</title>
-</head>
-<body style="margin:0;padding:0;background:transparent;font-family:${bodyFont};">
-${preview ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preview}</div>` : ''}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-${sectionsHTML}
-${legalFooter}
-</table>
-${includeTxt ? `<!--[TXT]\n${renderTXT(template)}\n[/TXT]-->` : ''}
-</body>
-</html>`;
-
-  if (minify) {
-    html = html
-      .replace(/\n+/g, '')
-      .replace(/>\s+</g, '><')
-      .replace(/[ \t]{2,}/g, ' ');
+  let html = result?.html || '';
+  if (includeTxt) {
+    html += `\n<!-- [TXT]\n${renderTXT(template, { resolveVars: doResolve })}\n[/TXT] -->`;
   }
   return html;
 }

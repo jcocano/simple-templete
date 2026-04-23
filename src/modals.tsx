@@ -277,9 +277,12 @@ function DevsTab({ onClose }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();
   const [fmt, setFmt] = React.useState('html');
-  const [minify, setMinify] = React.useState(false);
+  const [minify, setMinify] = React.useState(true);
   const [includeTxt, setIncludeTxt] = React.useState(false);
+  // R5 · Dialect selector for merge tags. Applies only to HTML fmt.
+  const [dialect, setDialect] = React.useState('native'); // native | sendgrid | mailgun | mailchimp
   const [template, setTemplate] = React.useState(null);
+  const [warnings, setWarnings] = React.useState([]);
 
   // Pull the currently-open template so the renderers have real sections + vars.
   // If no editor is mounted (modal opened from dashboard via command palette),
@@ -305,28 +308,47 @@ function DevsTab({ onClose }) {
   // Output se computa en un effect porque `inlineImages` es async (lee bytes
   // del disco via IPC por cada st-img:// URL). Para HTML/MJML pasa por inline;
   // TXT no tiene imágenes, va directo.
+  //
+  // R5: HTML ahora pasa por `window.docToEmailHtml` (email-safe, table-based,
+  // soporta mergeDialect). MJML/TXT siguen usando stExport.
   const [output, setOutput] = React.useState(null);
   React.useEffect(() => {
-    if (!template) { setOutput(null); return; }
+    if (!template) { setOutput(null); setWarnings([]); return; }
     const ex = window.stExport;
     if (!ex) { setOutput(null); return; }
     let alive = true;
     (async () => {
       try {
-        const htmlRaw = ex.renderHTML(template, { minify, includeTxt });
+        let html = '';
+        let collectedWarnings = [];
+        const docFn = window.docToEmailHtml;
+        if (typeof docFn !== 'function' || !template.doc) {
+          throw new Error('docToEmailHtml no está disponible para exportar HTML.');
+        }
+        const result = docFn(template.doc, {
+          lang,
+          mergeDialect: dialect,
+          subject: template.meta?.subject || template.name || '',
+          preheader: template.meta?.preheader || '',
+          minify,
+        });
+        html = result.html;
+        collectedWarnings = result.warnings || [];
+        if (includeTxt) {
+          html += `\n<!-- [TXT]\n${ex.renderTXT(template)}\n[/TXT] -->`;
+        }
+        const htmlInlined = await ex.inlineImages(html);
         const mjmlRaw = ex.renderMJML(template);
-        const [html, mjml] = await Promise.all([
-          ex.inlineImages(htmlRaw),
-          ex.inlineImages(mjmlRaw),
-        ]);
+        const mjml = await ex.inlineImages(mjmlRaw);
         if (!alive) return;
-        setOutput({ html, mjml, txt: ex.renderTXT(template) });
+        setOutput({ html: htmlInlined, mjml, txt: ex.renderTXT(template) });
+        setWarnings(collectedWarnings);
       } catch (err) {
         if (alive) setOutput({ error: err?.message || String(err) });
       }
     })();
     return () => { alive = false; };
-  }, [template, minify, includeTxt]);
+  }, [template, minify, includeTxt, dialect, lang]);
 
   const current = output && !output.error ? (output[fmt] || '') : '';
   const sizeKB = current ? Math.max(1, Math.round(new Blob([current]).size / 1024)) : 0;
@@ -377,11 +399,32 @@ function DevsTab({ onClose }) {
           ))}
         </div>
         <div className="divider"/>
+        {/* R5 · Dialect selector (HTML only) */}
+        <div className="prop-label" style={{opacity: fmt==='html'?1:0.5}}>{t('export.dialect.label')}</div>
+        <div className="col" style={{gap:4,opacity: fmt==='html'?1:0.5}}>
+          {[
+            { id:'native',    label: t('export.dialect.native') },
+            { id:'sendgrid',  label: t('export.dialect.sendgrid') },
+            { id:'mailgun',   label: t('export.dialect.mailgun') },
+            { id:'mailchimp', label: t('export.dialect.mailchimp') },
+          ].map(o => (
+            <label key={o.id} style={{display:'flex',gap:8,alignItems:'center',fontSize:12,cursor:fmt==='html'?'pointer':'default'}}>
+              <input type="radio" name="export-dialect" checked={dialect===o.id} onChange={()=>setDialect(o.id)} disabled={fmt!=='html'}/>
+              {o.label}
+            </label>
+          ))}
+        </div>
+        <div className="divider"/>
         <div className="prop-label">{t('modals.export.options')}</div>
         <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12,opacity: fmt==='html'?1:0.5}}>
           <input type="checkbox" checked={minify} onChange={e=>setMinify(e.target.checked)} disabled={fmt!=='html'}/>
-          {t('modals.export.opt.minify')}
+          {t('export.option.minify', null, t('modals.export.opt.minify'))}
         </label>
+        {fmt==='html' && (
+          <div style={{fontSize:11,color:'var(--fg-3)',lineHeight:1.45,paddingLeft:22}}>
+            {t('export.option.minify.hint')}
+          </div>
+        )}
         <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12,opacity: fmt==='html'?1:0.5}}>
           <input type="checkbox" checked={includeTxt} onChange={e=>setIncludeTxt(e.target.checked)} disabled={fmt!=='html'}/>
           {t('modals.export.opt.includeTxt')}
@@ -403,6 +446,30 @@ function DevsTab({ onClose }) {
         </div>
       </div>
       <div style={{background:'var(--surface-2)',borderRadius:'var(--r-md)',overflow:'hidden',display:'flex',flexDirection:'column'}}>
+        {/* R5 · Warnings banner (e.g. alt missing, scripts stripped, QR not baked) */}
+        {fmt==='html' && warnings.length > 0 && (
+          <div style={{padding:'8px 12px',background:'color-mix(in oklab, var(--warn, #d97757) 14%, transparent)',borderBottom:'1px solid var(--line)',fontSize:11.5,color:'var(--warn, #d97757)',lineHeight:1.5}}>
+            <div style={{fontWeight:600,marginBottom:4,display:'flex',alignItems:'center',gap:6}}><I.info size={12}/> {t('export.warnings.title')}</div>
+            <ul style={{margin:0,paddingLeft:18}}>
+              {warnings.map((w, i) => {
+                let msg = w;
+                if (w.startsWith('altMissing')) msg = t('export.warning.altMissing', { ref: w.split(':')[1] || '' });
+                else if (w === 'scriptStripped') msg = t('export.warning.scriptStripped');
+                else if (w === 'qrNotBaked') msg = t('export.warning.qrNotBaked');
+                else if (w.startsWith('htmlTagStripped:')) msg = t('export.warning.htmlTagStripped', { tag: w.split(':')[1] || 'unknown' });
+                else if (w.startsWith('attrStripped:')) msg = t('export.warning.attrStripped', { attr: w.split(':')[1] || 'unknown' });
+                else if (w.startsWith('mergeTagDotNotation:')) {
+                  const parts = w.split(':');
+                  msg = t('export.warning.mergeTag.dotNotation', { dialect: parts[1] || 'unknown', key: parts[2] || '' });
+                } else if (w.startsWith('mergeTagRawNotSupported:')) {
+                  const parts = w.split(':');
+                  msg = t('export.warning.mergeTag.rawNotSupported', { dialect: parts[1] || 'unknown', key: parts[2] || '' });
+                }
+                return <li key={i}>{msg}</li>;
+              })}
+            </ul>
+          </div>
+        )}
         <div style={{padding:'8px 12px',borderBottom:'1px solid var(--line)',display:'flex',alignItems:'center',gap:8,fontSize:12}}>
           <I.code size={13}/>
           <span style={{fontFamily:'var(--font-mono)'}}>{template ? window.stExport.safeFilename(template.name) : 'correo'}.{currentFormat.ext}</span>
