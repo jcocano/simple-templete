@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev:web": "vite",
-    "dev:electron": "wait-on http://127.0.0.1:5173 && env -u ELECTRON_RUN_AS_NODE ELECTRON_START_URL=http://127.0.0.1:5173 electron .",
+    "dev:electron": "wait-on http://127.0.0.1:5173 && node scripts/run-dev-electron.mjs",
     "dev": "concurrently -k \"npm:dev:web\" \"npm:dev:electron\"",
     "start": "env -u ELECTRON_RUN_AS_NODE electron .",
     "build:web": "vite build",
