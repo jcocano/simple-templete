@@ -46,6 +46,7 @@ function useTemplateVars() {
 }
 
 function Modal({ title, sub, onClose, children, footer, size }) {
+  window.stI18n.useLang();
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className={`modal ${size||''} pop`} onClick={e=>e.stopPropagation()}>
@@ -67,15 +68,17 @@ function Modal({ title, sub, onClose, children, footer, size }) {
 // EXPORT / SEND MODAL — 2 tabs: "Enviar a personas" y "Para devs"
 // ════════════════════════════════════════════════════════════════
 function ExportModal({ onClose }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [tab, setTab] = React.useState('share');  // share | devs
   return (
-    <Modal title="Compartir o exportar el correo"
-      sub="Aún no hay envíos masivos — por ahora puedes mandarte pruebas, compartir un link, o bajar el código."
+    <Modal title={t('modals.export.title')}
+      sub={t('modals.export.sub')}
       size="wide" onClose={onClose}
       footer={null}>
       <div style={{display:'flex',gap:0,borderBottom:'1px solid var(--line)',marginBottom:18}}>
-        <ModalTab label="Compartir y probar" icon="send" active={tab==='share'} onClick={()=>setTab('share')} sub="Prueba a ti mismo o link privado"/>
-        <ModalTab label="Para desarrolladores" icon="code" active={tab==='devs'} onClick={()=>setTab('devs')} sub="HTML, MJML, texto plano"/>
+        <ModalTab label={t('modals.export.tab.share')} icon="send" active={tab==='share'} onClick={()=>setTab('share')} sub={t('modals.export.tab.share.sub')}/>
+        <ModalTab label={t('modals.export.tab.devs')} icon="code" active={tab==='devs'} onClick={()=>setTab('devs')} sub={t('modals.export.tab.devs.sub')}/>
       </div>
       {tab==='share' && <SendTab onClose={onClose}/>}
       {tab==='devs' && <DevsTab onClose={onClose}/>}
@@ -109,6 +112,8 @@ function ModalTab({ label, icon, active, onClick, sub }) {
 
 // ─── TAB 1: SEND TO PEOPLE ──────────────────────────────────────
 function SendTab({ onClose }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const [action, setAction] = React.useState('test');  // test | copy
   const [emails, setEmails] = React.useState(() => {
     // Seed from the workspace account email so the user doesn't have to
@@ -133,10 +138,10 @@ function SendTab({ onClose }) {
     return () => { alive = false; };
   }, []);
 
-  const ACTIONS = [
-    { id:'test',     t:'Enviar prueba',        d:'Mándate el correo a ti o a tu equipo para revisarlo', icon:'send'},
-    { id:'copy',     t:'Copiar link privado',  d:'Compártelo por Slack, WhatsApp o correo',              icon:'copy'},
-  ];
+  const ACTIONS = React.useMemo(() => [
+    { id:'test',     t: t('modals.export.action.test.title'),  d: t('modals.export.action.test.desc'), icon:'send'},
+    { id:'copy',     t: t('modals.export.action.copy.title'),  d: t('modals.export.action.copy.desc'), icon:'copy'},
+  ], [lang]);
 
   const addEmail = () => {
     if (input && input.includes('@')) { setEmails(e=>[...e, input.trim()]); setInput(''); }
@@ -150,12 +155,12 @@ function SendTab({ onClose }) {
     if (result.ok) {
       window.notify && window.notify('testDone', {
         kind: 'ok',
-        title: `Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`,
-        msg: 'Suele tardar un par de minutos en llegar.',
+        title: t(emails.length === 1 ? 'modals.test.toast.title.one' : 'modals.test.toast.title.other', { n: emails.length }),
+        msg: t('modals.test.toast.msg'),
       });
       onClose();
     } else {
-      setError(result.error || 'Error desconocido al enviar.');
+      setError(result.error || t('modals.test.error.unknown'));
     }
   };
 
@@ -196,13 +201,13 @@ function SendTab({ onClose }) {
           display:'flex',gap:8,
         }}>
           <I.info size={14} style={{marginTop:1,flexShrink:0}}/>
-          <div><b>No podés enviar aún.</b> {cfgError}</div>
+          <div><b>{t('modals.test.cannotSend')}</b> {cfgError}</div>
         </div>
       )}
 
       {action==='test' && (
         <div className="col" style={{gap:12,padding:16,background:'var(--surface-2)',borderRadius:'var(--r-md)'}}>
-          <div className="prop-label">¿A qué correos lo enviamos?</div>
+          <div className="prop-label">{t('modals.test.recipients.label')}</div>
           <div style={{display:'flex',gap:6,flexWrap:'wrap',padding:6,border:'1px solid var(--line)',borderRadius:'var(--r-md)',background:'var(--surface)',minHeight:44}}>
             {emails.map((em,i) => (
               <span key={i} className="chip" style={{height:26,fontSize:12}}>
@@ -210,34 +215,34 @@ function SendTab({ onClose }) {
                 <button className="btn icon sm ghost" style={{height:18,width:18}} onClick={()=>setEmails(e=>e.filter((_,x)=>x!==i))}><I.x size={10}/></button>
               </span>
             ))}
-            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'||e.key===',')addEmail()}} style={{flex:1,minWidth:180,border:'none',outline:'none',background:'transparent',fontSize:13,padding:'0 4px'}} placeholder="Escribe un correo y aprieta Enter…"/>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'||e.key===',')addEmail()}} style={{flex:1,minWidth:180,border:'none',outline:'none',background:'transparent',fontSize:13,padding:'0 4px'}} placeholder={t('modals.test.recipients.placeholder')}/>
           </div>
           <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12}}>
             <input type="checkbox" defaultChecked/>
-            Añadir <b>[PRUEBA]</b> al asunto para distinguirlo
+            {t('modals.test.tag.prefix')} <b>{t('modals.test.tag.badge')}</b> {t('modals.test.tag.suffix')}
           </label>
           <div style={{fontSize:11,color:'var(--fg-3)',lineHeight:1.5}}>
-            Usa la cuenta SMTP configurada en Ajustes → Envío de pruebas. Las etiquetas <code style={{fontFamily:'var(--font-mono)'}}>{`{{nombre}}`}</code> aparecen con los valores de ejemplo.
+            {t('modals.test.smtp.hint.prefix')} <code style={{fontFamily:'var(--font-mono)'}}>{`{{nombre}}`}</code> {t('modals.test.smtp.hint.suffix')}
           </div>
         </div>
       )}
 
       {action==='copy' && (
         <div className="col" style={{gap:12,padding:16,background:'var(--surface-2)',borderRadius:'var(--r-md)'}}>
-          <div className="prop-label">Tu link privado</div>
+          <div className="prop-label">{t('modals.export.link.label')}</div>
           <div className="row">
             <input className="field" readOnly value="https://simple-template.app/v/k7h2-39pq" style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}/>
             <button className="btn" onClick={()=>{
               try { navigator.clipboard?.writeText('https://simple-template.app/v/k7h2-39pq'); } catch(e){}
-              window.toast && window.toast({ kind:'ok', title:'Link copiado', msg:'Pégalo donde lo quieras compartir.' });
-            }}><I.copy size={13}/> Copiar</button>
+              window.toast && window.toast({ kind:'ok', title: t('modals.export.link.copied.title'), msg: t('modals.export.link.copied.msg') });
+            }}><I.copy size={13}/> {t('modals.export.btn.copy')}</button>
           </div>
           <div style={{fontSize:12,color:'var(--fg-3)',lineHeight:1.5}}>
-            Cualquiera con este link puede abrir el correo en su navegador. Úsalo para pegarlo en WhatsApp, Slack o para mostrarle al cliente antes de enviar masivo.
+            {t('modals.export.link.description')}
           </div>
           <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12}}>
             <input type="checkbox" defaultChecked/>
-            Los datos de etiquetas aparecen con ejemplos ({`{{nombre}}`} → "Carmen")
+            {t('modals.export.link.sampleHint')} ({`{{nombre}}`} → "Carmen")
           </label>
         </div>
       )}
@@ -251,17 +256,17 @@ function SendTab({ onClose }) {
           display:'flex',gap:8,
         }}>
           <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
-          <div><b>No pudimos enviar.</b> {error}</div>
+          <div><b>{t('modals.test.sendFailed')}</b> {error}</div>
         </div>
       )}
 
       {/* Footer */}
       <div className="row" style={{justifyContent:'flex-end',paddingTop:8,borderTop:'1px solid var(--line)',marginTop:4}}>
-        <button className="btn ghost" onClick={onClose} disabled={sending}>Cancelar</button>
+        <button className="btn ghost" onClick={onClose} disabled={sending}>{t('modals.common.cancel')}</button>
         {action==='test' && <button className="btn primary" onClick={sendTest} disabled={sending || emails.length===0 || cfgLoading || !!cfgError}>
-          {sending ? <><I.loader size={13}/> Enviando…</> : <><I.send size={13}/> Mandar {emails.length} prueba{emails.length!==1?'s':''}</>}
+          {sending ? <><I.loader size={13}/> {t('modals.test.sending')}</> : <><I.send size={13}/> {t(emails.length === 1 ? 'modals.test.btn.send.one' : 'modals.test.btn.send.other', { n: emails.length })}</>}
         </button>}
-        {action==='copy' && <button className="btn primary" onClick={onClose}><I.check size={13}/> Listo</button>}
+        {action==='copy' && <button className="btn primary" onClick={onClose}><I.check size={13}/> {t('modals.common.done')}</button>}
       </div>
     </div>
   );
@@ -269,6 +274,8 @@ function SendTab({ onClose }) {
 
 // ─── TAB 2: FOR DEVELOPERS ──────────────────────────────────────
 function DevsTab({ onClose }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const [fmt, setFmt] = React.useState('html');
   const [minify, setMinify] = React.useState(false);
   const [includeTxt, setIncludeTxt] = React.useState(false);
@@ -324,20 +331,20 @@ function DevsTab({ onClose }) {
   const current = output && !output.error ? (output[fmt] || '') : '';
   const sizeKB = current ? Math.max(1, Math.round(new Blob([current]).size / 1024)) : 0;
 
-  const FORMATS = [
-    { id:'html', label:'HTML compilado',       d:'Pégalo en Mailchimp, Sendgrid, Klaviyo, Brevo', ext:'html', mime:'text/html' },
-    { id:'mjml', label:'MJML (código fuente)', d:'Para editar con herramientas MJML',              ext:'mjml', mime:'text/plain' },
-    { id:'txt',  label:'Texto plano',           d:'Versión alternativa, sin formato',              ext:'txt',  mime:'text/plain' },
-  ];
+  const FORMATS = React.useMemo(() => [
+    { id:'html', label: t('modals.export.fmt.html'),       d: t('modals.export.fmt.html.desc'), ext:'html', mime:'text/html' },
+    { id:'mjml', label: t('modals.export.fmt.mjml'),       d: t('modals.export.fmt.mjml.desc'), ext:'mjml', mime:'text/plain' },
+    { id:'txt',  label: t('modals.export.fmt.txt'),        d: t('modals.export.fmt.txt.desc'),  ext:'txt',  mime:'text/plain' },
+  ], [lang]);
   const currentFormat = FORMATS.find(f => f.id === fmt) || FORMATS[0];
 
   const doCopy = async () => {
     if (!current) return;
     try {
       await navigator.clipboard.writeText(current);
-      window.toast && window.toast({ kind:'ok', title:`${fmt.toUpperCase()} copiado al portapapeles`, msg:'Ya lo puedes pegar donde quieras.' });
+      window.toast && window.toast({ kind:'ok', title: t('modals.export.copy.toast.title', { fmt: fmt.toUpperCase() }), msg: t('modals.export.copy.toast.msg') });
     } catch (err) {
-      window.toast && window.toast({ kind:'error', title:'No se pudo copiar', msg: err?.message || 'Revisa los permisos del portapapeles.' });
+      window.toast && window.toast({ kind:'error', title: t('modals.export.copy.failed.title'), msg: err?.message || t('modals.export.copy.failed.msg') });
     }
   };
 
@@ -346,13 +353,13 @@ function DevsTab({ onClose }) {
     const base = window.stExport.safeFilename(template?.name);
     const filename = `${base}.${currentFormat.ext}`;
     window.stExport.downloadFile(filename, current, currentFormat.mime);
-    window.notify && window.notify('exportDone', { kind:'ok', title:'Descarga iniciada', msg: filename });
+    window.notify && window.notify('exportDone', { kind:'ok', title: t('modals.export.download.toast.title'), msg: filename });
   };
 
   return (
     <div style={{display:'grid',gridTemplateColumns:'240px 1fr',gap:20}}>
       <div className="col">
-        <div className="prop-label">Formato</div>
+        <div className="prop-label">{t('modals.export.format')}</div>
         <div className="col" style={{gap:6}}>
           {FORMATS.map(o => (
             <label key={o.id} style={{
@@ -370,29 +377,29 @@ function DevsTab({ onClose }) {
           ))}
         </div>
         <div className="divider"/>
-        <div className="prop-label">Opciones</div>
+        <div className="prop-label">{t('modals.export.options')}</div>
         <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12,opacity: fmt==='html'?1:0.5}}>
           <input type="checkbox" checked={minify} onChange={e=>setMinify(e.target.checked)} disabled={fmt!=='html'}/>
-          Comprimir código
+          {t('modals.export.opt.minify')}
         </label>
         <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12,opacity: fmt==='html'?1:0.5}}>
           <input type="checkbox" checked={includeTxt} onChange={e=>setIncludeTxt(e.target.checked)} disabled={fmt!=='html'}/>
-          Incluir versión de solo texto
+          {t('modals.export.opt.includeTxt')}
         </label>
         <div className="divider"/>
-        <div className="prop-label">Resultado</div>
+        <div className="prop-label">{t('modals.export.result')}</div>
         <div className="row">
           {template ? (
             output?.error
-              ? <div className="chip" style={{color:'var(--err,#e04f4f)'}}><I.x size={10}/> Error</div>
-              : <div className="chip ok"><I.check size={10}/> Válido</div>
+              ? <div className="chip" style={{color:'var(--err,#e04f4f)'}}><I.x size={10}/> {t('modals.export.status.error')}</div>
+              : <div className="chip ok"><I.check size={10}/> {t('modals.export.status.valid')}</div>
           ) : (
-            <div className="chip"><I.clock size={10}/> Sin plantilla</div>
+            <div className="chip"><I.clock size={10}/> {t('modals.export.status.noTemplate')}</div>
           )}
         </div>
         <div style={{fontSize:12,color:'var(--fg-3)',lineHeight:1.5}}>
-          {template ? <>Tamaño: <b style={{color:'var(--fg)'}}>{sizeKB} KB</b><br/></> : null}
-          Compatible con: Gmail, Outlook 2019+, iOS, Android
+          {template ? <>{t('modals.export.size')}: <b style={{color:'var(--fg)'}}>{sizeKB} KB</b><br/></> : null}
+          {t('modals.export.compat')}
         </div>
       </div>
       <div style={{background:'var(--surface-2)',borderRadius:'var(--r-md)',overflow:'hidden',display:'flex',flexDirection:'column'}}>
@@ -400,17 +407,17 @@ function DevsTab({ onClose }) {
           <I.code size={13}/>
           <span style={{fontFamily:'var(--font-mono)'}}>{template ? window.stExport.safeFilename(template.name) : 'correo'}.{currentFormat.ext}</span>
           <div className="grow"/>
-          <button className="btn icon sm ghost" onClick={doCopy} disabled={!current} title="Copiar"><I.copy size={12}/></button>
+          <button className="btn icon sm ghost" onClick={doCopy} disabled={!current} title={t('modals.export.btn.copy')}><I.copy size={12}/></button>
         </div>
         <pre style={{margin:0,padding:14,fontFamily:'var(--font-mono)',fontSize:11.5,lineHeight:1.6,overflow:'auto',maxHeight:340,color:'var(--fg-2)',whiteSpace:'pre-wrap',wordBreak:'break-word'}}>
           {output?.error
-            ? `⚠ No se pudo generar: ${output.error}`
-            : (current || 'Abre una plantilla en el editor para ver el código exportado aquí.')}
+            ? `⚠ ${t('modals.export.generate.failed')}: ${output.error}`
+            : (current || t('modals.export.empty'))}
         </pre>
         <div className="row" style={{padding:'10px 12px',borderTop:'1px solid var(--line)',justifyContent:'flex-end'}}>
-          <button className="btn ghost" onClick={onClose}>Cerrar</button>
-          <button className="btn" onClick={doCopy} disabled={!current}><I.copy size={13}/> Copiar</button>
-          <button className="btn primary" onClick={doDownload} disabled={!current}><I.download size={13}/> Descargar {fmt.toUpperCase()}</button>
+          <button className="btn ghost" onClick={onClose}>{t('modals.common.close')}</button>
+          <button className="btn" onClick={doCopy} disabled={!current}><I.copy size={13}/> {t('modals.export.btn.copy')}</button>
+          <button className="btn primary" onClick={doDownload} disabled={!current}><I.download size={13}/> {t('modals.export.btn.download', { fmt: fmt.toUpperCase() })}</button>
         </div>
       </div>
     </div>
@@ -421,6 +428,8 @@ function DevsTab({ onClose }) {
 // TEST SEND MODAL
 // ════════════════════════════════════════════════════════════════
 function TestSendModal({ onClose }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [emails, setEmails] = React.useState(() => {
     const account = window.stStorage.getSetting('account', {}) || {};
     return account.email ? [account.email] : [];
@@ -456,20 +465,20 @@ function TestSendModal({ onClose }) {
     if (result.ok) {
       window.notify && window.notify('testDone', {
         kind: 'ok',
-        title: `Prueba enviada a ${emails.length} correo${emails.length>1?'s':''}`,
-        msg: 'Suele tardar un par de minutos en llegar.',
+        title: t(emails.length === 1 ? 'modals.test.toast.title.one' : 'modals.test.toast.title.other', { n: emails.length }),
+        msg: t('modals.test.toast.msg'),
       });
       onClose();
     } else {
-      setError(result.error || 'Error desconocido al enviar.');
+      setError(result.error || t('modals.test.error.unknown'));
     }
   };
   return (
-    <Modal title="Enviar una prueba a ti mismo" sub="Mándate este correo para ver cómo se verá en tu bandeja de entrada" onClose={onClose}
+    <Modal title={t('modals.test.title')} sub={t('modals.test.sub')} onClose={onClose}
       footer={<>
-        <button className="btn ghost" onClick={onClose} disabled={sending}>Cancelar</button>
+        <button className="btn ghost" onClick={onClose} disabled={sending}>{t('modals.common.cancel')}</button>
         <button className="btn primary" onClick={sendTest} disabled={sending || emails.length===0 || cfgLoading || !!cfgError}>
-          {sending ? <><I.loader size={13}/> Enviando…</> : <><I.send size={13}/> Mandar {emails.length} prueba{emails.length!==1?'s':''}</>}
+          {sending ? <><I.loader size={13}/> {t('modals.test.sending')}</> : <><I.send size={13}/> {t(emails.length === 1 ? 'modals.test.btn.send.one' : 'modals.test.btn.send.other', { n: emails.length })}</>}
         </button>
       </>}>
       <div className="col">
@@ -482,10 +491,10 @@ function TestSendModal({ onClose }) {
             display:'flex',gap:8,marginBottom:4,
           }}>
             <I.info size={14} style={{marginTop:1,flexShrink:0}}/>
-            <div><b>No podés enviar aún.</b> {cfgError}</div>
+            <div><b>{t('modals.test.cannotSend')}</b> {cfgError}</div>
           </div>
         )}
-        <div className="prop-label">¿A qué correos lo enviamos?</div>
+        <div className="prop-label">{t('modals.test.recipients.label')}</div>
         <div style={{display:'flex',gap:6,flexWrap:'wrap',padding:6,border:'1px solid var(--line)',borderRadius:'var(--r-md)',background:'var(--surface)',minHeight:44}}>
           {emails.map((em,i) => (
             <span key={i} className="chip" style={{height:26,fontSize:12}}>
@@ -493,11 +502,11 @@ function TestSendModal({ onClose }) {
               <button className="btn icon sm ghost" style={{height:18,width:18}} onClick={()=>setEmails(e=>e.filter((_,x)=>x!==i))}><I.x size={10}/></button>
             </span>
           ))}
-          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'||e.key===',')add()}} style={{flex:1,minWidth:180,border:'none',outline:'none',background:'transparent',fontSize:13,padding:'0 4px'}} placeholder="Escribe un correo y aprieta Enter…"/>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'||e.key===',')add()}} style={{flex:1,minWidth:180,border:'none',outline:'none',background:'transparent',fontSize:13,padding:'0 4px'}} placeholder={t('modals.test.recipients.placeholder')}/>
         </div>
         <div className="divider"/>
-        <div className="prop-label">Datos de ejemplo para las etiquetas</div>
-        <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:6}}>Los valores que aparecerán en lugar de {`{{nombre}}`}, {`{{empresa}}`}, etc.</div>
+        <div className="prop-label">{t('modals.test.sampleData.label')}</div>
+        <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:6}}>{t('modals.test.sampleData.hint')}</div>
         <div style={{background:'var(--surface-2)',padding:12,borderRadius:'var(--r-md)',display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
           {vars.slice(0,6).map(v => (
             <div key={v.key} style={{display:'flex',flexDirection:'column',gap:2}}>
@@ -510,7 +519,7 @@ function TestSendModal({ onClose }) {
         <div className="row">
           <label style={{display:'flex',gap:8,alignItems:'center',fontSize:12}}>
             <input type="checkbox" defaultChecked/>
-            Añadir <b>[PRUEBA]</b> al asunto para distinguirlo
+            {t('modals.test.tag.prefix')} <b>{t('modals.test.tag.badge')}</b> {t('modals.test.tag.suffix')}
           </label>
         </div>
         {error && (
@@ -522,12 +531,12 @@ function TestSendModal({ onClose }) {
             display:'flex',gap:8,
           }}>
             <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
-            <div><b>No pudimos enviar.</b> {error}</div>
+            <div><b>{t('modals.test.sendFailed')}</b> {error}</div>
           </div>
         )}
         <div style={{padding:12,background:'var(--accent-soft)',borderRadius:'var(--r-md)',fontSize:12,color:'var(--accent)',display:'flex',gap:8}}>
           <I.check size={14}/>
-          <div>Los envíos de prueba no se cuentan en tu cuota mensual. Puedes mandarte todas las pruebas que quieras.</div>
+          <div>{t('modals.test.quota.note')}</div>
         </div>
       </div>
     </Modal>
@@ -538,6 +547,8 @@ function TestSendModal({ onClose }) {
 // VARIABLES / TAGS MODAL
 // ════════════════════════════════════════════════════════════════
 function VariablesModal({ onClose }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const { vars, setVars, editable } = useTemplateVars();
   const [creating, setCreating] = React.useState(false);
   const [draft, setDraft] = React.useState({ key:'', label:'', sample:'' });
@@ -554,7 +565,7 @@ function VariablesModal({ onClose }) {
     const key = draft.key.trim().replace(/^@/,'').replace(/\s+/g,'_');
     if (!key) return;
     if (vars.some(v => v.key === key)) {
-      window.toast && window.toast({ kind:'err', title:'Ya existe una etiqueta @'+key });
+      window.toast && window.toast({ kind:'err', title: t('modals.vars.alreadyExists', { key }) });
       return;
     }
     setVars([...vars, { key, label: draft.label.trim() || key, sample: draft.sample.trim() || '', type:'texto' }]);
@@ -562,40 +573,47 @@ function VariablesModal({ onClose }) {
     setDraft({ key:'', label:'', sample:'' });
   };
 
+  const sources = React.useMemo(() => [
+    { n: t('modals.vars.source.contacts.name'), d: t('modals.vars.source.contacts.desc'), on:true},
+    { n: t('modals.vars.source.csv.name'),      d: t('modals.vars.source.csv.desc'),      on:false},
+    { n: t('modals.vars.source.crm.name'),      d: t('modals.vars.source.crm.desc'),      on:false},
+    { n: t('modals.vars.source.db.name'),       d: t('modals.vars.source.db.desc'),       on:false},
+  ], [lang]);
+
   return (
-    <Modal title="Etiquetas de esta plantilla"
+    <Modal title={t('modals.vars.title')}
       sub={editable
-        ? 'Escribe {{nombre}} (con dobles llaves) en cualquier bloque y se reemplaza por el valor de cada destinatario. Cada plantilla tiene sus propias etiquetas.'
-        : 'Abre una plantilla para editar sus etiquetas. Aquí ves los valores por defecto del workspace.'}
+        ? t('modals.vars.sub.editable')
+        : t('modals.vars.sub.readonly')}
       size="wide" onClose={onClose}
       footer={<>
-        <button className="btn ghost" onClick={onClose}>Cerrar</button>
+        <button className="btn ghost" onClick={onClose}>{t('modals.common.close')}</button>
         {editable && !creating && (
           <button className="btn primary" onClick={()=>setCreating(true)}>
-            <I.plus size={13}/> Crear etiqueta nueva
+            <I.plus size={13}/> {t('modals.vars.btn.create')}
           </button>
         )}
       </>}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
         <div>
-          <div className="prop-label">Etiquetas disponibles</div>
+          <div className="prop-label">{t('modals.vars.available')}</div>
           <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8,lineHeight:1.5}}>
             {editable
-              ? 'Haz clic para copiar la etiqueta tal cual va en el texto. Edita el valor de ejemplo para ajustar lo que verá el destinatario en la vista previa.'
-              : 'Solo lectura — abre una plantilla del dashboard para modificar.'}
+              ? t('modals.vars.hint.editable')
+              : t('modals.vars.hint.readonly')}
           </div>
           {creating && (
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 28px',gap:6,padding:10,marginBottom:10,background:'var(--accent-soft)',borderRadius:'var(--r-md)',alignItems:'center'}}>
-              <input className="field" value={draft.key} onChange={e=>setDraft(d=>({...d,key:e.target.value}))} onKeyDown={e=>{if(e.key==='Enter')submitNew();if(e.key==='Escape')setCreating(false);}} placeholder="curso (sin {{}})" autoFocus style={{fontSize:12,padding:'4px 6px'}}/>
-              <input className="field" value={draft.label} onChange={e=>setDraft(d=>({...d,label:e.target.value}))} placeholder="Etiqueta" style={{fontSize:12,padding:'4px 6px'}}/>
-              <input className="field" value={draft.sample} onChange={e=>setDraft(d=>({...d,sample:e.target.value}))} placeholder="Ejemplo" style={{fontSize:12,padding:'4px 6px'}}/>
-              <button className="btn icon sm" onClick={submitNew} disabled={!draft.key.trim()} title="Crear"><I.check size={11}/></button>
+              <input className="field" value={draft.key} onChange={e=>setDraft(d=>({...d,key:e.target.value}))} onKeyDown={e=>{if(e.key==='Enter')submitNew();if(e.key==='Escape')setCreating(false);}} placeholder={t('modals.vars.placeholder.key')} autoFocus style={{fontSize:12,padding:'4px 6px'}}/>
+              <input className="field" value={draft.label} onChange={e=>setDraft(d=>({...d,label:e.target.value}))} placeholder={t('modals.vars.placeholder.label')} style={{fontSize:12,padding:'4px 6px'}}/>
+              <input className="field" value={draft.sample} onChange={e=>setDraft(d=>({...d,sample:e.target.value}))} placeholder={t('modals.vars.placeholder.sample')} style={{fontSize:12,padding:'4px 6px'}}/>
+              <button className="btn icon sm" onClick={submitNew} disabled={!draft.key.trim()} title={t('modals.vars.btn.create.tooltip')}><I.check size={11}/></button>
             </div>
           )}
           <div style={{border:'1px solid var(--line)',borderRadius:'var(--r-md)',overflow:'hidden'}}>
             {vars.length === 0 && (
               <div style={{padding:'18px 14px',fontSize:12,color:'var(--fg-3)',textAlign:'center'}}>
-                Esta plantilla aún no tiene etiquetas. {editable && 'Usa "Crear etiqueta nueva" para empezar.'}
+                {t('modals.vars.empty')} {editable && t('modals.vars.empty.cta')}
               </div>
             )}
             {vars.map((v,i) => (
@@ -605,22 +623,22 @@ function VariablesModal({ onClose }) {
                   <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>{v.label || v.key}</div>
                 </div>
                 <div style={{display:'flex',alignItems:'center',gap:6}}>
-                  <span style={{fontSize:10,color:'var(--fg-3)',flexShrink:0}}>Se verá:</span>
+                  <span style={{fontSize:10,color:'var(--fg-3)',flexShrink:0}}>{t('modals.vars.willShow')}</span>
                   {editable ? (
                     <input className="field" value={v.sample||''} onChange={e=>updateVar(i,{sample:e.target.value})} style={{fontSize:12,padding:'2px 6px',height:24,fontWeight:500}}/>
                   ) : (
                     <b>{v.sample}</b>
                   )}
                 </div>
-                <button className="btn icon sm ghost" title={`Copiar {{${v.key}}}`} onClick={()=>{
+                <button className="btn icon sm ghost" title={t('modals.vars.copy.tooltip', { key: v.key })} onClick={()=>{
                   const tag = `{{${v.key}}}`;
                   try { navigator.clipboard?.writeText(tag); } catch(e){}
-                  window.toast && window.toast({ kind:'ok', title:`${tag} copiada` });
+                  window.toast && window.toast({ kind:'ok', title: t('modals.vars.copied.toast', { tag }) });
                 }}><I.copy size={11}/></button>
                 {editable ? (
-                  <button className="btn icon sm ghost" title="Eliminar etiqueta" style={{color:'var(--err,#e04f4f)'}}
+                  <button className="btn icon sm ghost" title={t('modals.vars.delete.tooltip')} style={{color:'var(--err,#e04f4f)'}}
                     onClick={()=>{
-                      if (window.confirm(`Eliminar {{${v.key}}} de esta plantilla?`)) removeVar(i);
+                      if (window.confirm(t('modals.vars.delete.confirm', { key: v.key }))) removeVar(i);
                     }}>
                     <I.trash size={11}/>
                   </button>
@@ -630,15 +648,10 @@ function VariablesModal({ onClose }) {
           </div>
         </div>
         <div>
-          <div className="prop-label">¿De dónde salen estos datos?</div>
-          <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8,lineHeight:1.5}}>Elige de dónde queremos sacar el nombre, correo, etc. de cada persona.</div>
+          <div className="prop-label">{t('modals.vars.source.title')}</div>
+          <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8,lineHeight:1.5}}>{t('modals.vars.source.hint')}</div>
           <div className="col" style={{gap:8}}>
-            {[
-              {n:'Mi lista de contactos', d:'La lista que cargaste en Simple Template', on:true},
-              {n:'Archivo CSV', d:'Sube un Excel o Google Sheets', on:false},
-              {n:'Mi tienda / CRM',d:'Shopify, HubSpot, Pipedrive, Salesforce', on:false},
-              {n:'Mi base de datos', d:'Solo si tu equipo técnico la configuró', on:false},
-            ].map(s => (
+            {sources.map(s => (
               <div key={s.n} style={{display:'flex',gap:10,padding:12,background:'var(--surface-2)',borderRadius:'var(--r-md)',alignItems:'center'}}>
                 <div style={{width:34,height:34,borderRadius:'var(--r-sm)',background:'var(--surface)',display:'grid',placeItems:'center'}}>
                   <I.braces size={16} style={{color:'var(--fg-2)'}}/>
@@ -647,18 +660,18 @@ function VariablesModal({ onClose }) {
                   <div style={{fontSize:13,fontWeight:500}}>{s.n}</div>
                   <div style={{fontSize:11,color:'var(--fg-3)'}}>{s.d}</div>
                 </div>
-                {s.on ? <span className="chip ok"><I.check size={10}/> En uso</span> : <button className="btn sm">Usar este</button>}
+                {s.on ? <span className="chip ok"><I.check size={10}/> {t('modals.vars.source.inUse')}</span> : <button className="btn sm">{t('modals.vars.source.useThis')}</button>}
               </div>
             ))}
           </div>
           <div className="divider"/>
-          <div className="prop-label">Cómo se verá</div>
+          <div className="prop-label">{t('modals.vars.preview.title')}</div>
           <div style={{padding:14,background:'var(--surface-2)',borderRadius:'var(--r-md)',fontSize:13}}>
             <div style={{color:'var(--fg-3)',fontSize:11,marginBottom:6}}>
-              Tú escribiste: <span style={{color:'var(--accent)',fontWeight:600,fontFamily:'var(--font-mono)'}}>Hola {`{{nombre}}`}, aquí está tu pedido {`{{pedido}}`}</span>
+              {t('modals.vars.preview.youWrote')} <span style={{color:'var(--accent)',fontWeight:600,fontFamily:'var(--font-mono)'}}>{t('modals.vars.preview.template')}</span>
             </div>
             <div style={{color:'var(--fg)',fontWeight:500,padding:'6px 0',borderTop:'1px dashed var(--line)'}}>
-              Carmen verá: <b>Hola Carmen, aquí está tu pedido #A-4821</b>
+              {t('modals.vars.preview.theySee')} <b>{t('modals.vars.preview.rendered')}</b>
             </div>
           </div>
         </div>

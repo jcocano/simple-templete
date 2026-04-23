@@ -134,6 +134,8 @@ function EmptyState({
   compact = false, // padding reducido (para inline empty states)
   style = {},
 }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const Ill = ILLUSTRATIONS[illustration] || IllNoTemplates;
   return (
     <div style={{
@@ -178,7 +180,7 @@ function EmptyState({
           textAlign:'left', lineHeight:1.55, width:'100%', maxWidth:360,
         }}>
           <div style={{fontSize:10.5,fontWeight:600,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:0.4,marginBottom:6}}>
-            Consejos
+            {t('emptyState.tips')}
           </div>
           {tips.map((t,i)=>(
             <div key={i} style={{display:'flex',gap:8,marginBottom:i<tips.length-1?4:0}}>

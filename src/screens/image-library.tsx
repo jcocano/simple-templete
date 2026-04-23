@@ -20,6 +20,8 @@ function fmtDate(iso) {
 }
 
 function ImageLibraryScreen({ onBack, onOpenSettings }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [folder, setFolder] = React.useState('all');
   const [q, setQ] = React.useState('');
   const [sel, setSel] = React.useState(null);
@@ -57,14 +59,14 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
       for (const file of files) {
         const result = await window.stCDN.upload(file);
         if (!result.ok) {
-          setUploadError(result.error || `No se pudo subir ${file.name}.`);
+          setUploadError(result.error || t('imageLib.error.upload', { name: file.name }));
           break;
         }
         const dim = await window.stImages.readImageSize(file);
         const saved = await window.stImages.save({
           url: result.url,
-          name: file.name || 'imagen',
-          folder: folder === 'all' ? 'Subidas' : folder,
+          name: file.name || t('imageLib.fallback.name'),
+          folder: folder === 'all' ? t('imageLib.folder.uploads') : folder,
           mime: file.type || null,
           sizeBytes: file.size || null,
           width: dim.width,
@@ -75,7 +77,7 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
         if (saved) setSel(saved);
       }
     } catch (err) {
-      setUploadError(err?.message || 'Error inesperado al subir.');
+      setUploadError(err?.message || t('imageLib.error.unexpected'));
     } finally {
       setUploading(false);
     }
@@ -93,7 +95,7 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
   };
 
   const folders = [
-    { id:'all', name:'Toda la biblioteca', count: items.length },
+    { id:'all', name: t('imageLib.folder.all'), count: items.length },
     ...window.stImages.folders().map(f => ({ id: f.folder, name: f.folder, count: f.count })),
   ];
 
@@ -102,15 +104,15 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
     .filter((i) => !q || (i.name || '').toLowerCase().includes(q.toLowerCase()));
 
   const onDelete = async (img) => {
-    if (!window.confirm(`Quitar «${img.name}» de la biblioteca?\n\nEsto solo elimina el registro local. El archivo en el CDN no se borra.`)) return;
+    if (!window.confirm(t('imageLib.confirm.delete', { name: img.name }))) return;
     await window.stImages.remove(img.id);
   };
 
   const onMoveFolder = async (img) => {
-    const current = img.folder || 'Sin carpeta';
-    const name = window.prompt('Mover a carpeta (nombre libre)', current);
+    const current = img.folder || t('imageLib.folder.none');
+    const name = window.prompt(t('imageLib.prompt.moveFolder'), current);
     if (name == null) return;
-    const clean = name.trim() || 'Sin carpeta';
+    const clean = name.trim() || t('imageLib.folder.none');
     await window.stImages.updateFolder(img.id, clean);
   };
 
@@ -128,28 +130,28 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
   const onCopyUrl = async (img) => {
     try {
       await navigator.clipboard.writeText(img.url);
-      window.toast && window.toast({ kind:'ok', title:'URL copiada' });
+      window.toast && window.toast({ kind:'ok', title: t('imageLib.toast.urlCopied') });
     } catch {
-      window.toast && window.toast({ kind:'err', title:'No se pudo copiar' });
+      window.toast && window.toast({ kind:'err', title: t('imageLib.toast.copyFail') });
     }
   };
 
   return (
     <div className="editor" onDragOver={(e)=>{ e.preventDefault(); }} onDrop={onDrop}>
       <div className="editor-top">
-        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> Volver</button>
-        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>Biblioteca de imágenes</div>
-        <span className="chip">{filtered.length} {filtered.length===1?'imagen':'imágenes'}{q||folder!=='all'?` de ${items.length}`:''}</span>
+        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> {t('imageLib.back')}</button>
+        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>{t('imageLib.title')}</div>
+        <span className="chip">{t(filtered.length===1?'imageLib.count.one':'imageLib.count.other', { n: filtered.length })}{(q||folder!=='all')?' '+t('imageLib.countOf', { total: items.length }):''}</span>
         <div className="grow"/>
         <div className="search">
           <span className="si"><I.search size={14}/></span>
-          <input placeholder="Buscar imágenes…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <input placeholder={t('imageLib.search.placeholder')} value={q} onChange={e=>setQ(e.target.value)}/>
         </div>
         <div style={{fontSize:11,color:'var(--fg-3)',padding:'0 6px'}}>
-          Destino: <b style={{color:'var(--fg-2)',textTransform:'uppercase',fontFamily:'var(--font-mono)'}}>{cdnConfig}</b>
+          {t('imageLib.destination')}: <b style={{color:'var(--fg-2)',textTransform:'uppercase',fontFamily:'var(--font-mono)'}}>{cdnConfig}</b>
         </div>
         <button className="btn primary sm" onClick={()=>fileInputRef.current?.click()} disabled={uploading}>
-          {uploading ? 'Subiendo…' : <><I.upload size={13}/> Subir imágenes</>}
+          {uploading ? t('imageLib.uploading') : <><I.upload size={13}/> {t('imageLib.upload')}</>}
         </button>
         <input
           ref={fileInputRef}
@@ -168,7 +170,7 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
           display:'flex',gap:8,alignItems:'flex-start',
         }}>
           <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
-          <div><b>No pudimos subir.</b> {uploadError}</div>
+          <div><b>{t('imageLib.error.title')}</b> {uploadError}</div>
         </div>
       )}
 
@@ -179,7 +181,7 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
           borderRight:'1px solid var(--line)',
           padding:16, overflow:'auto',
         }}>
-          <div style={{fontSize:10.5,textTransform:'uppercase',letterSpacing:'0.06em',color:'var(--fg-3)',fontWeight:600,marginBottom:8}}>Carpetas</div>
+          <div style={{fontSize:10.5,textTransform:'uppercase',letterSpacing:'0.06em',color:'var(--fg-3)',fontWeight:600,marginBottom:8}}>{t('imageLib.folders')}</div>
           {folders.map(f => (
             <button key={f.id}
               onClick={()=>setFolder(f.id)}
@@ -198,11 +200,11 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
             </button>
           ))}
           <div style={{marginTop:14,padding:10,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-sm)',fontSize:11,color:'var(--fg-3)',lineHeight:1.5}}>
-            Las carpetas se crean solas cuando asignas una al mover una imagen. Son solo un nombre; no hay anidamiento.
+            {t('imageLib.folders.hint')}
           </div>
           {onOpenSettings && (
             <button className="btn sm" style={{marginTop:14,width:'100%'}} onClick={()=>onOpenSettings('storage')}>
-              <I.server size={12}/> Ajustes de almacenamiento
+              <I.server size={12}/> {t('imageLib.storageSettings')}
             </button>
           )}
         </aside>
@@ -215,25 +217,25 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
             {items.length === 0 ? (
               <EmptyState
                 illustration="no-blocks"
-                title="Aún no hay imágenes en esta biblioteca"
-                msg="Subí tu primera imagen desde aquí o arrastrala a la pantalla. Después podrás usarla en cualquier plantilla — el editor lee de esta misma biblioteca."
-                primaryAction={{ label:'Subir imagen', icon:'upload', onClick:()=>fileInputRef.current?.click() }}
+                title={t('imageLib.empty.title')}
+                msg={t('imageLib.empty.msg')}
+                primaryAction={{ label: t('imageLib.empty.upload'), icon:'upload', onClick:()=>fileInputRef.current?.click() }}
                 tips={[
                   cdnConfig==='local'
-                    ? 'Destino actual: tu equipo (disco local). Las imágenes se embeben automáticamente al exportar o enviar.'
+                    ? t('imageLib.tip.local')
                     : cdnConfig==='base64'
-                      ? 'Destino actual: Base64 embebido dentro del HTML del correo.'
-                      : `Destino actual: ${cdnConfig.toUpperCase()}. Las imágenes se suben a tu CDN al guardarlas.`,
-                  'Cambia el proveedor en Ajustes → Almacenamiento si querés publicar las imágenes en un CDN.',
-                  'Al insertar una imagen en un bloque, Simple Template la selecciona desde aquí.',
+                      ? t('imageLib.tip.base64')
+                      : t('imageLib.tip.cdn', { provider: cdnConfig.toUpperCase() }),
+                  t('imageLib.tip.changeProvider'),
+                  t('imageLib.tip.insert'),
                 ]}
               />
             ) : filtered.length === 0 ? (
               <EmptyState
                 illustration="search"
-                title={q ? `Nada que coincida con «${q}»` : `Nada en «${folder}» todavía`}
-                msg="Prueba con otro término o vuelve a toda la biblioteca."
-                primaryAction={{ label:'Ver todas', icon:'grid', onClick:()=>{setQ(''); setFolder('all');} }}
+                title={q ? t('imageLib.empty.search.title', { q }) : t('imageLib.empty.folder.title', { folder })}
+                msg={t('imageLib.empty.search.msg')}
+                primaryAction={{ label: t('imageLib.empty.viewAll'), icon:'grid', onClick:()=>{setQ(''); setFolder('all');} }}
               />
             ) : (
               <div style={{
@@ -258,10 +260,10 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
                     <I.upload size={18}/>
                   </div>
                   <div style={{fontWeight:500,color:'var(--fg-2)'}}>
-                    {uploading ? 'Subiendo…' : 'Subir imagen'}
+                    {uploading ? t('imageLib.uploading') : t('imageLib.empty.upload')}
                   </div>
                   <div style={{textAlign:'center',lineHeight:1.3}}>
-                    Arrastra aquí o haz click
+                    {t('imageLib.dropHint')}
                   </div>
                 </button>
 
@@ -309,12 +311,12 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
                   onChange={e=>setRenameDraft(e.target.value)}
                   onKeyDown={e=>{ if (e.key==='Enter') onRenameSubmit(); if (e.key==='Escape') setRenameMode(false); }}
                   style={{flex:1}}/>
-                <button className="btn sm primary" onClick={onRenameSubmit}>OK</button>
+                <button className="btn sm primary" onClick={onRenameSubmit}>{t('imageLib.ok')}</button>
               </div>
             ) : (
               <div style={{display:'flex',alignItems:'center',gap:6}}>
                 <div style={{fontFamily:'var(--font-display)',fontSize:14,fontWeight:600,wordBreak:'break-word',flex:1}}>{sel.name}</div>
-                <button className="btn icon sm" title="Renombrar"
+                <button className="btn icon sm" title={t('imageLib.rename')}
                   onClick={()=>{ setRenameDraft(sel.name||''); setRenameMode(true); }}>
                   <I.edit size={12}/>
                 </button>
@@ -322,18 +324,18 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
             )}
 
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,fontSize:11.5}}>
-              <div><div style={{color:'var(--fg-3)',fontSize:10}}>Dimensiones</div><div style={{fontFamily:'var(--font-mono)'}}>{sel.width && sel.height ? `${sel.width}×${sel.height}` : '—'}</div></div>
-              <div><div style={{color:'var(--fg-3)',fontSize:10}}>Tamaño</div><div style={{fontFamily:'var(--font-mono)'}}>{fmtBytes(sel.sizeBytes)}</div></div>
-              <div><div style={{color:'var(--fg-3)',fontSize:10}}>Carpeta</div><div>{sel.folder}</div></div>
-              <div><div style={{color:'var(--fg-3)',fontSize:10}}>Origen</div><div style={{fontFamily:'var(--font-mono)',textTransform:'uppercase'}}>{sel.provider || '—'}</div></div>
+              <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imageLib.meta.dimensions')}</div><div style={{fontFamily:'var(--font-mono)'}}>{sel.width && sel.height ? `${sel.width}×${sel.height}` : '—'}</div></div>
+              <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imageLib.meta.size')}</div><div style={{fontFamily:'var(--font-mono)'}}>{fmtBytes(sel.sizeBytes)}</div></div>
+              <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imageLib.meta.folder')}</div><div>{sel.folder}</div></div>
+              <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imageLib.meta.origin')}</div><div style={{fontFamily:'var(--font-mono)',textTransform:'uppercase'}}>{sel.provider || '—'}</div></div>
               <div style={{gridColumn:'1 / -1'}}>
-                <div style={{color:'var(--fg-3)',fontSize:10}}>Subida</div>
+                <div style={{color:'var(--fg-3)',fontSize:10}}>{t('imageLib.meta.uploaded')}</div>
                 <div style={{fontSize:11}}>{fmtDate(sel.createdAt)}</div>
               </div>
             </div>
 
             <div>
-              <div style={{color:'var(--fg-3)',fontSize:10,marginBottom:4}}>URL</div>
+              <div style={{color:'var(--fg-3)',fontSize:10,marginBottom:4}}>{t('imageLib.meta.url')}</div>
               <div style={{
                 padding:'6px 8px',background:'var(--surface)',border:'1px solid var(--line)',
                 borderRadius:'var(--r-sm)',fontFamily:'var(--font-mono)',fontSize:10.5,
@@ -343,16 +345,16 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
 
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
               <button className="btn sm" onClick={()=>onCopyUrl(sel)}>
-                <I.copy size={12}/> Copiar URL
+                <I.copy size={12}/> {t('imageLib.copyUrl')}
               </button>
               <button className="btn sm" onClick={()=>onMoveFolder(sel)}>
-                <I.folder size={12}/> Mover a carpeta
+                <I.folder size={12}/> {t('imageLib.moveFolder')}
               </button>
             </div>
 
             <div style={{flex:1}}/>
             <button className="btn sm" style={{color:'var(--danger)'}} onClick={()=>onDelete(sel)}>
-              <I.trash size={12}/> Quitar de la biblioteca
+              <I.trash size={12}/> {t('imageLib.remove')}
             </button>
           </aside>
         )}

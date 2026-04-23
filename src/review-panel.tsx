@@ -2,9 +2,23 @@
 // Se abre como panel lateral derecho desde el editor o el command palette
 
 function ReviewPanel({ onClose, onGoSettings }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const [running, setRunning] = React.useState(true);
   const [results, setResults] = React.useState([]);
   const [fixed, setFixed] = React.useState({});
+
+  // Translate each check's static labels using the active language. Rebuild
+  // when `lang` changes so the panel reflects language switches while open.
+  const translated = React.useMemo(() => {
+    return results.map(r => ({
+      ...r,
+      cat:    t(`review.cat.${r.cat}`),
+      title:  t(`review.check.${r.id}.title`),
+      detail: t(`review.check.${r.id}.detail`),
+      fixes:  r.fixes ? r.fixes.map((f, i) => ({ ...f, label: t(`review.check.${r.id}.fix.${i}`) })) : null,
+    }));
+  }, [results, lang]);
 
   React.useEffect(() => {
     // Simula análisis progresivo
@@ -28,22 +42,22 @@ function ReviewPanel({ onClose, onGoSettings }) {
 
   const summary = React.useMemo(() => {
     const s = { ok:0, warn:0, error:0, info:0 };
-    results.forEach(r => { if (!fixed[r.id]) s[r.kind] = (s[r.kind]||0) + 1; else s.ok++; });
+    translated.forEach(r => { if (!fixed[r.id]) s[r.kind] = (s[r.kind]||0) + 1; else s.ok++; });
     return s;
-  }, [results, fixed]);
+  }, [translated, fixed]);
 
   const grouped = React.useMemo(() => {
     const g = {};
-    results.forEach(r => { (g[r.cat] = g[r.cat] || []).push(r); });
+    translated.forEach(r => { (g[r.cat] = g[r.cat] || []).push(r); });
     return g;
-  }, [results]);
+  }, [translated]);
 
-  const score = results.length === 0 ? 0 :
-    Math.round(((results.filter(r=>r.kind==='ok'||fixed[r.id]).length) / results.length) * 100);
+  const score = translated.length === 0 ? 0 :
+    Math.round(((translated.filter(r=>r.kind==='ok'||fixed[r.id]).length) / translated.length) * 100);
 
   const markFixed = (id) => {
     setFixed(f => ({...f, [id]:true}));
-    window.toast && window.toast({ kind:'ok', title:'Arreglado', msg:'Se aplicó la corrección automática.' });
+    window.toast && window.toast({ kind:'ok', title: t('review.toast.fixed.title'), msg: t('review.toast.fixed.msg') });
   };
 
   return (
@@ -68,8 +82,8 @@ function ReviewPanel({ onClose, onGoSettings }) {
               display:'grid',placeItems:'center',
             }}><I.eye size={15}/></div>
             <div style={{flex:1}}>
-              <h3 style={{margin:0,fontSize:15,fontWeight:600,fontFamily:'var(--font-display)'}}>Revisar antes de enviar</h3>
-              <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:2}}>Chequeo completo del correo</div>
+              <h3 style={{margin:0,fontSize:15,fontWeight:600,fontFamily:'var(--font-display)'}}>{t('review.title')}</h3>
+              <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:2}}>{t('review.subtitle')}</div>
             </div>
             <button className="btn icon ghost" onClick={onClose}><I.x size={14}/></button>
           </div>
@@ -88,10 +102,10 @@ function ReviewPanel({ onClose, onGoSettings }) {
               }}>{score}<span style={{fontSize:14,color:'var(--fg-3)'}}>/100</span></div>
               <div style={{flex:1}}>
                 <div style={{fontSize:12.5,fontWeight:500}}>
-                  {running ? 'Analizando…' : score >= 90 ? '¡Listo para enviar!' : score >= 70 ? 'Hay algunas sugerencias' : 'Tiene problemas a revisar'}
+                  {running ? t('review.analyzing') : score >= 90 ? t('review.score.ready') : score >= 70 ? t('review.score.suggestions') : t('review.score.problems')}
                 </div>
                 <div style={{fontSize:11,color:'var(--fg-3)'}}>
-                  {results.length} revisiones · {summary.ok} bien · {summary.warn} avisos · {summary.error} fallas
+                  {t('review.summary', { total: translated.length, ok: summary.ok, warn: summary.warn, error: summary.error })}
                 </div>
               </div>
             </div>
@@ -124,7 +138,7 @@ function ReviewPanel({ onClose, onGoSettings }) {
           {running && (
             <div style={{padding:'10px 14px',fontSize:12,color:'var(--fg-3)',display:'flex',alignItems:'center',gap:8}}>
               <div className="spinner" style={{width:12,height:12,border:'2px solid var(--line)',borderTopColor:'var(--accent)',borderRadius:'50%',animation:'spin 0.7s linear infinite'}}/>
-              Analizando el correo…
+              {t('review.analyzingFull')}
             </div>
           )}
         </div>
@@ -136,11 +150,11 @@ function ReviewPanel({ onClose, onGoSettings }) {
           display:'flex',gap:8,alignItems:'center',
         }}>
           <div style={{flex:1,fontSize:11,color:'var(--fg-3)'}}>
-            {running ? 'Analizando…' : summary.error > 0 ? 'Corrige las fallas antes de enviar' : '¡Ya puedes enviarlo con confianza!'}
+            {running ? t('review.analyzing') : summary.error > 0 ? t('review.foot.fixFirst') : t('review.foot.goodToGo')}
           </div>
-          <button className="btn" onClick={onClose}>Cerrar</button>
+          <button className="btn" onClick={onClose}>{t('review.close')}</button>
           <button className="btn primary" disabled={running || summary.error > 0}>
-            <I.send size={12}/> Enviar prueba
+            <I.send size={12}/> {t('review.sendTest')}
           </button>
         </div>
       </div>
@@ -151,6 +165,8 @@ function ReviewPanel({ onClose, onGoSettings }) {
 }
 
 function ReviewItem({ r, fixed, onFix, onGoSettings }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [expanded, setExpanded] = React.useState(r.kind === 'error');
   const kindColor = fixed ? 'var(--ok)' : r.kind === 'ok' ? 'var(--ok)' : r.kind === 'warn' ? 'var(--warn)' : r.kind === 'error' ? 'var(--danger)' : 'var(--fg-3)';
   const kindIco = fixed ? I.check : r.kind === 'ok' ? I.check : r.kind === 'warn' ? I.info : r.kind === 'error' ? I.x : I.info;
@@ -189,47 +205,49 @@ function ReviewItem({ r, fixed, onFix, onGoSettings }) {
               ))}
             </div>
           )}
-          {fixed && <div style={{color:'var(--ok)',fontSize:11,marginTop:4}}>✓ Corregido</div>}
+          {fixed && <div style={{color:'var(--ok)',fontSize:11,marginTop:4}}>✓ {t('review.fixed')}</div>}
         </div>
       )}
     </div>
   );
 }
 
-// Mock checks — cubre categorías reales de email marketing
+// Mock checks — cubre categorías reales de email marketing.
+// Fields `cat`, `title`, `detail`, and `fixes[i].label` are translation-keyed:
+// the component replaces them via `review.cat.<cat>`, `review.check.<id>.title`, etc.
 const ALL_CHECKS = [
   // Contenido
-  { id:'c1', cat:'Contenido',      kind:'ok',    title:'Asunto no está vacío',              detail:'"Hola {{nombre}}, novedades de noviembre" · 38 caracteres (bien)' },
-  { id:'c2', cat:'Contenido',      kind:'warn',  title:'Preview text corto',                 detail:'Solo 22 caracteres. Se recomienda entre 40 y 90 para que los clientes de correo lo muestren completo.', fixes:[{label:'Generar con IA'},{label:'Edité manualmente'}] },
-  { id:'c3', cat:'Contenido',      kind:'ok',    title:'Hay al menos un botón CTA',          detail:'1 botón · "Ver colección"' },
-  { id:'c4', cat:'Contenido',      kind:'error', title:'Etiqueta {{nombre}} sin valor por defecto', detail:'Si un contacto no tiene nombre, aparecerá "Hola , novedades…".', fixes:[{label:'Poner "amigo" como default'},{label:'Ir a Etiquetas',goSettings:'vars'}] },
-  { id:'c5', cat:'Contenido',      kind:'ok',    title:'Longitud total adecuada',            detail:'184 palabras · correos de 100-300 palabras tienen mejor engagement' },
+  { id:'c1', cat:'content',       kind:'ok',    fixes:null },
+  { id:'c2', cat:'content',       kind:'warn',  fixes:[{},{}] },
+  { id:'c3', cat:'content',       kind:'ok',    fixes:null },
+  { id:'c4', cat:'content',       kind:'error', fixes:[{}, { goSettings:'vars' }] },
+  { id:'c5', cat:'content',       kind:'ok',    fixes:null },
 
   // Accesibilidad
-  { id:'a1', cat:'Accesibilidad',  kind:'error', title:'Imagen sin texto alternativo',       detail:'La imagen "hero-otono.jpg" no tiene atributo alt. Los lectores de pantalla no sabrán qué es.', fixes:[{label:'Sugerir alt con IA'},{label:'Ir al bloque'}] },
-  { id:'a2', cat:'Accesibilidad',  kind:'warn',  title:'Contraste bajo en un botón',         detail:'Botón azul sobre fondo lila tiene contraste 3.1:1. Mínimo recomendado: 4.5:1 (AA).', fixes:[{label:'Oscurecer el fondo'},{label:'Aclarar el texto'}] },
-  { id:'a3', cat:'Accesibilidad',  kind:'ok',    title:'Tamaño de tipografía legible',       detail:'Texto del cuerpo en 16px, títulos ≥ 22px' },
-  { id:'a4', cat:'Accesibilidad',  kind:'ok',    title:'Estructura semántica correcta',      detail:'Un solo H1, jerarquía lógica de H2/H3' },
+  { id:'a1', cat:'a11y',          kind:'error', fixes:[{},{}] },
+  { id:'a2', cat:'a11y',          kind:'warn',  fixes:[{},{}] },
+  { id:'a3', cat:'a11y',          kind:'ok',    fixes:null },
+  { id:'a4', cat:'a11y',          kind:'ok',    fixes:null },
 
   // Compatibilidad
-  { id:'k1', cat:'Compatibilidad', kind:'warn',  title:'Uso de CSS no soportado en Outlook', detail:'Se detectaron 2 usos de "flexbox" y 1 de "background-image en div". Outlook los ignora silenciosamente.', fixes:[{label:'Convertir a tablas'},{label:'Ignorar Outlook'}] },
-  { id:'k2', cat:'Compatibilidad', kind:'ok',    title:'HTML válido',                        detail:'Sin etiquetas no cerradas. Pasa validación W3C.' },
-  { id:'k3', cat:'Compatibilidad', kind:'ok',    title:'Ancho máximo 600px',                  detail:'El correo se ve bien tanto en web como en clientes móviles' },
-  { id:'k4', cat:'Compatibilidad', kind:'info',  title:'Modo oscuro de Gmail',                detail:'Gmail invierte los colores automáticamente. Tu correo se verá razonable pero considera probarlo.' },
+  { id:'k1', cat:'compat',        kind:'warn',  fixes:[{},{}] },
+  { id:'k2', cat:'compat',        kind:'ok',    fixes:null },
+  { id:'k3', cat:'compat',        kind:'ok',    fixes:null },
+  { id:'k4', cat:'compat',        kind:'info',  fixes:null },
 
   // Imágenes y pesos
-  { id:'i1', cat:'Imágenes y peso', kind:'warn', title:'Imagen pesada detectada',            detail:'"hero-otono.jpg" pesa 2.3 MB. Recomendado <500 KB para que cargue rápido en 4G.', fixes:[{label:'Comprimir automáticamente'}] },
-  { id:'i2', cat:'Imágenes y peso', kind:'ok',   title:'Total del correo: 1.8 MB',           detail:'Por debajo del límite de Gmail (102 KB truncan el correo, pero tu peso total es aceptable)' },
+  { id:'i1', cat:'images',        kind:'warn',  fixes:[{}] },
+  { id:'i2', cat:'images',        kind:'ok',    fixes:null },
 
   // Enlaces
-  { id:'l1', cat:'Enlaces',         kind:'ok',   title:'Todos los enlaces funcionan',         detail:'4 enlaces revisados, todos devuelven 200 OK' },
-  { id:'l2', cat:'Enlaces',         kind:'ok',   title:'Sin enlaces mailto: sin dirección',   detail:'0 enlaces rotos de tipo mailto' },
+  { id:'l1', cat:'links',         kind:'ok',    fixes:null },
+  { id:'l2', cat:'links',         kind:'ok',    fixes:null },
 
   // Legal y entrega
-  { id:'g1', cat:'Legal y entrega', kind:'ok',   title:'Link de desuscripción presente',      detail:'Detectado en el footer · obligatorio por GDPR/CAN-SPAM' },
-  { id:'g2', cat:'Legal y entrega', kind:'ok',   title:'Dirección física en el footer',       detail:'"Acme SA · Av. Reforma 123, CDMX" · requerido por CAN-SPAM' },
-  { id:'g3', cat:'Legal y entrega', kind:'warn', title:'No hay versión texto plano',          detail:'Algunos filtros de spam castigan correos que solo son HTML. Generar el fallback textual mejora entregabilidad.', fixes:[{label:'Generar versión texto plano'}] },
-  { id:'g4', cat:'Legal y entrega', kind:'info', title:'Spam score estimado: 2.1/10',         detail:'Muy bajo. No hay palabras gatillo frecuentes ("gratis", "urgente", excesos de signos)' },
+  { id:'g1', cat:'legal',         kind:'ok',    fixes:null },
+  { id:'g2', cat:'legal',         kind:'ok',    fixes:null },
+  { id:'g3', cat:'legal',         kind:'warn',  fixes:[{}] },
+  { id:'g4', cat:'legal',         kind:'info',  fixes:null },
 ];
 
 Object.assign(window, { ReviewPanel });

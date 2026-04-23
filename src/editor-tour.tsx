@@ -1,72 +1,25 @@
 // Editor Tour — overlay with spotlight + tooltip, walks user through editor on first open
 // Persistence: setting 'tour-seen'. Reactivable from Ajustes or via window event 'st:start-tour'.
 
-const TOUR_STEPS = [
-  {
-    id: 'welcome',
-    target: null, // centered, no spotlight
-    title: '¡Bienvenida al editor de Simple Template!',
-    body: 'Te mostramos las partes principales en 6 pasos. Tarda menos de un minuto.',
-    icon: 'sparkles',
-  },
-  {
-    id: 'left',
-    target: '[data-tour="left-panel"]',
-    title: 'Tu caja de piezas',
-    body: 'Aquí están las secciones listas y los bloques. Haz clic en uno y se añade al correo. La pestaña Capas te muestra la estructura completa.',
-    placement: 'right',
-    icon: 'grid',
-  },
-  {
-    id: 'canvas',
-    target: '[data-tour="canvas"]',
-    title: 'Tu correo en vivo',
-    body: 'Aquí compones. Pasa el ratón sobre una sección para ver sus acciones (duplicar, subir, bajar). Haz clic en cualquier bloque para editarlo.',
-    placement: 'left',
-    icon: 'mail',
-  },
-  {
-    id: 'right',
-    target: '[data-tour="right-panel"]',
-    title: 'El taller de edición',
-    body: 'Al seleccionar un bloque o sección aparecen aquí todas sus opciones: colores, tipografía, espaciado, contenido.',
-    placement: 'left',
-    icon: 'palette',
-  },
-  {
-    id: 'device',
-    target: '[data-tour="device-toggle"]',
-    title: 'Escritorio y móvil',
-    body: 'Alterna la vista en cualquier momento. Simple Template se encarga de que el correo se vea bien en ambos.',
-    placement: 'bottom',
-    icon: 'phone',
-  },
-  {
-    id: 'review',
-    target: '[data-tour="review-btn"]',
-    title: 'Revisar antes de enviar',
-    body: 'Una lista de verificación automática: imágenes pesadas, links rotos, texto alternativo que falte… Te evita sustos.',
-    placement: 'bottom',
-    icon: 'check',
-  },
-  {
-    id: 'export',
-    target: '[data-tour="export-btn"]',
-    title: 'Exportar o enviar prueba',
-    body: 'Cuando tengas listo el correo: envía una prueba a tu buzón, copia un link privado para compartirlo, o descarga el HTML/MJML.',
-    placement: 'bottom',
-    icon: 'download',
-  },
-  {
-    id: 'done',
-    target: null,
-    title: '¡Ya estás!',
-    body: 'Puedes volver a ver este recorrido en cualquier momento desde Ajustes → General. Ahora a diseñar correos bonitos 💌',
-    icon: 'check',
-  },
+const TOUR_STEP_META = [
+  { id: 'welcome', target: null, icon: 'sparkles' },
+  { id: 'left', target: '[data-tour="left-panel"]', placement: 'right', icon: 'grid' },
+  { id: 'canvas', target: '[data-tour="canvas"]', placement: 'left', icon: 'mail' },
+  { id: 'right', target: '[data-tour="right-panel"]', placement: 'left', icon: 'palette' },
+  { id: 'device', target: '[data-tour="device-toggle"]', placement: 'bottom', icon: 'phone' },
+  { id: 'review', target: '[data-tour="review-btn"]', placement: 'bottom', icon: 'check' },
+  { id: 'export', target: '[data-tour="export-btn"]', placement: 'bottom', icon: 'download' },
+  { id: 'done', target: null, icon: 'check' },
 ];
 
 function EditorTour({ onClose }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
+  const TOUR_STEPS = React.useMemo(() => TOUR_STEP_META.map(s => ({
+    ...s,
+    title: t(`editorTour.step.${s.id}.title`),
+    body: t(`editorTour.step.${s.id}.body`),
+  })), [lang]);
   const [stepIdx, setStepIdx] = React.useState(0);
   const [rect, setRect] = React.useState(null);
   const step = TOUR_STEPS[stepIdx];
@@ -202,12 +155,12 @@ function EditorTour({ onClose }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14.5, fontWeight: 600, letterSpacing: '-0.1px' }}>{step.title}</div>
             <div style={{ fontSize: 10.5, color: 'var(--fg-3)', marginTop: 1 }}>
-              Paso {stepIdx + 1} de {TOUR_STEPS.length}
+              {t('editorTour.stepCount', { current: stepIdx + 1, total: TOUR_STEPS.length })}
             </div>
           </div>
           <button
             onClick={handleClose}
-            title="Saltar recorrido"
+            title={t('editorTour.close')}
             style={{
               width: 24, height: 24, borderRadius: 6, border: 'none',
               background: 'transparent', color: 'var(--fg-3)', cursor: 'pointer',
@@ -236,14 +189,14 @@ function EditorTour({ onClose }) {
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <button className="btn ghost sm" onClick={handleClose} style={{ fontSize: 11.5 }}>
-            Saltar
+            {t('editorTour.skip')}
           </button>
           <div style={{ flex: 1 }} />
           {stepIdx > 0 && (
-            <button className="btn sm" onClick={handlePrev}>Atrás</button>
+            <button className="btn sm" onClick={handlePrev}>{t('editorTour.prev')}</button>
           )}
           <button className="btn primary sm" onClick={handleNext}>
-            {isLast ? '¡Terminar!' : 'Siguiente →'}
+            {isLast ? t('editorTour.finish') : t('editorTour.next')}
           </button>
         </div>
       </div>

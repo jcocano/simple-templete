@@ -1,6 +1,8 @@
 // App — orchestrates screens, tweaks, modals
 
 function App() {
+  const t = window.stI18n.t;
+  window.stI18n.useLang(); // re-render shell on language change
   // Restore last screen from storage, but force back to dashboard if the
   // persisted screen needs a template (editor/preview): the active template
   // is React state and doesn't survive a renderer reload.
@@ -56,8 +58,8 @@ function App() {
         setTpl(null);
         window.toast && window.toast({
           kind: 'info',
-          title: 'Cambiaste de espacio',
-          msg: 'Volvimos al tablero para que elijas una plantilla del nuevo espacio.',
+          title: t('app.workspace.changed.title'),
+          msg: t('app.workspace.changed.msg'),
         });
       }
     };
@@ -198,8 +200,8 @@ function App() {
           else if (target === 'test') setModal('test');
           else if (target === 'vars') setModal('vars');
           else if (target === 'ai-generate') { setScreen('dashboard'); setTimeout(()=>window.dispatchEvent(new CustomEvent('st:ai-generate')), 50); }
-          else if (target === 'theme:light') { setTweaks(t=>({...t, mode:'light'})); window.toast && window.toast({kind:'ok', title:'Tema claro activado'}); }
-          else if (target === 'theme:dark')  { setTweaks(t=>({...t, mode:'dark'})); window.toast && window.toast({kind:'ok', title:'Tema oscuro activado'}); }
+          else if (target === 'theme:light') { setTweaks(t=>({...t, mode:'light'})); window.toast && window.toast({kind:'ok', title:window.stI18n.t('app.theme.light.toast')}); }
+          else if (target === 'theme:dark')  { setTweaks(t=>({...t, mode:'dark'})); window.toast && window.toast({kind:'ok', title:window.stI18n.t('app.theme.dark.toast')}); }
           else if (target === 'theme:toggle') { setTweaks(t=>({...t, mode: t.mode==='dark'?'light':'dark'})); }
           else if (target && target.startsWith('settings:')) { setSettingsSection(target.slice(9)); setModal('settings'); }
           else if (target && target.startsWith('template:')) {
@@ -223,6 +225,8 @@ function App() {
 // Blocks workspace switch while the editor has unsaved changes.
 // Triggered by `st:workspace-switch-blocked` from src/lib/workspaces.tsx.
 function UnsavedChangesModal() {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [pending, setPending] = React.useState(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState(null);
@@ -246,7 +250,7 @@ function UnsavedChangesModal() {
       await pending.confirm();
       setPending(null);
     } catch (err) {
-      setError(err?.message || 'No se pudo guardar');
+      setError(err?.message || t('app.unsaved.error'));
     } finally {
       setBusy(false);
     }
@@ -261,8 +265,8 @@ function UnsavedChangesModal() {
       <div className="modal pop" onClick={e=>e.stopPropagation()} style={{maxWidth:440}}>
         <div className="modal-head">
           <div style={{flex:1}}>
-            <h3>Cambios sin guardar</h3>
-            <div className="sub">Tienes cambios en esta plantilla que aún no se guardaron. Vamos a guardarlos antes de cambiar de espacio.</div>
+            <h3>{t('app.unsaved.title')}</h3>
+            <div className="sub">{t('app.unsaved.sub')}</div>
           </div>
         </div>
         {error && (
@@ -271,9 +275,9 @@ function UnsavedChangesModal() {
           </div>
         )}
         <div className="modal-foot">
-          <button className="btn ghost" onClick={onCancel} disabled={busy}>Cancelar</button>
+          <button className="btn ghost" onClick={onCancel} disabled={busy}>{t('app.unsaved.cancel')}</button>
           <button className="btn primary" onClick={onSave} disabled={busy}>
-            {busy ? 'Guardando…' : error ? 'Reintentar guardado' : 'Guardar y cambiar'}
+            {busy ? t('app.unsaved.saving') : error ? t('app.unsaved.retry') : t('app.unsaved.save')}
           </button>
         </div>
       </div>

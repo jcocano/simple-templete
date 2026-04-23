@@ -1,6 +1,8 @@
 // Editor — section-based canvas
 
 function BlockTile({ b, onClick }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const Ico = I[b.icon] || I.grid;
   return (
     <div
@@ -13,31 +15,34 @@ function BlockTile({ b, onClick }) {
       }}
     >
       <div className="block-ic"><Ico size={18}/></div>
-      <div>{b.name}</div>
+      <div>{b.nameKey ? t(b.nameKey) : b.name}</div>
     </div>
   );
 }
 
 function ContentPanel({ onAddBlock, onAddSection }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [q, setQ] = React.useState('');
   const cats = [
-    { h:'Secciones listas', isSection:true, items: SECTION_PRESETS },
-    { h:'Básicos', items: BLOCKS_BASIC },
-    { h:'Contenido', items: BLOCKS_CONTENT },
-    { h:'Productos y ventas', items: BLOCKS_ECOM },
-    { h:'Redes sociales', items: BLOCKS_SOCIAL },
-    { h:'Multimedia', items: BLOCKS_MEDIA },
-    { h:'Avanzados', items: BLOCKS_ADV },
+    { h:t('editor.category.sectionsReady'), isSection:true, items: SECTION_PRESETS },
+    { h:t('editor.category.basics'), items: BLOCKS_BASIC },
+    { h:t('editor.category.content'), items: BLOCKS_CONTENT },
+    { h:t('editor.category.ecom'), items: BLOCKS_ECOM },
+    { h:t('editor.category.social'), items: BLOCKS_SOCIAL },
+    { h:t('editor.category.media'), items: BLOCKS_MEDIA },
+    { h:t('editor.category.advanced'), items: BLOCKS_ADV },
   ];
-  const f = (arr) => arr.filter(b => b.name.toLowerCase().includes(q.toLowerCase()));
+  const nameOf = (b) => (b.nameKey ? t(b.nameKey) : b.name) || '';
+  const f = (arr) => arr.filter(b => nameOf(b).toLowerCase().includes(q.toLowerCase()));
   return (
     <div style={{display:'flex',flexDirection:'column',flex:1,minHeight:0}}>
       <div style={{padding:'10px 12px',borderBottom:'1px solid var(--line)',flexShrink:0}}>
         <div className="search">
           <span className="si"><I.search size={13}/></span>
-          <input placeholder="Busca un bloque o una sección…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <input placeholder={t('editor.contentPanel.searchPlaceholder')} value={q} onChange={e=>setQ(e.target.value)}/>
         </div>
-        <div style={{fontSize:11,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>Haz clic en un bloque para añadirlo al correo.</div>
+        <div style={{fontSize:11,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>{t('editor.contentPanel.hint')}</div>
       </div>
       <div className="side-body">
         {cats.map(c => {
@@ -63,7 +68,7 @@ function ContentPanel({ onAddBlock, onAddSection }) {
                       <div style={{width:'100%',background:'var(--surface-2)',borderBottom:'1px solid var(--line)'}}>
                         <SectionPresetPreview preview={p.preview}/>
                       </div>
-                      <div style={{padding:'6px 4px',fontSize:11}}>{p.name}</div>
+                      <div style={{padding:'6px 4px',fontSize:11}}>{p.nameKey ? t(p.nameKey) : p.name}</div>
                     </button>
                   ))}
                 </div>
@@ -83,10 +88,12 @@ function ContentPanel({ onAddBlock, onAddSection }) {
 }
 
 function SectionPresetPreview({ preview }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const bar = (w,h=4,mb=3)=> <div style={{width:`${w}%`,height:h,background:'var(--fg-3)',opacity:0.35,borderRadius:1,marginBottom:mb}}/>;
   const box = (h,bg='var(--surface-3)')=> <div style={{width:'100%',height:h,background:bg,borderRadius:2,marginBottom:3}}/>;
   const layouts = {
-    blank: <div style={{padding:8,opacity:0.4,fontSize:10,textAlign:'center'}}>( vacía )</div>,
+    blank: <div style={{padding:8,opacity:0.4,fontSize:10,textAlign:'center'}}>{t('editor.preview.empty')}</div>,
     hero: <div style={{padding:8,textAlign:'center'}}>{bar(60,6,4)}{bar(80,3)}{bar(70,3)}<div style={{width:'30%',height:8,background:'var(--accent)',margin:'4px auto 0',borderRadius:2}}/></div>,
     '2col': <div style={{padding:8,display:'grid',gridTemplateColumns:'1fr 1fr',gap:4}}><div>{box(26)}{bar(80,3)}{bar(60,3)}</div><div>{box(26)}{bar(80,3)}{bar(60,3)}</div></div>,
     '3col': <div style={{padding:8,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:3}}>{[0,1,2].map(i=><div key={i}>{box(20)}{bar(90,3)}</div>)}</div>,
@@ -99,16 +106,18 @@ function SectionPresetPreview({ preview }) {
 }
 
 function SectionPresetPanel({ onAdd }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   return (
     <div className="side-body">
-      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:10,fontWeight:600}}>Secciones listas</div>
+      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:10,fontWeight:600}}>{t('editor.category.sectionsReady')}</div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
         {SECTION_PRESETS.map(p => (
           <button key={p.id} className="block-tile" style={{height:'auto',padding:0,flexDirection:'column',gap:0,overflow:'hidden'}} onClick={()=>onAdd(p)}>
             <div style={{width:'100%',background:'var(--surface-2)',borderBottom:'1px solid var(--line)'}}>
               <SectionPresetPreview preview={p.preview}/>
             </div>
-            <div style={{padding:'6px 4px',fontSize:11}}>{p.name}</div>
+            <div style={{padding:'6px 4px',fontSize:11}}>{p.nameKey ? t(p.nameKey) : p.name}</div>
           </button>
         ))}
       </div>
@@ -117,12 +126,14 @@ function SectionPresetPanel({ onAdd }) {
 }
 
 function LayersPanel({ doc, selected, onSelect, onSelectBlock }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   return (
     <div className="side-body">
-      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:8,fontWeight:600}}>Estructura</div>
+      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:8,fontWeight:600}}>{t('editor.layers.structure')}</div>
       <div style={{fontSize:12,padding:'4px 6px',display:'flex',alignItems:'center',gap:6,background:'var(--surface-2)',borderRadius:4,marginBottom:4}}>
-        <I.mail size={13}/><span style={{fontWeight:500}}>Todo el correo</span>
-        <span style={{marginLeft:'auto',fontSize:11,color:'var(--fg-3)'}}>600 px de ancho</span>
+        <I.mail size={13}/><span style={{fontWeight:500}}>{t('editor.layers.wholeEmail')}</span>
+        <span style={{marginLeft:'auto',fontSize:11,color:'var(--fg-3)'}}>{t('editor.layers.widthPx', { width: 600 })}</span>
       </div>
       <div style={{paddingLeft:6}}>
         {doc.map(s => (
@@ -150,9 +161,11 @@ function LayersPanel({ doc, selected, onSelect, onSelectBlock }) {
 }
 
 function HistoryPanel() {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   return (
     <div className="side-body">
-      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:10,fontWeight:600}}>Versiones guardadas de los últimos 7 días</div>
+      <div style={{fontSize:11,color:'var(--fg-3)',letterSpacing:0.04,textTransform:'uppercase',marginBottom:10,fontWeight:600}}>{t('editor.history.title')}</div>
       {HISTORY.map(h => (
         <div key={h.id} style={{
           display:'flex',gap:10,padding:'10px 8px',borderRadius:'var(--r-md)',
@@ -166,7 +179,7 @@ function HistoryPanel() {
             <div style={{fontSize:12,fontWeight:h.current?600:500,color:h.current?'var(--accent)':'var(--fg)'}}>{h.label}</div>
             <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>{h.ts} · {h.author}</div>
           </div>
-          {!h.current && <button className="btn icon sm ghost" title="Restaurar"><I.history size={12}/></button>}
+          {!h.current && <button className="btn icon sm ghost" title={t('editor.history.restore')}><I.history size={12}/></button>}
         </div>
       ))}
     </div>
@@ -222,6 +235,8 @@ function CanvasRuler() {
 // Quick chips for the workspace's brand display/body fonts. Falls back to
 // nothing if the workspace hasn't configured any brand fonts.
 function BrandFontsGroup({ current, onPick }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [brand, setBrand] = React.useState(() => window.stStorage?.getWSSetting('brand', {}) || {});
   React.useEffect(() => {
     const refresh = () => setBrand(window.stStorage?.getWSSetting('brand', {}) || {});
@@ -237,13 +252,13 @@ function BrandFontsGroup({ current, onPick }) {
   }, []);
 
   const items = [];
-  if (brand.fontDisplay) items.push({ label: brand.fontDisplay, role: 'Título de marca' });
-  if (brand.fontBody) items.push({ label: brand.fontBody, role: 'Cuerpo de marca' });
+  if (brand.fontDisplay) items.push({ label: brand.fontDisplay, role: t('editor.brandFonts.display') });
+  if (brand.fontBody) items.push({ label: brand.fontBody, role: t('editor.brandFonts.body') });
   if (items.length === 0) return null;
 
   return (
     <div className="prop-group">
-      <div className="prop-label">Fuentes de marca</div>
+      <div className="prop-label">{t('editor.brandFonts.title')}</div>
       <div style={{display:'grid',gap:4}}>
         {items.map((it) => (
           <button
@@ -261,6 +276,8 @@ function BrandFontsGroup({ current, onPick }) {
 }
 
 function SectionProps({ section, onChange }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [tab,setTab] = React.useState('style');
   if (!section) return null;
   const updStyle = (k,v) => onChange({ ...section, style: {...section.style, [k]:v} });
@@ -273,21 +290,21 @@ function SectionProps({ section, onChange }) {
         </div>
         <div style={{flex:1,minWidth:0}}>
           <input value={section.name} onChange={e=>upd('name',e.target.value)} style={{background:'transparent',border:'none',outline:'none',fontSize:13,fontWeight:500,width:'100%'}}/>
-          <div style={{fontSize:10,color:'var(--fg-3)'}}>Bloque de sección</div>
+          <div style={{fontSize:10,color:'var(--fg-3)'}}>{t('editor.sectionProps.subtitle')}</div>
         </div>
-        <button className="btn icon sm ghost" title="Duplicar"><I.copy size={13}/></button>
-        <button className="btn icon sm ghost" title="Eliminar"><I.trash size={13}/></button>
+        <button className="btn icon sm ghost" title={t('common.duplicate')}><I.copy size={13}/></button>
+        <button className="btn icon sm ghost" title={t('common.delete')}><I.trash size={13}/></button>
       </div>
       <div className="side-tabs">
-        <Tab label="Estilo" active={tab==='style'} onClick={()=>setTab('style')}/>
-        <Tab label="Layout" active={tab==='layout'} onClick={()=>setTab('layout')}/>
-        <Tab label="Tipografía" active={tab==='type'} onClick={()=>setTab('type')}/>
+        <Tab label={t('editor.sectionProps.tab.style')} active={tab==='style'} onClick={()=>setTab('style')}/>
+        <Tab label={t('editor.sectionProps.tab.layout')} active={tab==='layout'} onClick={()=>setTab('layout')}/>
+        <Tab label={t('editor.sectionProps.tab.type')} active={tab==='type'} onClick={()=>setTab('type')}/>
       </div>
       <div className="side-body">
         {tab==='style' && (
           <>
             <div className="prop-group">
-              <div className="prop-label">Presets rápidos</div>
+              <div className="prop-label">{t('editor.sectionProps.quickPresets')}</div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
                 {SECTION_STYLE_PRESETS.map(p => (
                   <button key={p.id} className="block-tile" style={{height:54,padding:0,overflow:'hidden',background:p.bg,color:p.text,border:'1px solid var(--line)',flexDirection:'column',gap:0}}
@@ -298,24 +315,24 @@ function SectionProps({ section, onChange }) {
               </div>
             </div>
             <div className="prop-group">
-              <div className="prop-label">Fondo del contenido</div>
+              <div className="prop-label">{t('editor.sectionProps.contentBg')}</div>
               <div className="prop-row">
-                <label>Color</label>
+                <label>{t('editor.sectionProps.color')}</label>
                 <ColorInput value={section.style.bg} onChange={v=>updStyle('bg',v)}/>
               </div>
               <div style={{fontSize:11,color:'var(--fg-3)',marginTop:6,lineHeight:1.5}}>
-                El color del área central de esta sección, donde están los bloques.
+                {t('editor.sectionProps.contentBgHint')}
               </div>
             </div>
             <SectionOuterGroup section={section} updStyle={updStyle}/>
             <div className="prop-group">
-              <div className="prop-label">Texto</div>
+              <div className="prop-label">{t('editor.sectionProps.text')}</div>
               <div className="prop-row">
-                <label>Color</label>
+                <label>{t('editor.sectionProps.color')}</label>
                 <ColorInput value={section.style.text} onChange={v=>updStyle('text',v)}/>
               </div>
               <div className="prop-row">
-                <label>Alineación</label>
+                <label>{t('editor.sectionProps.align')}</label>
                 <div className="seg" style={{width:'100%'}}>
                   {['left','center','right'].map(a => (
                     <button key={a} className={section.style.align===a?'on':''} onClick={()=>updStyle('align',a)}>
@@ -326,27 +343,27 @@ function SectionProps({ section, onChange }) {
               </div>
             </div>
             <div className="prop-group">
-              <div className="prop-label">Espaciado</div>
+              <div className="prop-label">{t('editor.sectionProps.spacing')}</div>
               <div className="prop-row">
-                <label>Padding</label>
+                <label>{t('editor.sectionProps.padding')}</label>
                 <Num value={section.style.padding} onChange={v=>updStyle('padding',v)} min={0} max={80}/>
               </div>
             </div>
             <div className="prop-group">
-              <div className="prop-label">Tamaño</div>
+              <div className="prop-label">{t('editor.sectionProps.size')}</div>
               <div className="prop-row">
-                <label>Ancho</label>
+                <label>{t('editor.sectionProps.widthLabel')}</label>
                 <Num value={section.style.width || 600} onChange={v=>updStyle('width',v)} min={320} max={800}/>
               </div>
               <div style={{fontSize:11,color:'var(--fg-3)',marginTop:6,lineHeight:1.5}}>
-                Ancho del contenido de esta sección. El fondo exterior siempre va a todo lo ancho.
+                {t('editor.sectionProps.widthHint')}
               </div>
             </div>
           </>
         )}
         {tab==='layout' && (
           <div className="prop-group">
-            <div className="prop-label">Columnas</div>
+            <div className="prop-label">{t('editor.sectionProps.columns')}</div>
             <div className="seg" style={{width:'100%'}}>
               {[
                 {v:'1col',l:'1'}, {v:'2col',l:'2'}, {v:'3col',l:'3'}, {v:'sidebar',l:'1:2'}
@@ -360,14 +377,14 @@ function SectionProps({ section, onChange }) {
                 }}>{o.l}</button>
               ))}
             </div>
-            <div style={{fontSize:11,color:'var(--fg-3)',marginTop:10,lineHeight:1.5}}>Las columnas se apilan en móvil automáticamente.</div>
+            <div style={{fontSize:11,color:'var(--fg-3)',marginTop:10,lineHeight:1.5}}>{t('editor.sectionProps.columnsHint')}</div>
           </div>
         )}
         {tab==='type' && (
           <>
             <BrandFontsGroup current={section.style.font} onPick={v=>updStyle('font',v)}/>
             <div className="prop-group">
-              <div className="prop-label">Familia tipográfica</div>
+              <div className="prop-label">{t('editor.sectionProps.fontFamily')}</div>
               <div style={{display:'grid',gap:4}}>
                 {FONT_OPTIONS.map(f => (
                   <button key={f.id} className={`btn ${section.style.font===f.id?'primary':''}`} style={{justifyContent:'flex-start',fontFamily:f.css}} onClick={()=>updStyle('font',f.id)}>
@@ -384,40 +401,42 @@ function SectionProps({ section, onChange }) {
 }
 
 function SaveBtn({ saveState, onClick }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const base = { display:'inline-flex', alignItems:'center', gap:6, whiteSpace:'nowrap' };
   if (saveState === 'idle') {
     return (
-      <div className="btn ghost sm" title="Todo guardado"
+      <div className="btn ghost sm" title={t('editor.save.allSaved')}
         style={{...base, color:'#2bb07f', cursor:'default', pointerEvents:'none'}}>
         <I.check size={13}/>
-        <span>Todo guardado</span>
+        <span>{t('editor.save.allSaved')}</span>
       </div>
     );
   }
   if (saveState === 'saving') {
     return (
-      <div className="btn ghost sm" title="Guardando…"
+      <div className="btn ghost sm" title={t('editor.save.saving')}
         style={{...base, color:'var(--fg-3)', opacity:0.85, pointerEvents:'none'}}>
         <I.loader size={13} className="spin"/>
-        <span>Guardando…</span>
+        <span>{t('editor.save.saving')}</span>
       </div>
     );
   }
   if (saveState === 'error') {
     return (
-      <button className="btn primary sm" onClick={onClick} title="No se pudo guardar — clic para reintentar"
+      <button className="btn primary sm" onClick={onClick} title={t('editor.save.errorTooltip')}
         style={{...base, background:'#e04f4f', borderColor:'#e04f4f', color:'#fff'}}>
         <I.info size={13}/>
-        <span>Reintentar</span>
+        <span>{t('editor.save.retry')}</span>
       </button>
     );
   }
   // dirty
   return (
-    <button className="btn primary sm" onClick={onClick} title="Guardar ahora"
+    <button className="btn primary sm" onClick={onClick} title={t('editor.save.saveNow')}
       style={base}>
       <I.upload size={13}/>
-      <span>Guardar</span>
+      <span>{t('editor.save.save')}</span>
     </button>
   );
 }
@@ -452,6 +471,8 @@ function useEditorPrefs() {
 }
 
 function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars, onReview }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [doc, setDoc] = React.useState([]);
   const [vars, setVars] = React.useState([]);
   const [loaded, setLoaded] = React.useState(false);
@@ -459,7 +480,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
   const [device, setDevice] = React.useState('desktop');
   const [leftTab, setLeftTab] = React.useState('content');
   const [rightTab, setRightTab] = React.useState('props');
-  const [name, setName] = React.useState(template?.name || 'Plantilla sin título');
+  const [name, setName] = React.useState(template?.name || t('editor.untitledTemplate'));
   const [zoom, setZoom] = React.useState(100);
   const [improveBlock, setImproveBlock] = React.useState(null);
   // When the user clicks an empty image placeholder in the canvas we want to
@@ -628,7 +649,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
         ? tpl.vars
         : (window.stStorage.getWSSetting('vars', null) || window.VARIABLES || []);
       setVars(loadedVars);
-      setName(tpl?.name || template.name || 'Plantilla sin título');
+      setName(tpl?.name || template.name || t('editor.untitledTemplate'));
       // Reset selection to the first section (or clear if empty)
       const firstId = Array.isArray(sections) && sections[0]?.id;
       setSel(firstId ? { type:'section', id:firstId } : null);
@@ -666,7 +687,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
         // Optional notification, gated by notif.saved (off by default).
         window.notify && window.notify('saved', {
           kind: 'ok',
-          title: 'Se guardó la plantilla',
+          title: t('editor.toast.saved'),
           msg: nameRef.current,
           ttl: 1800,
         });
@@ -789,7 +810,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
       const orig = d[i];
       const copy = JSON.parse(JSON.stringify(orig));
       copy.id = 's'+Date.now();
-      copy.name = orig.name + ' (copia)';
+      copy.name = orig.name + ' ' + t('editor.section.copySuffix');
       copy.columns.forEach(c => c.blocks.forEach(b => b.id = 'b'+Math.random().toString(36).slice(2,8)));
       return [...d.slice(0,i+1), copy, ...d.slice(i+1)];
     });
@@ -817,7 +838,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
   };
   const addBlankBlockInColumn = (sectionId, colIdx, atIndex, blockType='text') => {
     const id = 'b'+Math.random().toString(36).slice(2,8);
-    const defaultData = blockType==='text' ? {body:'Nuevo bloque — edita aquí.'} : {};
+    const defaultData = blockType==='text' ? {body:t('editor.block.textDefault')} : {};
     const newBlock = { id, type:blockType, data:defaultData };
     setDoc(d => d.map(s => s.id===sectionId ? {
       ...s, columns: s.columns.map((c,i) => {
@@ -834,7 +855,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
   const resolvePreset = (id) => SECTION_PRESETS.find(x => x.id === id);
   const addBlankSection = (atIndex) => {
     const newId = 's'+Date.now();
-    const newSection = { id:newId, name:'Sección', layout:'1col', style:defaultSectionStyle({padding:40}), columns:[{w:100,blocks:[]}] };
+    const newSection = { id:newId, name:t('editor.section.defaultName'), layout:'1col', style:defaultSectionStyle({padding:40}), columns:[{w:100,blocks:[]}] };
     setDoc(d => {
       const copy = [...d];
       copy.splice(atIndex, 0, newSection);
@@ -847,45 +868,45 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
     <div className="editor" data-view={device}>
       <div className="editor-top">
         {/* Zone A — context */}
-        <button className="btn icon ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onBack(); }} title="Volver a mis plantillas" aria-label="Volver"><I.chevronL size={14}/></button>
+        <button className="btn icon ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onBack(); }} title={t('editor.back.tooltip')} aria-label={t('editor.back.aria')}><I.chevronL size={14}/></button>
         <div className="name">
           <input value={name} onChange={e=>setName(e.target.value)}/>
           <div className="meta">
-            {template?.folder || templateJsonRef.current?.folder || 'Sin carpeta'} · {doc.length} secciones
+            {template?.folder || templateJsonRef.current?.folder || t('editor.noFolder')} · {t('editor.sectionsCount', { n: doc.length })}
           </div>
         </div>
 
         {/* Zone B — view mode (centered) */}
         <div className="grow"/>
         <div className="device-toggle" data-tour="device-toggle">
-          <button className={device==='desktop'?'on':''} onClick={()=>setDevice('desktop')} title="Escritorio (600 px)" aria-label="Escritorio"><I.monitor size={13}/></button>
-          <button className={device==='mobile'?'on':''} onClick={()=>setDevice('mobile')} title="Móvil (375 px)" aria-label="Móvil"><I.phone size={13}/></button>
+          <button className={device==='desktop'?'on':''} onClick={()=>setDevice('desktop')} title={t('editor.device.desktopTooltip')} aria-label={t('editor.device.desktop')}><I.monitor size={13}/></button>
+          <button className={device==='mobile'?'on':''} onClick={()=>setDevice('mobile')} title={t('editor.device.mobileTooltip')} aria-label={t('editor.device.mobile')}><I.phone size={13}/></button>
         </div>
         <div className="grow"/>
 
         {/* Zone C — utility cluster */}
         <div className="icon-cluster">
-          <button className="btn icon ghost sm" title="Deshacer (⌘Z)" aria-label="Deshacer" disabled={!historyState.canUndo} onClick={undo}><I.undo size={13}/></button>
-          <button className="btn icon ghost sm" title="Rehacer (⌘⇧Z)" aria-label="Rehacer" disabled={!historyState.canRedo} onClick={redo}><I.redo size={13}/></button>
+          <button className="btn icon ghost sm" title={t('editor.toolbar.undoTooltip')} aria-label={t('editor.toolbar.undo')} disabled={!historyState.canUndo} onClick={undo}><I.undo size={13}/></button>
+          <button className="btn icon ghost sm" title={t('editor.toolbar.redoTooltip')} aria-label={t('editor.toolbar.redo')} disabled={!historyState.canRedo} onClick={redo}><I.redo size={13}/></button>
           <SaveBtn saveState={saveState} onClick={()=>flushSaveRef.current()}/>
           <ThemeToggleBtn/>
-          <button className="btn icon ghost sm" onClick={()=>window.dispatchEvent(new CustomEvent('st:cmd-open'))} title="Buscar (⌘K)" aria-label="Buscar"><I.search size={13}/></button>
+          <button className="btn icon ghost sm" onClick={()=>window.dispatchEvent(new CustomEvent('st:cmd-open'))} title={t('editor.toolbar.searchTooltip')} aria-label={t('editor.toolbar.search')}><I.search size={13}/></button>
         </div>
 
         {/* Zone D — actions */}
-        <button className="btn ghost sm" onClick={onOpenVars}><I.braces size={13}/> Etiquetas</button>
-        <button className="btn ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onPreview(); }}><I.eye size={13}/> Vista previa</button>
-        <button className="btn ghost sm" onClick={onReview} title="Revisar antes de enviar (⌘⇧R)" data-tour="review-btn"><I.check size={13}/> Revisar</button>
-        <button className="btn sm" onClick={onTestSend}><I.send size={13}/> Enviar prueba</button>
-        <button className="btn primary sm" onClick={onExport} data-tour="export-btn"><I.download size={13}/> Exportar</button>
+        <button className="btn ghost sm" onClick={onOpenVars}><I.braces size={13}/> {t('editor.action.tags')}</button>
+        <button className="btn ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onPreview(); }}><I.eye size={13}/> {t('editor.action.preview')}</button>
+        <button className="btn ghost sm" onClick={onReview} title={t('editor.action.reviewTooltip')} data-tour="review-btn"><I.check size={13}/> {t('editor.action.review')}</button>
+        <button className="btn sm" onClick={onTestSend}><I.send size={13}/> {t('editor.action.testSend')}</button>
+        <button className="btn primary sm" onClick={onExport} data-tour="export-btn"><I.download size={13}/> {t('editor.action.export')}</button>
       </div>
 
       <div className="editor-body">
         <aside className="side-panel left" data-tour="left-panel">
           <div className="side-tabs" style={{padding:'8px 8px 4px'}}>
-            <Tab label="Contenido" active={leftTab==='content'} onClick={()=>setLeftTab('content')}/>
-            <Tab label="Capas" active={leftTab==='layers'} onClick={()=>setLeftTab('layers')}/>
-            <Tab label="Historial" active={leftTab==='history'} onClick={()=>setLeftTab('history')}/>
+            <Tab label={t('editor.leftTab.content')} active={leftTab==='content'} onClick={()=>setLeftTab('content')}/>
+            <Tab label={t('editor.leftTab.layers')} active={leftTab==='layers'} onClick={()=>setLeftTab('layers')}/>
+            <Tab label={t('editor.leftTab.history')} active={leftTab==='history'} onClick={()=>setLeftTab('history')}/>
           </div>
           {leftTab==='content' && <ContentPanel onAddBlock={addBlockToEnd} onAddSection={addSection}/>}
           {leftTab==='layers' && <LayersPanel doc={doc} selected={sel} onSelect={setSel}/>}
@@ -924,12 +945,12 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
                 >
                   <EmptyState
                     illustration="editor-empty"
-                    title="Empieza añadiendo una sección"
-                    msg="Cada correo se arma con secciones (una fila que contiene columnas de bloques). Elige una de la izquierda o empieza en blanco."
-                    primaryAction={{ label:'Añadir sección en blanco', icon:'plus', onClick:()=>addBlankSection(0) }}
+                    title={t('editor.empty.title')}
+                    msg={t('editor.empty.msg')}
+                    primaryAction={{ label:t('editor.empty.addBlank'), icon:'plus', onClick:()=>addBlankSection(0) }}
                     tips={[
-                      'Pulsa una plantilla de sección de la izquierda («Portada», «Dos columnas», «Llamada a la acción»…) y aparece aquí.',
-                      'Arrastra bloques sobre cualquier sección para rellenarla.',
+                      t('editor.empty.tip1'),
+                      t('editor.empty.tip2'),
                     ]}
                   />
                 </div>
@@ -970,18 +991,18 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
             <div style={{fontSize:12,padding:'0 6px',minWidth:40,textAlign:'center'}}>{zoom}%</div>
             <button className="btn icon sm ghost" onClick={()=>setZoom(z=>Math.min(200,z+10))}>+</button>
             <div className="vdivider"/>
-            <button className="btn sm ghost" onClick={()=>setZoom(100)} style={{fontSize:11}}>Ajustar</button>
+            <button className="btn sm ghost" onClick={()=>setZoom(100)} style={{fontSize:11}}>{t('editor.zoom.fit')}</button>
           </div>
         </div>
 
         <aside className="side-panel" data-tour="right-panel">
           <div className="side-tabs" style={{padding:'8px 8px 4px'}}>
-            <Tab label={selBlock?'Bloque':'Sección'} active={rightTab==='props'} onClick={()=>setRightTab('props')}/>
-            <Tab label="Diseño global" active={rightTab==='design'} onClick={()=>setRightTab('design')}/>
+            <Tab label={selBlock?t('editor.rightTab.block'):t('editor.rightTab.section')} active={rightTab==='props'} onClick={()=>setRightTab('props')}/>
+            <Tab label={t('editor.rightTab.design')} active={rightTab==='design'} onClick={()=>setRightTab('design')}/>
           </div>
           {rightTab==='props' && selBlock && <BlockProps block={selBlock} onChange={updateBlock} onDelete={()=>deleteBlock(sel.sectionId, sel.id)}/>}
           {rightTab==='props' && !selBlock && selSection && <SectionProps section={selSection} onChange={updateSection}/>}
-          {rightTab==='props' && !selBlock && !selSection && <div className="side-body"><div style={{fontSize:12,color:'var(--fg-3)'}}>Selecciona una sección o bloque en el canvas.</div></div>}
+          {rightTab==='props' && !selBlock && !selSection && <div className="side-body"><div style={{fontSize:12,color:'var(--fg-3)'}}>{t('editor.rightPanel.selectPrompt')}</div></div>}
           {rightTab==='design' && <DesignPanel/>}
         </aside>
       </div>
@@ -1006,6 +1027,8 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
 // Improve AI Modal — reescribe el texto de un bloque seleccionado
 // ════════════════════════════════════════════════════════════════
 function ImproveAIModal({ block, onClose, onApply }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const aiCfg = window.stStorage.getSetting('ai', {});
   const [action, setAction] = React.useState('rewrite');
   const [extra, setExtra] = React.useState('');
@@ -1013,16 +1036,16 @@ function ImproveAIModal({ block, onClose, onApply }) {
   const [variants, setVariants] = React.useState([]);
   const [error, setError] = React.useState(null);
 
-  const ACTIONS = [
-    {id:'rewrite', t:'Reescribir', d:'Manteniendo el sentido, con otras palabras', icon:'wand'},
-    {id:'shorten', t:'Acortar',    d:'Más conciso, mismo mensaje',                icon:'minus'},
-    {id:'expand',  t:'Ampliar',    d:'Más contexto, un poco más largo',            icon:'plus'},
-    {id:'tone',    t:'Cambiar tono', d:'Más cálido, profesional, divertido…',      icon:'palette'},
-    {id:'translate', t:'Traducir',  d:'A inglés, portugués u otro idioma',         icon:'braces'},
-    {id:'fix',     t:'Corregir',   d:'Ortografía, gramática, claridad',           icon:'check'},
-  ];
+  const ACTIONS = React.useMemo(() => [
+    {id:'rewrite',  t:t('editor.improveAi.action.rewrite'),   d:t('editor.improveAi.action.rewrite.desc'),   icon:'wand'},
+    {id:'shorten',  t:t('editor.improveAi.action.shorten'),   d:t('editor.improveAi.action.shorten.desc'),   icon:'minus'},
+    {id:'expand',   t:t('editor.improveAi.action.expand'),    d:t('editor.improveAi.action.expand.desc'),    icon:'plus'},
+    {id:'tone',     t:t('editor.improveAi.action.tone'),      d:t('editor.improveAi.action.tone.desc'),      icon:'palette'},
+    {id:'translate',t:t('editor.improveAi.action.translate'), d:t('editor.improveAi.action.translate.desc'), icon:'braces'},
+    {id:'fix',      t:t('editor.improveAi.action.fix'),       d:t('editor.improveAi.action.fix.desc'),       icon:'check'},
+  ], [lang]);
 
-  const currentText = block.data?.content?.text || block.data?.content?.label || block.data?.text || block.data?.label || '(sin texto)';
+  const currentText = block.data?.content?.text || block.data?.content?.label || block.data?.text || block.data?.label || t('editor.improveAi.noText');
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -1030,13 +1053,13 @@ function ImproveAIModal({ block, onClose, onApply }) {
     const result = await window.stAI.improveText({ block, action, extra });
     setLoading(false);
     if (!result.ok) {
-      setError(result.error || 'No se pudo generar variantes.');
+      setError(result.error || t('editor.improveAi.errorDefault'));
       setVariants([]);
       return;
     }
-    setVariants(result.variants.map((t, i) => ({
-      t,
-      label: `Variante ${i + 1}`,
+    setVariants(result.variants.map((txt, i) => ({
+      t: txt,
+      label: t('editor.improveAi.variantN', { n: i + 1 }),
     })));
   };
 
@@ -1057,18 +1080,18 @@ function ImproveAIModal({ block, onClose, onApply }) {
             <I.sparkles size={16}/>
           </div>
           <div style={{flex:1}}>
-            <h3>Mejorar este bloque con IA</h3>
-            <div className="sub">Bloque tipo <b>{block.type}</b> · Elige qué hacer y te propongo varias versiones.</div>
+            <h3>{t('editor.improveAi.title')}</h3>
+            <div className="sub">{t('editor.improveAi.subtitleBefore')}<b>{block.type}</b>{t('editor.improveAi.subtitleAfter')}</div>
           </div>
           <button className="btn icon ghost" onClick={onClose}><I.x size={15}/></button>
         </div>
         <div className="modal-body">
           <div style={{padding:'10px 12px',background:'var(--surface-2)',borderRadius:'var(--r-md)',fontSize:12.5,lineHeight:1.5,marginBottom:16,color:'var(--fg-2)',borderLeft:'3px solid var(--accent)'}}>
-            <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:4}}>Texto actual</div>
+            <div style={{fontSize:10.5,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:4}}>{t('editor.improveAi.currentText')}</div>
             {currentText}
           </div>
 
-          <div className="prop-label" style={{marginBottom:8}}>¿Qué hacemos con este texto?</div>
+          <div className="prop-label" style={{marginBottom:8}}>{t('editor.improveAi.whatToDo')}</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:14}}>
             {ACTIONS.map(a => {
               const Ico = I[a.icon] || I.wand;
@@ -1090,8 +1113,8 @@ function ImproveAIModal({ block, onClose, onApply }) {
             })}
           </div>
 
-          <div className="prop-label" style={{marginBottom:6}}>Instrucción extra (opcional)</div>
-          <input className="field" value={extra} onChange={e=>setExtra(e.target.value)} placeholder={action==='tone'?'Ej.: más cálido, como un amigo':action==='translate'?'Ej.: al portugués':'Ej.: mencionar envío gratis'}/>
+          <div className="prop-label" style={{marginBottom:6}}>{t('editor.improveAi.extraLabel')}</div>
+          <input className="field" value={extra} onChange={e=>setExtra(e.target.value)} placeholder={action==='tone'?t('editor.improveAi.extra.tone'):action==='translate'?t('editor.improveAi.extra.translate'):t('editor.improveAi.extra.default')}/>
 
           {error && (
             <div style={{
@@ -1102,21 +1125,21 @@ function ImproveAIModal({ block, onClose, onApply }) {
               display:'flex',gap:8,
             }}>
               <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
-              <div><b>No pudimos generar.</b> {error}</div>
+              <div><b>{t('editor.improveAi.couldNotGenerate')}</b> {error}</div>
             </div>
           )}
 
           {variants.length > 0 && (
             <>
-              <div className="prop-label" style={{marginTop:20,marginBottom:8}}>Propuestas ({variants.length})</div>
+              <div className="prop-label" style={{marginTop:20,marginBottom:8}}>{t('editor.improveAi.proposals', { n: variants.length })}</div>
               <div className="col" style={{gap:8}}>
                 {variants.map((v, i) => (
                   <div key={i} style={{padding:'12px 14px',border:'1px solid var(--line)',borderRadius:'var(--r-md)',background:'var(--surface)'}}>
                     <div style={{fontSize:10.5,color:'var(--fg-3)',marginBottom:4,textTransform:'uppercase',letterSpacing:'.06em'}}>{v.label}</div>
                     <div style={{fontSize:13,lineHeight:1.5,marginBottom:8}}>{v.t}</div>
                     <div className="row" style={{gap:6}}>
-                      <button className="btn sm" onClick={()=>applyVariant(v.t)}><I.check size={11}/> Usar esta</button>
-                      <button className="btn sm ghost"><I.copy size={11}/> Copiar</button>
+                      <button className="btn sm" onClick={()=>applyVariant(v.t)}><I.check size={11}/> {t('editor.improveAi.useThis')}</button>
+                      <button className="btn sm ghost"><I.copy size={11}/> {t('common.copy')}</button>
                     </div>
                   </div>
                 ))}
@@ -1126,11 +1149,11 @@ function ImproveAIModal({ block, onClose, onApply }) {
         </div>
         <div className="modal-foot">
           <div style={{fontSize:11,color:'var(--fg-3)',flex:1}}>
-            Usando <b style={{color:'var(--fg-2)'}}>{aiCfg.provider==='openai'?'OpenAI':aiCfg.provider==='google'?'Gemini':aiCfg.provider==='ollama'?'Ollama':'Claude'}</b>
+            {t('editor.improveAi.using')}<b style={{color:'var(--fg-2)'}}>{aiCfg.provider==='openai'?'OpenAI':aiCfg.provider==='google'?'Gemini':aiCfg.provider==='ollama'?'Ollama':'Claude'}</b>
           </div>
-          <button className="btn" onClick={onClose}>Cerrar</button>
+          <button className="btn" onClick={onClose}>{t('common.close')}</button>
           <button className="btn primary" onClick={handleGenerate} disabled={loading}>
-            {loading ? <><I.clock size={13}/> Pensando…</> : <><I.sparkles size={13}/> Generar propuestas</>}
+            {loading ? <><I.clock size={13}/> {t('editor.improveAi.thinking')}</> : <><I.sparkles size={13}/> {t('editor.improveAi.generate')}</>}
           </button>
         </div>
       </div>
@@ -1139,6 +1162,8 @@ function ImproveAIModal({ block, onClose, onApply }) {
 }
 
 function SectionInsertBtn({ onClick, onDropPreset }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [over, setOver] = React.useState(false);
   return (
     <div
@@ -1163,7 +1188,7 @@ function SectionInsertBtn({ onClick, onDropPreset }) {
       }}
     >
       <div className="section-insert-line"/>
-      <button className="section-insert-btn" onClick={onClick} title="Insertar sección vacía">
+      <button className="section-insert-btn" onClick={onClick} title={t('editor.insert.emptySection')}>
         <I.plus size={14}/>
       </button>
       <div className="section-insert-line"/>
@@ -1172,6 +1197,8 @@ function SectionInsertBtn({ onClick, onDropPreset }) {
 }
 
 function BlockInsertBtn({ onClick, onDropBlock }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [over, setOver] = React.useState(false);
   return (
     <div
@@ -1198,7 +1225,7 @@ function BlockInsertBtn({ onClick, onDropBlock }) {
       }}
     >
       <div className="block-insert-line"/>
-      <button className="block-insert-btn" title="Insertar bloque vacío" onClick={e=>{e.stopPropagation(); onClick();}}>
+      <button className="block-insert-btn" title={t('editor.insert.emptyBlock')} onClick={e=>{e.stopPropagation(); onClick();}}>
         <I.plus size={12}/>
       </button>
       <div className="block-insert-line"/>
@@ -1207,6 +1234,8 @@ function BlockInsertBtn({ onClick, onDropBlock }) {
 }
 
 function SectionView({ section, selected, selectedBlockId, onSelectSection, onSelectBlock, onMoveUp, onMoveDown, onDuplicate, onDelete, onMoveBlock, onDeleteBlock, onAddBlankBlock, onDropBlock, onEditBlock }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const font = FONT_OPTIONS.find(f => f.id===section.style.font) || FONT_OPTIONS[0];
   const [hover, setHover] = React.useState(false);
   const showChrome = selected || hover;
@@ -1245,10 +1274,10 @@ function SectionView({ section, selected, selectedBlockId, onSelectSection, onSe
           </div>
           <div style={{flex:1}}/>
           <div className="elem-actions" style={{pointerEvents:'auto'}}>
-            <button disabled={!onMoveUp} onClick={e=>{e.stopPropagation(); onMoveUp && onMoveUp();}} title="Subir"><I.chevronD size={11} style={{transform:'rotate(180deg)'}}/></button>
-            <button disabled={!onMoveDown} onClick={e=>{e.stopPropagation(); onMoveDown && onMoveDown();}} title="Bajar"><I.chevronD size={11}/></button>
-            <button onClick={e=>{e.stopPropagation(); onDuplicate();}} title="Duplicar"><I.copy size={11}/></button>
-            <button disabled={!onDelete} onClick={e=>{e.stopPropagation(); onDelete && onDelete();}} title="Eliminar" className="danger"><I.minus size={13}/></button>
+            <button disabled={!onMoveUp} onClick={e=>{e.stopPropagation(); onMoveUp && onMoveUp();}} title={t('common.moveUp')}><I.chevronD size={11} style={{transform:'rotate(180deg)'}}/></button>
+            <button disabled={!onMoveDown} onClick={e=>{e.stopPropagation(); onMoveDown && onMoveDown();}} title={t('common.moveDown')}><I.chevronD size={11}/></button>
+            <button onClick={e=>{e.stopPropagation(); onDuplicate();}} title={t('common.duplicate')}><I.copy size={11}/></button>
+            <button disabled={!onDelete} onClick={e=>{e.stopPropagation(); onDelete && onDelete();}} title={t('common.delete')} className="danger"><I.minus size={13}/></button>
           </div>
         </div>
       )}
@@ -1290,6 +1319,8 @@ function SectionView({ section, selected, selectedBlockId, onSelectSection, onSe
 }
 
 function ColumnView({ column, colIdx, sectionId, totalBlocks, selectedBlockId, onSelectBlock, onMoveBlock, onDeleteBlock, onAddBlankBlock, onDropBlock, onEditBlock }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [dragOver, setDragOver] = React.useState(false);
   return (
     <div
@@ -1329,8 +1360,8 @@ function ColumnView({ column, colIdx, sectionId, totalBlocks, selectedBlockId, o
     >
       {column.blocks.length === 0 && (
         <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8,padding:'12px 0'}}>
-          <div style={{fontSize:11,opacity:0.5,fontFamily:'var(--font-mono)'}}>{dragOver ? 'Soltar aquí' : 'Columna vacía'}</div>
-          <button className="round-add" onClick={e=>{e.stopPropagation(); onAddBlankBlock(0);}} title="Añadir bloque">
+          <div style={{fontSize:11,opacity:0.5,fontFamily:'var(--font-mono)'}}>{dragOver ? t('editor.column.dropHere') : t('editor.column.empty')}</div>
+          <button className="round-add" onClick={e=>{e.stopPropagation(); onAddBlankBlock(0);}} title={t('editor.column.addBlock')}>
             <I.plus size={14}/>
           </button>
         </div>
@@ -1372,9 +1403,9 @@ function ColumnView({ column, colIdx, sectionId, totalBlocks, selectedBlockId, o
                 ? <R data={b.data} onEdit={onEditBlock ? (patch)=>onEditBlock(b, patch) : undefined}/>
                 : <div style={{padding:12,opacity:0.5,fontFamily:'var(--font-mono)',fontSize:11}}>&lt;{b.type}/&gt;</div>}
               <div className="elem-actions block-actions" style={{opacity:isSel?1:undefined}}>
-                <button disabled={bi===0} onClick={e=>{e.stopPropagation(); onMoveBlock(b.id,-1);}} title="Subir"><I.chevronD size={11} style={{transform:'rotate(180deg)'}}/></button>
-                <button disabled={bi===column.blocks.length-1} onClick={e=>{e.stopPropagation(); onMoveBlock(b.id,1);}} title="Bajar"><I.chevronD size={11}/></button>
-                <button onClick={e=>{e.stopPropagation(); onDeleteBlock(b.id);}} title="Eliminar" className="danger"><I.minus size={13}/></button>
+                <button disabled={bi===0} onClick={e=>{e.stopPropagation(); onMoveBlock(b.id,-1);}} title={t('common.moveUp')}><I.chevronD size={11} style={{transform:'rotate(180deg)'}}/></button>
+                <button disabled={bi===column.blocks.length-1} onClick={e=>{e.stopPropagation(); onMoveBlock(b.id,1);}} title={t('common.moveDown')}><I.chevronD size={11}/></button>
+                <button onClick={e=>{e.stopPropagation(); onDeleteBlock(b.id);}} title={t('common.delete')} className="danger"><I.minus size={13}/></button>
               </div>
             </div>
             <BlockInsertBtn onClick={()=>onAddBlankBlock(bi+1)} onDropBlock={(type)=>onDropBlock(bi+1, type)}/>
@@ -1390,15 +1421,17 @@ function ColumnView({ column, colIdx, sectionId, totalBlocks, selectedBlockId, o
 // through. We use a Switch to opt in because <input type=color> can't hold
 // 'transparent'; the last solid color is remembered for re-enable.
 function SectionOuterGroup({ section, updStyle }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const outerBg = section.style.outerBg || 'transparent';
   const hasOuter = outerBg !== 'transparent';
   const lastBgRef = React.useRef(hasOuter ? outerBg : '#f6f5f1');
   if (hasOuter) lastBgRef.current = outerBg;
   return (
     <div className="prop-group">
-      <div className="prop-label">Fondo exterior</div>
+      <div className="prop-label">{t('editor.sectionOuter.title')}</div>
       <div className="prop-row">
-        <label>Mostrar</label>
+        <label>{t('editor.sectionOuter.show')}</label>
         <label className="switch">
           <input
             type="checkbox"
@@ -1411,28 +1444,30 @@ function SectionOuterGroup({ section, updStyle }) {
       {hasOuter && (
         <>
           <div className="prop-row">
-            <label>Color</label>
+            <label>{t('editor.sectionProps.color')}</label>
             <ColorInput value={outerBg} onChange={v => updStyle('outerBg', v)}/>
           </div>
           <div className="prop-row">
-            <label>Padding vertical</label>
+            <label>{t('editor.sectionOuter.paddingY')}</label>
             <Num value={section.style.outerPadY || 0} onChange={v => updStyle('outerPadY', v)} min={0} max={120}/>
           </div>
         </>
       )}
       <div style={{fontSize:11,color:'var(--fg-3)',marginTop:6,lineHeight:1.5}}>
-        Franja a todo el ancho que se ve detrás del contenido de la sección.
+        {t('editor.sectionOuter.hint')}
       </div>
     </div>
   );
 }
 
 function DesignPanel() {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   return (
     <div className="side-body">
       <div className="prop-group">
         <div style={{fontSize:12,color:'var(--fg-3)',lineHeight:1.6}}>
-          Cada sección tiene sus propios estilos (fondo del contenido, fondo exterior, ancho, padding…). Selecciona una sección en el canvas para configurarla.
+          {t('editor.design.hint')}
         </div>
       </div>
     </div>

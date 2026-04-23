@@ -51,6 +51,8 @@ function ImageThumb({ item, large=false }) {
 }
 
 function ImagePickerModal({ open, onClose, onSelect }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const [tab, setTab] = React.useState('library'); // library | url | cdn
   const [folder, setFolder] = React.useState('all');
   const [q, setQ] = React.useState('');
@@ -77,14 +79,14 @@ function ImagePickerModal({ open, onClose, onSelect }) {
     try {
       const result = await window.stCDN.upload(file);
       if (!result.ok) {
-        setUploadError(result.error || 'No se pudo subir la imagen.');
+        setUploadError(result.error || t('imagePicker.upload.failed'));
         return;
       }
       const dim = await window.stImages.readImageSize(file);
       const saved = await window.stImages.save({
         url: result.url,
-        name: file.name || 'imagen',
-        folder: 'Subidas',
+        name: file.name || t('imagePicker.defaultName'),
+        folder: t('imagePicker.folder.uploads'),
         mime: file.type || null,
         sizeBytes: file.size || null,
         width: dim.width,
@@ -94,7 +96,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
       });
       if (saved) setSel(saved);
     } catch (err) {
-      setUploadError(err?.message || 'Error inesperado al subir.');
+      setUploadError(err?.message || t('imagePicker.upload.unexpected'));
     } finally {
       setUploading(false);
     }
@@ -117,10 +119,10 @@ function ImagePickerModal({ open, onClose, onSelect }) {
     .filter((i) => folder === 'all' || i.folder === folder)
     .filter((i) => !q || (i.name || '').toLowerCase().includes(q.toLowerCase()));
 
-  // Folders derived from the live library. "Toda la biblioteca" is always
-  // first; the rest are sorted by the facade (alphabetical).
+  // Folders derived from the live library. "All" is always first; the rest
+  // are sorted by the facade (alphabetical).
   const folderList = [
-    { id:'all', name:'Toda la biblioteca', count: library.length },
+    { id:'all', name: t('imagePicker.folder.all'), count: library.length },
     ...window.stImages.folders().map(f => ({ id: f.folder, name: f.folder, count: f.count })),
   ];
 
@@ -148,13 +150,13 @@ function ImagePickerModal({ open, onClose, onSelect }) {
             <I.image size={16}/>
           </div>
           <div style={{flex:1,minWidth:0}}>
-            <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600}}>Seleccionar imagen</div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600}}>{t('imagePicker.title')}</div>
             <div style={{fontSize:11.5,color:'var(--fg-3)'}}>
               {cdnConfig === 'local'
-                ? 'Biblioteca del espacio · Guardadas en tu equipo'
+                ? t('imagePicker.subtitle.local')
                 : cdnConfig === 'base64'
-                  ? 'Biblioteca del espacio · Las imágenes se embeben en Base64'
-                  : `Biblioteca del espacio · Subidas van a ${cdnConfig.toUpperCase()}`}
+                  ? t('imagePicker.subtitle.base64')
+                  : t('imagePicker.subtitle.cdn', { name: cdnConfig.toUpperCase() })}
             </div>
           </div>
           <button className="btn icon ghost" onClick={onClose}><I.x size={14}/></button>
@@ -163,28 +165,28 @@ function ImagePickerModal({ open, onClose, onSelect }) {
         {/* Tabs */}
         <div style={{display:'flex',gap:2,padding:'6px 10px 0',borderBottom:'1px solid var(--line)'}}>
           {[
-            {id:'library', icon:'folder', label:'Biblioteca', badge:library.length},
-            {id:'url',     icon:'external', label:'URL externa'},
-            {id:'cdn',     icon:'server', label:`CDN · ${cdnConfig==='local'||cdnConfig==='base64'?'no configurado':cdnConfig}`, disabled:cdnConfig==='local'||cdnConfig==='base64'},
-          ].map(t => {
-            const Ico = I[t.icon];
-            const active = tab===t.id;
+            {id:'library', icon:'folder', label: t('imagePicker.tab.library'), badge:library.length},
+            {id:'url',     icon:'external', label: t('imagePicker.tab.url')},
+            {id:'cdn',     icon:'server', label: t('imagePicker.tab.cdn', { name: cdnConfig==='local'||cdnConfig==='base64' ? t('imagePicker.cdn.notConfigured') : cdnConfig }), disabled:cdnConfig==='local'||cdnConfig==='base64'},
+          ].map(tb => {
+            const Ico = I[tb.icon];
+            const active = tab===tb.id;
             return (
-              <button key={t.id}
-                onClick={()=>!t.disabled && setTab(t.id)}
-                disabled={t.disabled}
+              <button key={tb.id}
+                onClick={()=>!tb.disabled && setTab(tb.id)}
+                disabled={tb.disabled}
                 style={{
                   padding:'10px 14px 12px',
                   border:'none',background:'transparent',
                   borderBottom: active?'2px solid var(--accent)':'2px solid transparent',
-                  color: t.disabled?'var(--fg-3)':active?'var(--accent)':'var(--fg-2)',
-                  fontSize:12,fontWeight:500,cursor: t.disabled?'not-allowed':'pointer',
+                  color: tb.disabled?'var(--fg-3)':active?'var(--accent)':'var(--fg-2)',
+                  fontSize:12,fontWeight:500,cursor: tb.disabled?'not-allowed':'pointer',
                   display:'flex',alignItems:'center',gap:6,
-                  opacity: t.disabled?0.5:1,
+                  opacity: tb.disabled?0.5:1,
                 }}
               >
-                {Ico && <Ico size={13}/>} {t.label}
-                {t.badge!=null && <span className="chip" style={{fontSize:10,padding:'1px 6px'}}>{t.badge}</span>}
+                {Ico && <Ico size={13}/>} {tb.label}
+                {tb.badge!=null && <span className="chip" style={{fontSize:10,padding:'1px 6px'}}>{tb.badge}</span>}
               </button>
             );
           })}
@@ -200,7 +202,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                 borderRight:'1px solid var(--line)',
                 padding:14, overflow:'auto',
               }}>
-                <div style={{fontSize:10.5,textTransform:'uppercase',letterSpacing:'0.06em',color:'var(--fg-3)',fontWeight:600,marginBottom:8}}>Carpetas</div>
+                <div style={{fontSize:10.5,textTransform:'uppercase',letterSpacing:'0.06em',color:'var(--fg-3)',fontWeight:600,marginBottom:8}}>{t('imagePicker.folders')}</div>
                 {folderList.map(f => (
                   <button key={f.id}
                     onClick={()=>setFolder(f.id)}
@@ -223,7 +225,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                     marginTop:8,padding:'10px 8px',
                     fontSize:11,color:'var(--fg-3)',lineHeight:1.4,
                   }}>
-                    Aún no subes imágenes. Arrastra una al panel o pulsa «Subir».
+                    {t('imagePicker.empty.hint')}
                   </div>
                 )}
               </div>
@@ -237,14 +239,14 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                 }}>
                   <div className="search" style={{flex:1}}>
                     <span className="si"><I.search size={13}/></span>
-                    <input placeholder="Buscar imágenes…" value={q} onChange={e=>setQ(e.target.value)}/>
+                    <input placeholder={t('imagePicker.search.placeholder')} value={q} onChange={e=>setQ(e.target.value)}/>
                   </div>
                   <button
                     type="button"
                     className="btn sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}>
-                    {uploading ? <>Subiendo…</> : <><I.upload size={12}/> Subir</>}
+                    {uploading ? <>{t('imagePicker.uploading')}</> : <><I.upload size={12}/> {t('imagePicker.btn.upload')}</>}
                   </button>
                   <input
                     ref={fileInputRef}
@@ -263,7 +265,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                     display:'flex',gap:8,alignItems:'flex-start',
                   }}>
                     <I.x size={14} style={{marginTop:1,flexShrink:0}}/>
-                    <div><b>No pudimos subir.</b> {uploadError}</div>
+                    <div><b>{t('imagePicker.upload.failedTitle')}</b> {uploadError}</div>
                   </div>
                 )}
 
@@ -299,14 +301,14 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                         <I.upload size={16}/>
                       </div>
                       <div style={{fontWeight:500,color:'var(--fg-2)'}}>
-                        {uploading ? 'Subiendo…' : 'Arrastra aquí'}
+                        {uploading ? t('imagePicker.uploading') : t('imagePicker.dropZone.title')}
                       </div>
                       <div style={{textAlign:'center',lineHeight:1.3}}>
                         {cdnConfig === 'local'
-                          ? 'Se guardará en tu equipo'
+                          ? t('imagePicker.dropZone.local')
                           : cdnConfig === 'base64'
-                            ? 'Se embeberá en Base64'
-                            : `Se subirá a ${cdnConfig.toUpperCase()}`}
+                            ? t('imagePicker.dropZone.base64')
+                            : t('imagePicker.dropZone.cdn', { name: cdnConfig.toUpperCase() })}
                       </div>
                     </button>
 
@@ -346,22 +348,22 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                   <ImageThumb item={sel} large/>
                   <div style={{fontFamily:'var(--font-display)',fontSize:13,fontWeight:600,marginTop:12,wordBreak:'break-word'}}>{sel.name}</div>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginTop:10,fontSize:11}}>
-                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>Dimensiones</div><div style={{fontFamily:'var(--font-mono)'}}>{sel.width && sel.height ? `${sel.width}×${sel.height}` : '—'}</div></div>
-                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>Tamaño</div><div style={{fontFamily:'var(--font-mono)'}}>{formatBytes(sel.sizeBytes)}</div></div>
-                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>Carpeta</div><div>{sel.folder}</div></div>
-                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>Origen</div><div style={{fontFamily:'var(--font-mono)',textTransform:'uppercase'}}>{sel.provider || '—'}</div></div>
+                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imagePicker.detail.dimensions')}</div><div style={{fontFamily:'var(--font-mono)'}}>{sel.width && sel.height ? `${sel.width}×${sel.height}` : '—'}</div></div>
+                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imagePicker.detail.size')}</div><div style={{fontFamily:'var(--font-mono)'}}>{formatBytes(sel.sizeBytes)}</div></div>
+                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imagePicker.detail.folder')}</div><div>{sel.folder}</div></div>
+                    <div><div style={{color:'var(--fg-3)',fontSize:10}}>{t('imagePicker.detail.source')}</div><div style={{fontFamily:'var(--font-mono)',textTransform:'uppercase'}}>{sel.provider || '—'}</div></div>
                   </div>
                   <button className="btn primary" style={{width:'100%',marginTop:12}}
                     onClick={()=>{onSelect && onSelect(sel); onClose();}}>
-                    <I.check size={13}/> Usar esta imagen
+                    <I.check size={13}/> {t('imagePicker.btn.use')}
                   </button>
                   <button className="btn ghost" style={{width:'100%',marginTop:6,color:'var(--danger)'}}
                     onClick={async ()=>{
-                      if (!window.confirm(`Quitar «${sel.name}» de la biblioteca? No se borra del CDN.`)) return;
+                      if (!window.confirm(t('imagePicker.remove.confirm', { name: sel.name }))) return;
                       await window.stImages.remove(sel.id);
                       setSel(null);
                     }}>
-                    <I.trash size={12}/> Quitar de la biblioteca
+                    <I.trash size={12}/> {t('imagePicker.btn.remove')}
                   </button>
                 </div>
               )}
@@ -371,14 +373,14 @@ function ImagePickerModal({ open, onClose, onSelect }) {
           {tab==='url' && (
             <div style={{flex:1,padding:'40px 60px',overflow:'auto'}}>
               <div style={{maxWidth:500,margin:'0 auto'}}>
-                <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:600,marginBottom:6}}>Cargar desde URL</div>
+                <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:600,marginBottom:6}}>{t('imagePicker.url.title')}</div>
                 <p style={{fontSize:13,color:'var(--fg-3)',lineHeight:1.6,marginBottom:20}}>
-                  Pega el enlace directo de la imagen. Simple Template la referenciará tal cual en el correo — asegúrate de que la URL sea pública y permanente.
+                  {t('imagePicker.url.description')}
                 </p>
-                <label style={{fontSize:11.5,color:'var(--fg-3)',fontWeight:500}}>URL de la imagen</label>
+                <label style={{fontSize:11.5,color:'var(--fg-3)',fontWeight:500}}>{t('imagePicker.url.label')}</label>
                 <input
                   className="field" value={urlInput} onChange={e=>setUrlInput(e.target.value)}
-                  placeholder="https://ejemplo.com/imagen.jpg"
+                  placeholder={t('imagePicker.url.placeholder')}
                   style={{marginTop:6,marginBottom:12}}
                 />
                 {urlInput && (
@@ -387,20 +389,20 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                     border:'1px solid var(--line)',borderRadius:'var(--r-md)',
                     marginBottom:14,
                   }}>
-                    <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8}}>Vista previa</div>
+                    <div style={{fontSize:11,color:'var(--fg-3)',marginBottom:8}}>{t('imagePicker.url.preview')}</div>
                     <div style={{
                       aspectRatio:'16/9',background:'var(--surface)',
                       border:'1px solid var(--line)',borderRadius:'var(--r-sm)',
                       display:'grid',placeItems:'center',color:'var(--fg-3)',fontSize:12,
-                    }}>Cargando…</div>
+                    }}>{t('imagePicker.url.loading')}</div>
                   </div>
                 )}
                 <div style={{display:'flex',gap:8}}>
-                  <button className="btn ghost" onClick={onClose}>Cancelar</button>
+                  <button className="btn ghost" onClick={onClose}>{t('imagePicker.btn.cancel')}</button>
                   <div style={{flex:1}}/>
                   <button className="btn primary" disabled={!urlInput}
                     onClick={()=>{onSelect && onSelect({url:urlInput,name:'imagen.jpg',w:'?',h:'?'}); onClose();}}>
-                    Usar URL
+                    {t('imagePicker.url.useBtn')}
                   </button>
                 </div>
               </div>
@@ -414,12 +416,12 @@ function ImagePickerModal({ open, onClose, onSelect }) {
                   <I.server size={24}/>
                 </div>
                 <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:600,marginBottom:6}}>
-                  Explorar tu CDN
+                  {t('imagePicker.cdn.title')}
                 </div>
                 <p style={{fontSize:13,color:'var(--fg-3)',lineHeight:1.6,marginBottom:20}}>
-                  Aquí aparecerán las imágenes alojadas en el proveedor configurado. Si aún no has conectado uno, ve a Ajustes → Almacenamiento de imágenes.
+                  {t('imagePicker.cdn.description')}
                 </p>
-                <button className="btn" onClick={onClose}>Ir a Ajustes</button>
+                <button className="btn" onClick={onClose}>{t('imagePicker.cdn.goSettings')}</button>
               </div>
             </div>
           )}
@@ -430,6 +432,7 @@ function ImagePickerModal({ open, onClose, onSelect }) {
 }
 
 // ────────── Emoji picker ──────────
+// `name` is looked up via t('imagePicker.emoji.cat.<id>') — see EmojiPicker.
 const EMOJI_CATS = [
   { id:'smileys',  name:'Caras y emociones', icon:'😀',
     items:'😀😃😄😁😆😅🤣😂🙂🙃😉😊😇🥰😍🤩😘😗😚😙🥲😋😛😜🤪😝🤑🤗🤭🤫🤔🤐🤨😐😑😶😏😒🙄😬🤥😌😔😪🤤😴😷🤒🤕🤢🤮🤧🥵🥶🥴😵🤯🤠🥳🥸😎🤓🧐😕😟🙁😮😯😲😳🥺😦😧😨😰😥😢😭😱😖😣😞😓😩😫🥱😤😡😠🤬😈👿💀👽👻👾🤖🎃😺😸😹😻😼😽🙀😿😾'.match(/.{2,4}/gu) || [],
@@ -461,9 +464,12 @@ const EMOJI_CATS = [
 ];
 
 function EmojiPicker({ onSelect }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [cat, setCat] = React.useState('smileys');
   const [q, setQ] = React.useState('');
   const current = EMOJI_CATS.find(c => c.id===cat);
+  const catName = (c) => t(`imagePicker.emoji.cat.${c.id}`);
 
   return (
     <div style={{
@@ -484,7 +490,7 @@ function EmojiPicker({ onSelect }) {
         {EMOJI_CATS.map(c => (
           <button key={c.id}
             onClick={()=>setCat(c.id)}
-            title={c.name}
+            title={catName(c)}
             style={{
               padding:'6px 8px',border:'none',
               background: cat===c.id?'var(--surface)':'transparent',
@@ -500,7 +506,7 @@ function EmojiPicker({ onSelect }) {
       <div style={{padding:'8px 10px',borderBottom:'1px solid var(--line)',flexShrink:0}}>
         <div className="search">
           <span className="si"><I.search size={12}/></span>
-          <input placeholder="Buscar emoji…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <input placeholder={t('imagePicker.emoji.search.placeholder')} value={q} onChange={e=>setQ(e.target.value)}/>
         </div>
       </div>
 
@@ -509,7 +515,7 @@ function EmojiPicker({ onSelect }) {
         <div style={{
           fontSize:10.5,textTransform:'uppercase',letterSpacing:'0.06em',
           color:'var(--fg-3)',fontWeight:600,marginBottom:8,
-        }}>{current?.name}</div>
+        }}>{current ? catName(current) : ''}</div>
         <div style={{
           display:'grid',
           gridTemplateColumns:'repeat(auto-fill, minmax(32px,1fr))',

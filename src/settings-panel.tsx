@@ -2,20 +2,22 @@
 // Section 3 (Envío de pruebas) reuses DeliveryInner from smtp-modal.jsx
 
 const SETTINGS_SECTIONS = [
-  { id:'workspace',  label:'Espacios',                    icon:'layers',   desc:'Crea, renombra o borra espacios de trabajo' },
-  { id:'account',    label:'Perfil',                      icon:'user',     desc:'Tu nombre y cómo apareces en las plantillas' },
-  { id:'brand',      label:'Marca',                       icon:'palette',  desc:'Colores, fuentes, logo, footer legal' },
-  { id:'appearance', label:'Apariencia',                  icon:'sun',      desc:'Tema, densidad, esquinas y tipografía de la app' },
-  { id:'editor',     label:'Editor',                      icon:'edit',     desc:'Autoguardado, grid y regla del canvas' },
-  { id:'storage',    label:'Almacenamiento de imágenes',  icon:'image',    desc:'Dónde se alojan las imágenes de tus correos' },
-  { id:'delivery',   label:'Envío de pruebas',            icon:'send',     desc:'Cuenta desde la que envías pruebas' },
-  { id:'variables',  label:'Variables por defecto',       icon:'braces',   desc:'Etiquetas que se copian a las plantillas nuevas' },
-  { id:'export',     label:'Exportación',                 icon:'download', desc:'Formato por defecto al exportar el correo' },
-  { id:'ai',         label:'Inteligencia artificial',     icon:'sparkles', desc:'Proveedor, API key y modelo para generar o mejorar plantillas' },
-  { id:'notif',      label:'Notificaciones',              icon:'bell',     desc:'Avisos internos de la app: guardado, exportación, pruebas, actualizaciones' },
+  { id:'workspace',  labelKey:'settings.nav.workspace',  descKey:'settings.nav.workspace.desc',  icon:'layers'   },
+  { id:'account',    labelKey:'settings.nav.account',    descKey:'settings.nav.account.desc',    icon:'user'     },
+  { id:'brand',      labelKey:'settings.nav.brand',      descKey:'settings.nav.brand.desc',      icon:'palette'  },
+  { id:'appearance', labelKey:'settings.nav.appearance', descKey:'settings.nav.appearance.desc', icon:'sun'      },
+  { id:'editor',     labelKey:'settings.nav.editor',     descKey:'settings.nav.editor.desc',     icon:'edit'     },
+  { id:'storage',    labelKey:'settings.nav.storage',    descKey:'settings.nav.storage.desc',    icon:'image'    },
+  { id:'delivery',   labelKey:'settings.nav.delivery',   descKey:'settings.nav.delivery.desc',   icon:'send'     },
+  { id:'variables',  labelKey:'settings.nav.variables',  descKey:'settings.nav.variables.desc',  icon:'braces'   },
+  { id:'export',     labelKey:'settings.nav.export',     descKey:'settings.nav.export.desc',     icon:'download' },
+  { id:'ai',         labelKey:'settings.nav.ai',         descKey:'settings.nav.ai.desc',         icon:'sparkles' },
+  { id:'notif',      labelKey:'settings.nav.notif',      descKey:'settings.nav.notif.desc',      icon:'bell'     },
 ];
 
 function SettingsPanel({ onClose, initialSection='account' }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [section, setSection] = React.useState(initialSection);
   const [saved, setSaved] = React.useState(false);
   const currentWorkspace = useCurrentWorkspace();
@@ -28,7 +30,7 @@ function SettingsPanel({ onClose, initialSection='account' }) {
     // Emit a toast too for the global notification stream
     clearTimeout(window.__mcSavedToastT);
     window.__mcSavedToastT = setTimeout(() => {
-      window.toast && window.toast({ kind:'ok', title:'Ajustes guardados', msg:'Los cambios se aplican al momento.' });
+      window.toast && window.toast({ kind:'ok', title:t('settings.toast.saved.title'), msg:t('settings.toast.saved.msg') });
     }, 600);
   };
 
@@ -71,9 +73,9 @@ function SettingsPanel({ onClose, initialSection='account' }) {
               fontFamily:'var(--font-display)',fontWeight:700,fontSize:12,
             }}>A</div>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:12.5,fontWeight:500}}>Ajustes</div>
+              <div style={{fontSize:12.5,fontWeight:500}}>{t('settings.title')}</div>
               <div style={{fontSize:10.5,color:'var(--fg-3)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
-                Espacio {currentWorkspace?.name || '…'}
+                {t('settings.workspaceLabel', { name: currentWorkspace?.name || '…' })}
               </div>
             </div>
           </div>
@@ -102,14 +104,14 @@ function SettingsPanel({ onClose, initialSection='account' }) {
                   onMouseEnter={e=>{ if(!active) e.currentTarget.style.background='color-mix(in oklab, var(--accent) 6%, transparent)'; }}
                   onMouseLeave={e=>{ if(!active) e.currentTarget.style.background='transparent'; }}>
                   <Icon size={14} style={{color:active?'var(--accent)':'var(--fg-3)',flexShrink:0}}/>
-                  <span>{s.label}</span>
+                  <span>{t(s.labelKey)}</span>
                 </button>
               );
             })}
           </div>
 
           <div style={{marginTop:'auto',padding:'12px 10px 4px',fontSize:10.5,color:'var(--fg-3)',lineHeight:1.55}}>
-            Simple Template v0.4.2 · <span style={{color:'var(--accent)',cursor:'pointer'}}>Cambios</span>
+            {t('settings.version', { version: '0.4.2' })} · <span style={{color:'var(--accent)',cursor:'pointer'}}>{t('settings.changelog')}</span>
           </div>
         </aside>
 
@@ -123,10 +125,10 @@ function SettingsPanel({ onClose, initialSection='account' }) {
           }}>
             <div style={{flex:1,minWidth:0}}>
               <h3 style={{margin:0,fontSize:18,fontWeight:500,fontFamily:'var(--font-display)'}}>
-                {SETTINGS_SECTIONS.find(s=>s.id===section)?.label}
+                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? t(s.labelKey) : ''; })()}
               </h3>
               <div style={{fontSize:12,color:'var(--fg-3)',marginTop:3}}>
-                {SETTINGS_SECTIONS.find(s=>s.id===section)?.desc}
+                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? t(s.descKey) : ''; })()}
               </div>
             </div>
             <div style={{
@@ -135,7 +137,7 @@ function SettingsPanel({ onClose, initialSection='account' }) {
               opacity:saved?1:0,
               transition:'opacity 200ms',
             }}>
-              <I.check size={12}/> Guardado
+              <I.check size={12}/> {t('settings.savedFlash')}
             </div>
             <button className="btn icon ghost" onClick={onClose}><I.x size={15}/></button>
           </header>
@@ -199,6 +201,8 @@ function SGroup({ title, children }) {
 // Banner used by sections whose values persist correctly per-workspace but
 // don't have a consumer wired yet. Promised to the user as P1 work.
 function SoonBanner({ msg }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   return (
     <div style={{
       padding:'10px 14px',marginBottom:18,
@@ -210,7 +214,7 @@ function SoonBanner({ msg }) {
     }}>
       <I.info size={14} style={{color:'#b87a18',flexShrink:0,marginTop:1}}/>
       <div>
-        <b style={{color:'var(--fg-1)'}}>Pronto en una versión próxima.</b> {msg || 'Tus cambios se guardan en el espacio actual, pero la app aún no los está aplicando.'}
+        <b style={{color:'var(--fg-1)'}}>{t('settings.soonBanner.title')}</b> {msg || t('settings.soonBanner.default')}
       </div>
     </div>
   );
@@ -218,6 +222,8 @@ function SoonBanner({ msg }) {
 
 // ───────────────────────────── Workspace ─────────────────────────────
 function WorkspaceSection({ onChange }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const workspaces = useWorkspaces();
   const current = useCurrentWorkspace();
   const [creating, setCreating] = React.useState(false);
@@ -227,6 +233,7 @@ function WorkspaceSection({ onChange }) {
   const [confirmDelete, setConfirmDelete] = React.useState(null); // {id, name, count}
   const [deleteWord, setDeleteWord] = React.useState('');
   const [busy, setBusy] = React.useState(false);
+  const DELETE_WORD = t('settings.workspace.deleteWord');
 
   // Template counts per workspace, refreshed when the workspace list or any
   // template mutates.
@@ -274,7 +281,7 @@ function WorkspaceSection({ onChange }) {
   };
 
   const runDelete = async () => {
-    if (!confirmDelete || deleteWord !== 'BORRAR') return;
+    if (!confirmDelete || deleteWord !== DELETE_WORD) return;
     setBusy(true);
     try {
       const result = await window.stWorkspaces.remove(confirmDelete.id);
@@ -291,7 +298,7 @@ function WorkspaceSection({ onChange }) {
 
   return (
     <>
-      <SGroup title={`Mis espacios · ${workspaces.length}`}>
+      <SGroup title={`${t('settings.workspace.myList')} · ${workspaces.length}`}>
         <div style={{display:'flex',flexDirection:'column',gap:8}}>
           {workspaces.map((w) => {
             const isCurrent = w.id === current?.id;
@@ -331,26 +338,26 @@ function WorkspaceSection({ onChange }) {
                   ) : (
                     <div style={{fontSize:13,fontWeight:500,display:'flex',alignItems:'center',gap:6}}>
                       <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{w.name}</span>
-                      {isCurrent && <span className="chip" style={{fontSize:10,background:'var(--accent-soft)',color:'var(--accent)',flexShrink:0}}>Activo</span>}
+                      {isCurrent && <span className="chip" style={{fontSize:10,background:'var(--accent-soft)',color:'var(--accent)',flexShrink:0}}>{t('settings.workspace.active')}</span>}
                     </div>
                   )}
                   <div style={{fontSize:11,color:'var(--fg-3)',marginTop:2}}>
-                    {count == null ? '…' : `${count} plantilla${count===1?'':'s'}`}
+                    {count == null ? '…' : (count===1 ? t('settings.workspace.count.one', { n: count }) : t('settings.workspace.count.other', { n: count }))}
                   </div>
                 </div>
                 <div style={{display:'flex',gap:4,flexShrink:0}}>
                   {!isCurrent && !isRenaming && (
-                    <button className="btn sm ghost" onClick={()=>window.stWorkspaces.switch(w.id)}>Cambiar aquí</button>
+                    <button className="btn sm ghost" onClick={()=>window.stWorkspaces.switch(w.id)}>{t('settings.workspace.btn.switch')}</button>
                   )}
                   {!isRenaming && (
-                    <button className="btn icon sm ghost" title="Renombrar"
+                    <button className="btn icon sm ghost" title={t('settings.workspace.btn.rename')}
                       onClick={()=>setRenaming({id:w.id, name:w.name})}>
                       <I.edit size={12}/>
                     </button>
                   )}
                   <button
                     className="btn icon sm ghost"
-                    title={isLast ? 'No puedes borrar tu único espacio — crea otro antes.' : 'Eliminar'}
+                    title={isLast ? t('settings.workspace.deleteLast.tip') : t('settings.workspace.btn.delete')}
                     disabled={isLast}
                     onClick={()=>openDelete(w)}
                     style={{
@@ -367,7 +374,7 @@ function WorkspaceSection({ onChange }) {
         </div>
       </SGroup>
 
-      <SGroup title="Crear espacio nuevo">
+      <SGroup title={t('settings.workspace.create.title')}>
         {creating ? (
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
             <input
@@ -379,22 +386,20 @@ function WorkspaceSection({ onChange }) {
                 if (e.key === 'Enter') submitCreate();
                 if (e.key === 'Escape') { setCreating(false); setNewName(''); }
               }}
-              placeholder="Ej. Marca B, Cliente X, Personal…"
+              placeholder={t('settings.workspace.create.placeholder')}
               style={{flex:1}}
             />
-            <button className="btn primary sm" onClick={submitCreate} disabled={!newName.trim()}>Crear</button>
-            <button className="btn ghost sm" onClick={()=>{ setCreating(false); setNewName(''); }}>Cancelar</button>
+            <button className="btn primary sm" onClick={submitCreate} disabled={!newName.trim()}>{t('common.create')}</button>
+            <button className="btn ghost sm" onClick={()=>{ setCreating(false); setNewName(''); }}>{t('common.cancel')}</button>
           </div>
         ) : (
-          <button className="btn" onClick={()=>setCreating(true)}><I.plus size={13}/> Crear espacio nuevo</button>
+          <button className="btn" onClick={()=>setCreating(true)}><I.plus size={13}/> {t('settings.workspace.btn.createNew')}</button>
         )}
       </SGroup>
 
-      <SGroup title="Cómo funcionan los espacios">
+      <SGroup title={t('settings.workspace.howItWorks.title')}>
         <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.6,padding:12,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)'}}>
-          Cada espacio tiene sus propias plantillas, marca, variables, envío de pruebas y preferencias.
-          Los ajustes globales (tu perfil, apariencia de la app, clave de IA) se comparten entre todos.
-          Borrar un espacio elimina sus plantillas para siempre — incluidas las que estén en la papelera.
+          {t('settings.workspace.howItWorks.body')}
         </div>
       </SGroup>
 
@@ -410,37 +415,41 @@ function WorkspaceSection({ onChange }) {
                 <I.trash size={15}/>
               </div>
               <div style={{flex:1,minWidth:0}}>
-                <h3>Eliminar «{confirmDelete.name}»</h3>
+                <h3>{t('settings.workspace.delete.title', { name: confirmDelete.name })}</h3>
                 <div className="sub">
-                  Vas a borrar este espacio{confirmDelete.count>0 ? ` y sus ${confirmDelete.count} plantilla${confirmDelete.count===1?'':'s'}` : ''}. No se puede deshacer.
+                  {confirmDelete.count > 0
+                    ? (confirmDelete.count === 1
+                        ? t('settings.workspace.delete.sub.withTemplates.one', { n: confirmDelete.count })
+                        : t('settings.workspace.delete.sub.withTemplates.other', { n: confirmDelete.count }))
+                    : t('settings.workspace.delete.sub.empty')}
                 </div>
               </div>
             </div>
             <div className="modal-body">
               <div style={{fontSize:12.5,color:'var(--fg-2)',marginBottom:10}}>
-                Para confirmar, escribe <b style={{fontFamily:'var(--font-mono)'}}>BORRAR</b> abajo:
+                {t('settings.workspace.delete.prompt')} <b style={{fontFamily:'var(--font-mono)'}}>{DELETE_WORD}</b>{t('settings.workspace.delete.promptSuffix')}
               </div>
               <input
                 autoFocus
                 className="field"
                 value={deleteWord}
                 onChange={e=>setDeleteWord(e.target.value)}
-                onKeyDown={e=>{ if (e.key === 'Enter' && deleteWord === 'BORRAR') runDelete(); }}
-                placeholder="BORRAR"
+                onKeyDown={e=>{ if (e.key === 'Enter' && deleteWord === DELETE_WORD) runDelete(); }}
+                placeholder={DELETE_WORD}
                 style={{fontFamily:'var(--font-mono)',letterSpacing:'0.08em'}}
               />
             </div>
             <div className="modal-foot">
-              <button className="btn ghost" onClick={()=>setConfirmDelete(null)} disabled={busy}>Cancelar</button>
+              <button className="btn ghost" onClick={()=>setConfirmDelete(null)} disabled={busy}>{t('common.cancel')}</button>
               <button
                 className="btn primary"
                 onClick={runDelete}
-                disabled={busy || deleteWord !== 'BORRAR'}
+                disabled={busy || deleteWord !== DELETE_WORD}
                 style={{
-                  background: deleteWord==='BORRAR' ? '#e04f4f' : undefined,
-                  borderColor: deleteWord==='BORRAR' ? '#e04f4f' : undefined,
+                  background: deleteWord===DELETE_WORD ? '#e04f4f' : undefined,
+                  borderColor: deleteWord===DELETE_WORD ? '#e04f4f' : undefined,
                 }}>
-                {busy ? 'Eliminando…' : 'Eliminar definitivamente'}
+                {busy ? t('settings.workspace.delete.busy') : t('settings.workspace.delete.confirm')}
               </button>
             </div>
           </div>
@@ -452,6 +461,8 @@ function WorkspaceSection({ onChange }) {
 
 // ───────────────────────────── Appearance ─────────────────────────────
 function AppearanceSection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [tw, setTw] = React.useState(() => ({...window.TWEAKS, ...window.stStorage.getSetting('tweaks', {})}));
   const set = (k, v) => {
     const next = {...tw, [k]: v};
@@ -461,38 +472,38 @@ function AppearanceSection({ onChange }) {
     onChange();
   };
 
-  const themes = [
-    { id:'indigo', name:'Índigo',    color:'#5b5bf0', desc:'Azul con matices violetas (por defecto)' },
-    { id:'ocean',  name:'Océano',    color:'#2b6cb0', desc:'Azul frío, profesional' },
-    { id:'violet', name:'Violeta',   color:'#7c3aed', desc:'Más violeta, creativo' },
-  ];
-  const fonts = [
-    { id:'inter-tight',      name:'Inter Tight',      sample:'Plantilla', hint:'Sans moderno, condensado' },
-    { id:'inter',            name:'Inter',            sample:'Plantilla', hint:'Sans clásico, amplio' },
-    { id:'instrument-serif', name:'Instrument Serif', sample:'Plantilla', hint:'Serif editorial' },
-  ];
+  const themes = React.useMemo(() => [
+    { id:'indigo', name:t('settings.appearance.theme.indigo.name'), color:'#5b5bf0', desc:t('settings.appearance.theme.indigo.desc') },
+    { id:'ocean',  name:t('settings.appearance.theme.ocean.name'),  color:'#2b6cb0', desc:t('settings.appearance.theme.ocean.desc') },
+    { id:'violet', name:t('settings.appearance.theme.violet.name'), color:'#7c3aed', desc:t('settings.appearance.theme.violet.desc') },
+  ], [lang]);
+  const fonts = React.useMemo(() => [
+    { id:'inter-tight',      name:'Inter Tight',      sample:t('settings.appearance.font.sample'), hint:t('settings.appearance.font.interTight.hint') },
+    { id:'inter',            name:'Inter',            sample:t('settings.appearance.font.sample'), hint:t('settings.appearance.font.inter.hint') },
+    { id:'instrument-serif', name:'Instrument Serif', sample:t('settings.appearance.font.sample'), hint:t('settings.appearance.font.instrumentSerif.hint') },
+  ], [lang]);
 
   return (
     <>
-      <SGroup title="Tema">
-        <SRow label="Modo" hint="Claro para el día, oscuro para la noche. Afecta la app, no tus correos.">
+      <SGroup title={t('settings.appearance.group.theme')}>
+        <SRow label={t('settings.appearance.mode.label')} hint={t('settings.appearance.mode.hint')}>
           <div className="seg" style={{width:'fit-content'}}>
             <button
               className={tw.mode==='light'?'on':''}
               onClick={()=>set('mode','light')}
               style={{padding:'0 14px',height:30}}>
-              <I.sun size={12} style={{marginRight:6}}/> Claro
+              <I.sun size={12} style={{marginRight:6}}/> {t('settings.appearance.mode.light')}
             </button>
             <button
               className={tw.mode==='dark'?'on':''}
               onClick={()=>set('mode','dark')}
               style={{padding:'0 14px',height:30}}>
-              <I.moon size={12} style={{marginRight:6}}/> Oscuro
+              <I.moon size={12} style={{marginRight:6}}/> {t('settings.appearance.mode.dark')}
             </button>
           </div>
         </SRow>
 
-        <SRow label="Paleta de color" hint="El acento que tiñe botones, enlaces y elementos activos.">
+        <SRow label={t('settings.appearance.palette.label')} hint={t('settings.appearance.palette.hint')}>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
             {themes.map(t => {
               const on = tw.theme === t.id;
@@ -523,38 +534,38 @@ function AppearanceSection({ onChange }) {
         </SRow>
       </SGroup>
 
-      <SGroup title="Interfaz">
-        <SRow label="Densidad" hint="Qué tan apretados se ven los controles. Cómodo para pantallas grandes, compacto para portátiles.">
+      <SGroup title={t('settings.appearance.group.interface')}>
+        <SRow label={t('settings.appearance.density.label')} hint={t('settings.appearance.density.hint')}>
           <div className="seg" style={{width:'fit-content'}}>
             <button
               className={tw.density==='comfy'?'on':''}
               onClick={()=>set('density','comfy')}
-              style={{padding:'0 14px',height:30}}>Cómodo</button>
+              style={{padding:'0 14px',height:30}}>{t('settings.appearance.density.comfy')}</button>
             <button
               className={tw.density==='compact'?'on':''}
               onClick={()=>set('density','compact')}
-              style={{padding:'0 14px',height:30}}>Compacto</button>
+              style={{padding:'0 14px',height:30}}>{t('settings.appearance.density.compact')}</button>
           </div>
         </SRow>
 
-        <SRow label="Esquinas" hint="Radio de bordes en botones, cards y campos. No afecta tus correos.">
+        <SRow label={t('settings.appearance.corners.label')} hint={t('settings.appearance.corners.hint')}>
           <div className="seg" style={{width:'fit-content'}}>
             <button
               className={tw.radius==='sharp'?'on':''}
               onClick={()=>set('radius','sharp')}
-              style={{padding:'0 14px',height:30}}>Rectas</button>
+              style={{padding:'0 14px',height:30}}>{t('settings.appearance.corners.sharp')}</button>
             <button
               className={tw.radius==='soft'?'on':''}
               onClick={()=>set('radius','soft')}
-              style={{padding:'0 14px',height:30}}>Suaves</button>
+              style={{padding:'0 14px',height:30}}>{t('settings.appearance.corners.soft')}</button>
             <button
               className={tw.radius==='round'?'on':''}
               onClick={()=>set('radius','round')}
-              style={{padding:'0 14px',height:30}}>Redondeadas</button>
+              style={{padding:'0 14px',height:30}}>{t('settings.appearance.corners.round')}</button>
           </div>
         </SRow>
 
-        <SRow label="Tipografía de la app" hint="La fuente del chrome. Las plantillas de correo tienen la suya propia.">
+        <SRow label={t('settings.appearance.appFont.label')} hint={t('settings.appearance.appFont.hint')}>
           <div style={{display:'grid',gap:6}}>
             {fonts.map(f => {
               const on = tw.font === f.id;
@@ -587,7 +598,7 @@ function AppearanceSection({ onChange }) {
         </SRow>
       </SGroup>
 
-      <SGroup title="Vista previa en vivo">
+      <SGroup title={t('settings.appearance.group.preview')}>
         <div style={{
           padding:16, borderRadius:'var(--r-md)',
           background:'var(--surface-2)', border:'1px solid var(--line)',
@@ -599,40 +610,40 @@ function AppearanceSection({ onChange }) {
               display:'grid',placeItems:'center',
               fontFamily:'var(--font-display)',fontWeight:700,fontSize:13,
             }}>A</div>
-            <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600}}>Así se ve la app</div>
-            <div className="chip accent" style={{marginLeft:'auto'}}>en vivo</div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600}}>{t('settings.appearance.preview.title')}</div>
+            <div className="chip accent" style={{marginLeft:'auto'}}>{t('settings.appearance.preview.live')}</div>
           </div>
           <div style={{display:'flex',gap:8,marginBottom:10}}>
-            <button className="btn primary sm"><I.send size={12}/> Acción principal</button>
-            <button className="btn sm">Secundaria</button>
-            <button className="btn ghost sm">Fantasma</button>
+            <button className="btn primary sm"><I.send size={12}/> {t('settings.appearance.preview.btn.primary')}</button>
+            <button className="btn sm">{t('settings.appearance.preview.btn.secondary')}</button>
+            <button className="btn ghost sm">{t('settings.appearance.preview.btn.ghost')}</button>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             <div style={{padding:10,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--r-sm)'}}>
-              <div style={{fontSize:11.5,color:'var(--fg-3)'}}>Campo de ejemplo</div>
-              <div style={{fontSize:13,marginTop:3,fontWeight:500}}>Estudio Acme</div>
+              <div style={{fontSize:11.5,color:'var(--fg-3)'}}>{t('settings.appearance.preview.sampleField')}</div>
+              <div style={{fontSize:13,marginTop:3,fontWeight:500}}>{t('settings.appearance.preview.sampleValue')}</div>
             </div>
             <div style={{padding:10,background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--r-sm)'}}>
-              <div style={{fontSize:11.5,color:'var(--fg-3)'}}>Tono de acento</div>
-              <div style={{fontSize:13,marginTop:3,color:'var(--accent)',fontWeight:500}}>Enlace activo</div>
+              <div style={{fontSize:11.5,color:'var(--fg-3)'}}>{t('settings.appearance.preview.accentTone')}</div>
+              <div style={{fontSize:13,marginTop:3,color:'var(--accent)',fontWeight:500}}>{t('settings.appearance.preview.activeLink')}</div>
             </div>
           </div>
         </div>
       </SGroup>
 
-      <SGroup title="Seguir el sistema">
-        <SRow label="Usar el modo del sistema operativo" hint="Cambia automáticamente a oscuro cuando tu equipo lo hace (al anochecer, por ejemplo).">
+      <SGroup title={t('settings.appearance.group.followSystem')}>
+        <SRow label={t('settings.appearance.followSystem.label')} hint={t('settings.appearance.followSystem.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={false} onChange={onChange}/></label>
         </SRow>
       </SGroup>
 
-      <SGroup title="Recorrido guiado">
-        <SRow label="Volver a ver el tour del editor" hint="Te llevamos de nuevo por las partes principales del editor. Dura menos de un minuto.">
+      <SGroup title={t('settings.appearance.group.tour')}>
+        <SRow label={t('settings.appearance.tour.label')} hint={t('settings.appearance.tour.hint')}>
           <button className="btn" onClick={()=>{
             window.stStorage.removeSetting('tour-seen');
             window.dispatchEvent(new CustomEvent('st:start-tour'));
             onChange();
-          }}><I.sparkles size={12}/> Iniciar tour</button>
+          }}><I.sparkles size={12}/> {t('settings.appearance.tour.btn')}</button>
         </SRow>
       </SGroup>
     </>
@@ -641,31 +652,33 @@ function AppearanceSection({ onChange }) {
 
 // ───────────────────────────── Account (perfil local) ─────────────────────────────
 function AccountSection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [acc, setAcc] = React.useState(() => window.stStorage.getSetting('account', {}));
   const set = (k,v) => { const next = {...acc, [k]:v}; setAcc(next); window.stStorage.setSetting('account', next); onChange(); };
 
-  const stats = [
-    { k:'Plantillas guardadas', v:'24', icon:'mail' },
-    { k:'Bloques personalizados', v:'11', icon:'grid' },
-    { k:'Espacio ocupado en disco', v:'18.4 MB', icon:'folder' },
-  ];
+  const stats = React.useMemo(() => [
+    { k:t('settings.account.stats.templates'),    v:'24',      icon:'mail' },
+    { k:t('settings.account.stats.blocks'),       v:'11',      icon:'grid' },
+    { k:t('settings.account.stats.diskSpace'),    v:'18.4 MB', icon:'folder' },
+  ], [lang]);
 
   return (
     <>
-      <SGroup title="Tu perfil">
-        <SRow label="Nombre" hint="Aparece como remitente por defecto en los correos de prueba.">
+      <SGroup title={t('settings.account.group.profile')}>
+        <SRow label={t('settings.account.name.label')} hint={t('settings.account.name.hint')}>
           <input className="field"
             value={acc.name||''}
-            placeholder="Tu nombre"
+            placeholder={t('settings.account.name.placeholder')}
             onChange={e=>set('name',e.target.value)}/>
         </SRow>
-        <SRow label="Correo" hint="Se usa como remitente por defecto en pruebas.">
+        <SRow label={t('settings.account.email.label')} hint={t('settings.account.email.hint')}>
           <input className="field" type="email"
             value={acc.email||''}
-            placeholder="tu@correo.com"
+            placeholder={t('settings.account.email.placeholder')}
             onChange={e=>set('email',e.target.value)}/>
         </SRow>
-        <SRow label="Avatar" hint="Imagen local. Se muestra solo dentro de la app.">
+        <SRow label={t('settings.account.avatar.label')} hint={t('settings.account.avatar.hint')}>
           <div style={{display:'flex',gap:12,alignItems:'center'}}>
             <div style={{
               width:56,height:56,borderRadius:'50%',
@@ -674,14 +687,14 @@ function AccountSection({ onChange }) {
               fontFamily:'var(--font-display)',fontWeight:700,fontSize:22,
             }}>{((acc.name||'').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase()) || '?'}</div>
             <div className="col" style={{gap:4}}>
-              <button className="btn sm"><I.upload size={12}/> Subir imagen</button>
-              <button className="btn sm ghost" style={{color:'var(--fg-3)'}}>Quitar</button>
+              <button className="btn sm"><I.upload size={12}/> {t('settings.account.avatar.upload')}</button>
+              <button className="btn sm ghost" style={{color:'var(--fg-3)'}}>{t('settings.account.avatar.remove')}</button>
             </div>
           </div>
         </SRow>
       </SGroup>
 
-      <SGroup title="Sobre Simple Template">
+      <SGroup title={t('settings.account.group.about')}>
         <div style={{
           padding:14, borderRadius:'var(--r-md)',
           background:'var(--surface-2)', border:'1px solid var(--line)',
@@ -694,22 +707,21 @@ function AccountSection({ onChange }) {
           }}><I.heart size={18}/></div>
           <div style={{flex:1, minWidth:0}}>
             <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,marginBottom:4}}>
-              Aplicación local, de código abierto
+              {t('settings.account.about.title')}
             </div>
             <p style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.55,margin:0}}>
-              Simple Template se ejecuta 100 % en tu equipo. Toda la información — plantillas, marca, credenciales — se guarda localmente.
-              No hay planes, ni roles, ni servidores centrales: todas las personas que usan la app tienen acceso completo a todas las funciones.
+              {t('settings.account.about.body')}
             </p>
             <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
-              <button className="btn sm"><I.code size={12}/> Ver código en GitHub</button>
-              <button className="btn sm ghost"><I.external size={12}/> Documentación</button>
-              <button className="btn sm ghost"><I.book size={12}/> Licencia MIT</button>
+              <button className="btn sm"><I.code size={12}/> {t('settings.account.about.btn.github')}</button>
+              <button className="btn sm ghost"><I.external size={12}/> {t('settings.account.about.btn.docs')}</button>
+              <button className="btn sm ghost"><I.book size={12}/> {t('settings.account.about.btn.license')}</button>
             </div>
           </div>
         </div>
       </SGroup>
 
-      <SGroup title="Tu biblioteca local">
+      <SGroup title={t('settings.account.group.library')}>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
           {stats.map(s => (
             <div key={s.k} style={{
@@ -724,15 +736,15 @@ function AccountSection({ onChange }) {
         </div>
       </SGroup>
 
-      <SGroup title="Datos locales">
-        <SRow label="Exportar configuración" hint="Descarga un archivo .json con tu perfil, marca, variables y credenciales cifradas.">
-          <button className="btn sm"><I.download size={12}/> Descargar respaldo</button>
+      <SGroup title={t('settings.account.group.localData')}>
+        <SRow label={t('settings.account.export.label')} hint={t('settings.account.export.hint')}>
+          <button className="btn sm"><I.download size={12}/> {t('settings.account.export.btn')}</button>
         </SRow>
-        <SRow label="Importar configuración" hint="Restaura desde un archivo .json previamente exportado.">
-          <button className="btn sm"><I.upload size={12}/> Cargar archivo…</button>
+        <SRow label={t('settings.account.import.label')} hint={t('settings.account.import.hint')}>
+          <button className="btn sm"><I.upload size={12}/> {t('settings.account.import.btn')}</button>
         </SRow>
-        <SRow label="Borrar datos locales" hint="Elimina plantillas, marca y credenciales guardadas en este equipo. No se puede deshacer." danger>
-          <button className="btn danger sm">Borrar todo…</button>
+        <SRow label={t('settings.account.wipe.label')} hint={t('settings.account.wipe.hint')} danger>
+          <button className="btn danger sm">{t('settings.account.wipe.btn')}</button>
         </SRow>
       </SGroup>
     </>
@@ -789,6 +801,8 @@ function useCDNSecret(provider, field) {
 }
 
 function StorageSection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [s, setS] = React.useState(() => ({
     mode: 'local',
     s3: { endpoint:'https://s3.amazonaws.com', region:'us-east-1', bucket:'', key:'', publicUrl:'' },
@@ -817,35 +831,35 @@ function StorageSection({ onChange }) {
     try {
       // Persist config first so stCDN can read fresh values.
       const result = await window.stCDN.testConnection(providerId);
-      setTestState(t => ({
-        ...t,
+      setTestState(tt => ({
+        ...tt,
         [providerId]: result.ok
           ? { state: 'ok', url: result.url }
-          : { state: 'err', msg: result.error || 'Falló la prueba.' },
+          : { state: 'err', msg: result.error || t('settings.storage.test.fail') },
       }));
     } catch (err) {
-      setTestState(t => ({ ...t, [providerId]: { state: 'err', msg: err?.message || 'Error desconocido.' } }));
+      setTestState(tt => ({ ...tt, [providerId]: { state: 'err', msg: err?.message || t('settings.storage.test.unknownErr') } }));
     }
   };
 
   const testIndicator = (providerId) => {
-    const t = testState[providerId];
-    if (!t) return null;
-    if (t.state === 'testing') return <span style={{fontSize:11,color:'var(--fg-3)'}}>Probando…</span>;
-    if (t.state === 'ok') return <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> Subida OK</span>;
-    if (t.state === 'err') return <span style={{fontSize:11,color:'var(--danger)',lineHeight:1.4,flex:1}}>{t.msg}</span>;
+    const tt = testState[providerId];
+    if (!tt) return null;
+    if (tt.state === 'testing') return <span style={{fontSize:11,color:'var(--fg-3)'}}>{t('settings.storage.test.testing')}</span>;
+    if (tt.state === 'ok') return <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> {t('settings.storage.test.ok')}</span>;
+    if (tt.state === 'err') return <span style={{fontSize:11,color:'var(--danger)',lineHeight:1.4,flex:1}}>{tt.msg}</span>;
     return null;
   };
 
-  const providers = [
-    { id:'local',      name:'Disco local',      tag:'Por defecto',     icon:'folder',   desc:'Las imágenes se guardan en tu equipo, dentro de la carpeta del espacio. Sin límite de tamaño y sin configurar nada. Al exportar o enviar, se embeben automáticamente.' },
-    { id:'base64',     name:'Base64 embebido',  tag:'HTML self-contained', icon:'code',  desc:'Incrusta las imágenes dentro del HTML del correo al subirlas. Útil si querés que cada plantilla sea autosuficiente, pero con imágenes grandes algunos clientes truncan.' },
-    { id:'s3',         name:'S3 compatible',    tag:'Popular',         icon:'server',   desc:'AWS S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi. Sube y sirve con tu propio bucket — útil si vas a publicar el correo con URLs remotas.' },
-    { id:'cloudinary', name:'Cloudinary',       tag:'Plan gratuito amplio', icon:'image', desc:'Servicio optimizado para imágenes con CDN global. Tier gratuito generoso.' },
-    { id:'imgbb',      name:'imgbb',            tag:'Más simple',      icon:'upload',   desc:'Subida rápida con solo una API key. Ideal para prototipos y pruebas.' },
-    { id:'github',     name:'GitHub Pages',     tag:'Gratis',          icon:'code',     desc:'Sube las imágenes como commits a un repo público servido por GitHub Pages.' },
-    { id:'ftp',        name:'FTP / SFTP',       tag:'Tu servidor',     icon:'folder',   desc:'Conecta a tu propio hosting o VPS. Control total sobre las URLs y el almacenamiento.' },
-  ];
+  const providers = React.useMemo(() => [
+    { id:'local',      name:t('settings.storage.provider.local.name'),      tag:t('settings.storage.tag.default'),    icon:'folder',   desc:t('settings.storage.provider.local.desc') },
+    { id:'base64',     name:t('settings.storage.provider.base64.name'),     tag:t('settings.storage.tag.selfContained'), icon:'code',   desc:t('settings.storage.provider.base64.desc') },
+    { id:'s3',         name:t('settings.storage.provider.s3.name'),         tag:t('settings.storage.tag.popular'),     icon:'server',  desc:t('settings.storage.provider.s3.desc') },
+    { id:'cloudinary', name:t('settings.storage.provider.cloudinary.name'), tag:t('settings.storage.tag.freeTier'),    icon:'image',   desc:t('settings.storage.provider.cloudinary.desc') },
+    { id:'imgbb',      name:'imgbb',                                        tag:t('settings.storage.tag.simplest'),    icon:'upload',  desc:t('settings.storage.provider.imgbb.desc') },
+    { id:'github',     name:t('settings.storage.provider.github.name'),     tag:t('settings.storage.tag.free'),        icon:'code',    desc:t('settings.storage.provider.github.desc') },
+    { id:'ftp',        name:'FTP / SFTP',                                   tag:t('settings.storage.tag.yourServer'),  icon:'folder',  desc:t('settings.storage.provider.ftp.desc') },
+  ], [lang]);
 
   const isSet = (p) => {
     if (p.id==='local') return true;
@@ -863,7 +877,7 @@ function StorageSection({ onChange }) {
 
   return (
     <>
-      <SGroup title="Cómo funciona">
+      <SGroup title={t('settings.storage.group.howItWorks')}>
         <div style={{
           padding:14, borderRadius:'var(--r-md)',
           background:'var(--accent-soft)', border:'1px solid var(--accent)',
@@ -872,14 +886,13 @@ function StorageSection({ onChange }) {
           <div style={{color:'var(--accent)',marginTop:2}}><I.info size={16}/></div>
           <div style={{flex:1,minWidth:0}}>
             <p style={{fontSize:12.5,lineHeight:1.55,margin:0,color:'var(--fg-2)'}}>
-              Por defecto, Simple Template guarda las imágenes en tu equipo, dentro de la carpeta del espacio. Al exportar o enviar, las embebe automáticamente para que el correo funcione en cualquier cliente.
-              Configurá un CDN (S3, Cloudinary, etc.) solo si preferís que las imágenes vivan en una URL pública — útil para publicar correos pesados o compartirlos con tu equipo.
+              {t('settings.storage.howItWorks.body')}
             </p>
           </div>
         </div>
       </SGroup>
 
-      <SGroup title="Proveedor activo">
+      <SGroup title={t('settings.storage.group.activeProvider')}>
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10}}>
           {providers.map(p => {
             const selected = s.mode===p.id;
@@ -933,33 +946,33 @@ function StorageSection({ onChange }) {
 
       {/* Config form for the selected provider */}
       {s.mode==='local' && (
-        <SGroup title="Configuración · Disco local">
+        <SGroup title={t('settings.storage.config.local.title')}>
           <div style={{padding:14,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)'}}>
             <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.6,marginBottom:10}}>
-              Las imágenes se guardan en <code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>userData/workspaces/&#123;id&#125;/images</code> y se sirven en el editor vía un protocolo interno (<code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>st-img://</code>).
+              {t('settings.storage.config.local.body.prefix')} <code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>userData/workspaces/&#123;id&#125;/images</code> {t('settings.storage.config.local.body.mid')} (<code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>st-img://</code>).
             </div>
             <div style={{fontSize:11.5,color:'var(--fg-3)',lineHeight:1.6}}>
-              · Sin límite estricto de tamaño (cap blando 50 MB por archivo).<br/>
-              · Al <strong style={{color:'var(--fg-1)'}}>exportar</strong> o <strong style={{color:'var(--fg-1)'}}>enviar una prueba</strong>, las imágenes se embeben automáticamente como Base64 para que el correo sea autosuficiente.<br/>
-              · Si querés publicar un correo con URLs remotas (p.ej. en tu web), cambiá el proveedor a S3/Cloudinary/etc. y las próximas subidas irán ahí.
+              {t('settings.storage.config.local.bullet1')}<br/>
+              {t('settings.storage.config.local.bullet2.prefix')} <strong style={{color:'var(--fg-1)'}}>{t('settings.storage.config.local.bullet2.exportWord')}</strong> {t('settings.storage.config.local.bullet2.or')} <strong style={{color:'var(--fg-1)'}}>{t('settings.storage.config.local.bullet2.sendWord')}</strong>{t('settings.storage.config.local.bullet2.suffix')}<br/>
+              {t('settings.storage.config.local.bullet3')}
             </div>
           </div>
         </SGroup>
       )}
       {s.mode==='base64' && (
-        <SGroup title="Configuración · Base64">
+        <SGroup title={t('settings.storage.config.base64.title')}>
           <div style={{padding:14,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)'}}>
             <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.6,marginBottom:10}}>
-              No hay nada que configurar. Simple Template embeberá automáticamente cada imagen como un string Base64 dentro del HTML.
+              {t('settings.storage.config.base64.body')}
             </div>
             <div style={{fontSize:11.5,color:'var(--fg-3)',lineHeight:1.6}}>
-              <strong style={{color:'var(--fg-1)'}}>Limitaciones conocidas:</strong><br/>
-              · Gmail trunca los correos que pasan de 102 KB, lo que suele pasar con pocas imágenes.<br/>
-              · Outlook desktop y algunos clientes corporativos bloquean imágenes en Base64.<br/>
-              · El peso total del correo aumenta ~33 % por la codificación.
+              <strong style={{color:'var(--fg-1)'}}>{t('settings.storage.config.base64.limits')}</strong><br/>
+              {t('settings.storage.config.base64.bullet.gmail')}<br/>
+              {t('settings.storage.config.base64.bullet.outlook')}<br/>
+              {t('settings.storage.config.base64.bullet.weight')}
             </div>
           </div>
-          <SRow label="Tamaño máximo por imagen" hint="Simple Template te avisará antes de embeber imágenes más grandes que este límite.">
+          <SRow label={t('settings.storage.config.base64.maxSize.label')} hint={t('settings.storage.config.base64.maxSize.hint')}>
             <div style={{display:'flex',gap:8,alignItems:'center'}}>
               <input type="range" min="50" max="500" defaultValue="150" style={{flex:1}}/>
               <span className="chip" style={{minWidth:60,textAlign:'center'}}>150 KB</span>
@@ -969,38 +982,38 @@ function StorageSection({ onChange }) {
       )}
 
       {s.mode==='s3' && (
-        <SGroup title="Configuración · S3 compatible">
+        <SGroup title={t('settings.storage.config.s3.title')}>
           <div style={{
             padding:10, marginBottom:4,
             background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-sm)',
             display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',
           }}>
-            <span style={{fontSize:11,color:'var(--fg-3)',marginRight:4}}>Presets:</span>
+            <span style={{fontSize:11,color:'var(--fg-3)',marginRight:4}}>{t('settings.storage.s3.presets')}</span>
             {['AWS S3','Cloudflare R2','Backblaze B2','Wasabi','MinIO','DigitalOcean Spaces'].map(p => (
               <button key={p} className="btn sm ghost" style={{fontSize:11,padding:'3px 8px'}}>{p}</button>
             ))}
           </div>
-          <SRow label="Endpoint" hint="Ej: https://s3.amazonaws.com o https://<account>.r2.cloudflarestorage.com">
+          <SRow label={t('settings.storage.s3.endpoint.label')} hint={t('settings.storage.s3.endpoint.hint')}>
             <input className="field" value={s.s3.endpoint} onChange={e=>setField('s3','endpoint',e.target.value)} placeholder="https://s3.amazonaws.com"/>
           </SRow>
-          <SRow label="Región" hint="Código de región. Para R2 usa 'auto'.">
+          <SRow label={t('settings.storage.s3.region.label')} hint={t('settings.storage.s3.region.hint')}>
             <input className="field" value={s.s3.region} onChange={e=>setField('s3','region',e.target.value)} placeholder="us-east-1"/>
           </SRow>
-          <SRow label="Nombre del bucket" hint="Debe existir previamente y tener acceso público de lectura.">
-            <input className="field" value={s.s3.bucket} onChange={e=>setField('s3','bucket',e.target.value)} placeholder="mi-bucket-imagenes"/>
+          <SRow label={t('settings.storage.s3.bucket.label')} hint={t('settings.storage.s3.bucket.hint')}>
+            <input className="field" value={s.s3.bucket} onChange={e=>setField('s3','bucket',e.target.value)} placeholder={t('settings.storage.s3.bucket.placeholder')}/>
           </SRow>
-          <SRow label="Access Key ID" hint="Credencial de un usuario con permisos PutObject y GetObject.">
+          <SRow label="Access Key ID" hint={t('settings.storage.s3.accessKey.hint')}>
             <input className="field" value={s.s3.key} onChange={e=>setField('s3','key',e.target.value)} placeholder="AKIA…"/>
           </SRow>
-          <SRow label="Secret Access Key" hint="Se guarda cifrada en tu equipo. Nunca sale de tu disco.">
+          <SRow label="Secret Access Key" hint={t('settings.storage.s3.secret.hint')}>
             <input className="field" type="password" value={s3Secret} onChange={e=>setS3Secret(e.target.value)} placeholder="••••••••••••••••"/>
           </SRow>
-          <SRow label="URL pública base" hint="Opcional. Dominio desde el que se servirán las imágenes (ej: cdn.tudominio.com).">
+          <SRow label={t('settings.storage.s3.publicUrl.label')} hint={t('settings.storage.s3.publicUrl.hint')}>
             <input className="field" value={s.s3.publicUrl} onChange={e=>setField('s3','publicUrl',e.target.value)} placeholder="https://cdn.tudominio.com"/>
           </SRow>
           <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
             <button className="btn" onClick={() => doTest('s3')} disabled={testState.s3?.state === 'testing'}>
-              <I.check size={12}/> Probar conexión
+              <I.check size={12}/> {t('settings.storage.btn.testConnection')}
             </button>
             {testIndicator('s3')}
           </div>
@@ -1008,19 +1021,19 @@ function StorageSection({ onChange }) {
       )}
 
       {s.mode==='cloudinary' && (
-        <SGroup title="Configuración · Cloudinary">
-          <SRow label="Cloud name" hint="Lo encuentras en tu dashboard de Cloudinary, arriba a la izquierda.">
-            <input className="field" value={s.cloudinary.cloudName} onChange={e=>setField('cloudinary','cloudName',e.target.value)} placeholder="mi-cuenta"/>
+        <SGroup title={t('settings.storage.config.cloudinary.title')}>
+          <SRow label={t('settings.storage.cloudinary.cloudName.label')} hint={t('settings.storage.cloudinary.cloudName.hint')}>
+            <input className="field" value={s.cloudinary.cloudName} onChange={e=>setField('cloudinary','cloudName',e.target.value)} placeholder={t('settings.storage.cloudinary.cloudName.placeholder')}/>
           </SRow>
-          <SRow label="Upload preset" hint="Preset sin firma (Unsigned) configurado en Settings → Upload.">
+          <SRow label={t('settings.storage.cloudinary.uploadPreset.label')} hint={t('settings.storage.cloudinary.uploadPreset.hint')}>
             <input className="field" value={s.cloudinary.uploadPreset} onChange={e=>setField('cloudinary','uploadPreset',e.target.value)} placeholder="simple_template_unsigned"/>
           </SRow>
-          <SRow label="API key" hint="Opcional. Solo necesario si usas presets firmados.">
+          <SRow label="API key" hint={t('settings.storage.cloudinary.apiKey.hint')}>
             <input className="field" type="password" value={cloudinaryKey} onChange={e=>setCloudinaryKey(e.target.value)} placeholder="1234567890"/>
           </SRow>
           <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
             <button className="btn" onClick={() => doTest('cloudinary')} disabled={testState.cloudinary?.state === 'testing'}>
-              <I.check size={12}/> Probar conexión
+              <I.check size={12}/> {t('settings.storage.btn.testConnection')}
             </button>
             {testIndicator('cloudinary')}
           </div>
@@ -1028,13 +1041,13 @@ function StorageSection({ onChange }) {
       )}
 
       {s.mode==='imgbb' && (
-        <SGroup title="Configuración · imgbb">
-          <SRow label="API key" hint="Obtén una clave gratuita en api.imgbb.com. Se guarda cifrada en tu equipo.">
+        <SGroup title={t('settings.storage.config.imgbb.title')}>
+          <SRow label="API key" hint={t('settings.storage.imgbb.apiKey.hint')}>
             <input className="field" type="password" value={imgbbKey} onChange={e=>setImgbbKey(e.target.value)} placeholder="••••••••••••••••"/>
           </SRow>
           <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
             <button className="btn" onClick={() => doTest('imgbb')} disabled={testState.imgbb?.state === 'testing'}>
-              <I.check size={12}/> Probar conexión
+              <I.check size={12}/> {t('settings.storage.btn.testConnection')}
             </button>
             {testIndicator('imgbb')}
           </div>
@@ -1042,25 +1055,25 @@ function StorageSection({ onChange }) {
       )}
 
       {s.mode==='github' && (
-        <SGroup title="Configuración · GitHub Pages">
-          <SRow label="Repositorio" hint="Formato usuario/repo. Debe tener GitHub Pages habilitado.">
+        <SGroup title={t('settings.storage.config.github.title')}>
+          <SRow label={t('settings.storage.github.repo.label')} hint={t('settings.storage.github.repo.hint')}>
             <input className="field" value={s.github.repo} onChange={e=>setField('github','repo',e.target.value)} placeholder="mi-usuario/simple-template-assets"/>
           </SRow>
-          <SRow label="Rama" hint="Rama donde se harán los commits.">
+          <SRow label={t('settings.storage.github.branch.label')} hint={t('settings.storage.github.branch.hint')}>
             <input className="field" value={s.github.branch} onChange={e=>setField('github','branch',e.target.value)} placeholder="main"/>
           </SRow>
-          <SRow label="Carpeta destino" hint="Ruta relativa dentro del repo donde se subirán las imágenes.">
+          <SRow label={t('settings.storage.github.path.label')} hint={t('settings.storage.github.path.hint')}>
             <input className="field" value={s.github.path} onChange={e=>setField('github','path',e.target.value)} placeholder="assets/img/"/>
           </SRow>
-          <SRow label="Personal Access Token" hint="Token con permiso 'repo' (o fine-grained 'contents:write'). Se guarda cifrado en tu equipo.">
+          <SRow label={t('settings.storage.github.token.label')} hint={t('settings.storage.github.token.hint')}>
             <input className="field" type="password" value={githubToken} onChange={e=>setGithubToken(e.target.value)} placeholder="ghp_••••••••••••"/>
           </SRow>
-          <SRow label="URL pública base (opcional)" hint="Dominio desde el que se servirán las imágenes. Si no lo pones, se usa la URL cruda de GitHub.">
+          <SRow label={t('settings.storage.github.publicUrl.label')} hint={t('settings.storage.github.publicUrl.hint')}>
             <input className="field" value={s.github.publicUrl||''} onChange={e=>setField('github','publicUrl',e.target.value)} placeholder="https://miusuario.github.io/mi-repo/assets"/>
           </SRow>
           <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
             <button className="btn" onClick={() => doTest('github')} disabled={testState.github?.state === 'testing'}>
-              <I.check size={12}/> Probar conexión
+              <I.check size={12}/> {t('settings.storage.btn.testConnection')}
             </button>
             {testIndicator('github')}
           </div>
@@ -1068,39 +1081,39 @@ function StorageSection({ onChange }) {
       )}
 
       {s.mode==='ftp' && (
-        <SGroup title="Configuración · FTP / FTPS">
-          <SRow label="Host" hint="Dirección del servidor (ej: ftp.tudominio.com). SFTP (SSH) no está soportado — usá FTP o FTPS.">
+        <SGroup title={t('settings.storage.config.ftp.title')}>
+          <SRow label={t('settings.storage.ftp.host.label')} hint={t('settings.storage.ftp.host.hint')}>
             <input className="field" value={s.ftp.host} onChange={e=>setField('ftp','host',e.target.value)} placeholder="ftp.tudominio.com"/>
           </SRow>
-          <SRow label="Puerto" hint="21 para FTP normal, 990 para FTPS implícito.">
+          <SRow label={t('settings.storage.ftp.port.label')} hint={t('settings.storage.ftp.port.hint')}>
             <input className="field" value={s.ftp.port} onChange={e=>setField('ftp','port',e.target.value)} placeholder="21"/>
           </SRow>
-          <SRow label="Usar FTPS (TLS)" hint="Activá si el servidor requiere conexión cifrada.">
+          <SRow label={t('settings.storage.ftp.tls.label')} hint={t('settings.storage.ftp.tls.hint')}>
             <Switch checked={!!s.ftp.secure} onChange={v=>setField('ftp','secure',v)}/>
           </SRow>
-          <SRow label="Usuario" hint="Nombre de usuario con permiso de escritura en la carpeta destino.">
+          <SRow label={t('settings.storage.ftp.user.label')} hint={t('settings.storage.ftp.user.hint')}>
             <input className="field" value={s.ftp.user} onChange={e=>setField('ftp','user',e.target.value)} placeholder="mi-usuario"/>
           </SRow>
-          <SRow label="Contraseña" hint="Se guarda cifrada en tu equipo.">
+          <SRow label={t('settings.storage.ftp.password.label')} hint={t('settings.storage.ftp.password.hint')}>
             <input className="field" type="password" value={ftpPassword} onChange={e=>setFtpPassword(e.target.value)} placeholder="••••••••••••"/>
           </SRow>
-          <SRow label="Carpeta destino" hint="Ruta absoluta en el servidor donde se subirán las imágenes.">
+          <SRow label={t('settings.storage.ftp.path.label')} hint={t('settings.storage.ftp.path.hint')}>
             <input className="field" value={s.ftp.path} onChange={e=>setField('ftp','path',e.target.value)} placeholder="/public_html/img/"/>
           </SRow>
-          <SRow label="URL pública base" hint="Dominio desde el que se servirán las imágenes. Requerido.">
+          <SRow label={t('settings.storage.ftp.publicUrl.label')} hint={t('settings.storage.ftp.publicUrl.hint')}>
             <input className="field" value={s.ftp.publicUrl} onChange={e=>setField('ftp','publicUrl',e.target.value)} placeholder="https://tudominio.com/img/"/>
           </SRow>
           <div style={{display:'flex',gap:8,marginTop:4,alignItems:'center',flexWrap:'wrap'}}>
             <button className="btn" onClick={() => doTest('ftp')} disabled={testState.ftp?.state === 'testing'}>
-              <I.check size={12}/> Probar conexión
+              <I.check size={12}/> {t('settings.storage.btn.testConnection')}
             </button>
             {testIndicator('ftp')}
           </div>
         </SGroup>
       )}
 
-      <SGroup title="Comportamiento">
-        <SRow label="Optimizar imágenes al guardar" hint="Redimensiona a máximo 2000 px y re-comprime manteniendo el formato original (JPG sigue JPG, PNG sigue PNG). Ahorra hasta 80 % del peso sin perder compatibilidad con clientes de correo. Recomendado dejarlo activado.">
+      <SGroup title={t('settings.storage.group.behavior')}>
+        <SRow label={t('settings.storage.optimize.label')} hint={t('settings.storage.optimize.hint')}>
           <Switch checked={s.optimize !== false} onChange={v => save({...s, optimize: v})}/>
         </SRow>
       </SGroup>
@@ -1111,6 +1124,8 @@ function StorageSection({ onChange }) {
 // ───────────────────────────── Brand ─────────────────────────────
 // Single swatch with native color picker + remove-on-hover. Used by BrandSection.
 function ColorSwatch({ value, onChange, onRemove }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const inputRef = React.useRef(null);
   const [hover, setHover] = React.useState(false);
   return (
@@ -1121,7 +1136,7 @@ function ColorSwatch({ value, onChange, onRemove }) {
     >
       <div
         onClick={()=>inputRef.current?.click()}
-        title="Cambiar color"
+        title={t('settings.brand.color.change')}
         style={{
           width:40,height:40,borderRadius:'var(--r-sm)',
           background:value,
@@ -1141,8 +1156,8 @@ function ColorSwatch({ value, onChange, onRemove }) {
       {onRemove && hover && (
         <button
           onClick={(e)=>{ e.stopPropagation(); onRemove(); }}
-          title="Eliminar color"
-          aria-label="Eliminar color"
+          title={t('settings.brand.color.remove')}
+          aria-label={t('settings.brand.color.remove')}
           style={{
             position:'absolute',top:-6,right:-6,
             width:18,height:18,borderRadius:'50%',
@@ -1157,6 +1172,8 @@ function ColorSwatch({ value, onChange, onRemove }) {
 }
 
 function BrandSection({ onChange }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [brand, setBrand] = React.useState(() => window.stStorage.getWSSetting('brand', {}));
   const set = (k,v) => { const n = {...brand, [k]:v}; setBrand(n); window.stStorage.setWSSetting('brand', n); onChange(); };
 
@@ -1171,8 +1188,8 @@ function BrandSection({ onChange }) {
 
   return (
     <>
-      <SGroup title="Identidad visual">
-        <SRow label="Paleta de colores" hint="Los primeros 5 aparecen en el editor como accesos rápidos. Pasa el mouse sobre uno para borrarlo, o haz clic para cambiarlo.">
+      <SGroup title={t('settings.brand.group.identity')}>
+        <SRow label={t('settings.brand.palette.label')} hint={t('settings.brand.palette.hint')}>
           <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'flex-start',paddingTop:6}}>
             {colors.map((c, i) => (
               <ColorSwatch
@@ -1185,8 +1202,8 @@ function BrandSection({ onChange }) {
             <div style={{position:'relative'}}>
               <button
                 onClick={()=>addRef.current?.click()}
-                title="Añadir color"
-                aria-label="Añadir color"
+                title={t('settings.brand.color.add')}
+                aria-label={t('settings.brand.color.add')}
                 style={{
                   width:40,height:40,borderRadius:'var(--r-sm)',
                   border:'1px dashed var(--line)',
@@ -1206,19 +1223,19 @@ function BrandSection({ onChange }) {
           </div>
         </SRow>
 
-        <SRow label="Fuente principal" hint="Se usa en encabezados y bloques de título por defecto.">
+        <SRow label={t('settings.brand.fontDisplay.label')} hint={t('settings.brand.fontDisplay.hint')}>
           <select className="field" value={brand.fontDisplay||'Fraunces'} onChange={e=>set('fontDisplay',e.target.value)}>
             {fonts.map(f => <option key={f} style={{fontFamily:f}}>{f}</option>)}
           </select>
         </SRow>
 
-        <SRow label="Fuente de cuerpo" hint="Se usa en párrafos y botones.">
+        <SRow label={t('settings.brand.fontBody.label')} hint={t('settings.brand.fontBody.hint')}>
           <select className="field" value={brand.fontBody||'Inter'} onChange={e=>set('fontBody',e.target.value)}>
             {fonts.map(f => <option key={f} style={{fontFamily:f}}>{f}</option>)}
           </select>
         </SRow>
 
-        <SRow label="Logo por defecto" hint="Se inserta automáticamente al añadir un bloque de Logo.">
+        <SRow label={t('settings.brand.logo.label')} hint={t('settings.brand.logo.hint')}>
           <div style={{display:'flex',gap:12,alignItems:'center'}}>
             <div style={{
               width:120,height:56,borderRadius:'var(--r-sm)',
@@ -1228,29 +1245,29 @@ function BrandSection({ onChange }) {
               color:'var(--fg)',
             }}>acme</div>
             <div className="col" style={{gap:4}}>
-              <button className="btn sm"><I.upload size={12}/> Subir logo</button>
-              <span style={{fontSize:10.5,color:'var(--fg-3)'}}>PNG / SVG · 400×160 px recomendado</span>
+              <button className="btn sm"><I.upload size={12}/> {t('settings.brand.logo.upload')}</button>
+              <span style={{fontSize:10.5,color:'var(--fg-3)'}}>{t('settings.brand.logo.recommended')}</span>
             </div>
           </div>
         </SRow>
       </SGroup>
 
-      <SGroup title="Footer legal (requerido por ley)">
-        <SRow label="Dirección física" hint="CAN-SPAM / RGPD exigen una dirección postal real en todos los correos comerciales.">
+      <SGroup title={t('settings.brand.group.legalFooter')}>
+        <SRow label={t('settings.brand.address.label')} hint={t('settings.brand.address.hint')}>
           <textarea className="field" rows="2"
-            placeholder="Ej. Acme SA · Av. Reforma 123, CDMX 06600, México"
+            placeholder={t('settings.brand.address.placeholder')}
             value={brand.address || ''}
             onChange={e=>set('address', e.target.value)}/>
         </SRow>
-        <SRow label="Enlace de baja" hint="URL a la que lleva el botón 'Darme de baja' en el footer.">
+        <SRow label={t('settings.brand.unsubscribe.label')} hint={t('settings.brand.unsubscribe.hint')}>
           <input className="field"
             placeholder="https://acme.com/unsubscribe"
             value={brand.unsubscribe || ''}
             onChange={e=>set('unsubscribe', e.target.value)}/>
         </SRow>
-        <SRow label="Texto del footer" hint="Aparece debajo del botón de baja en todos los envíos.">
+        <SRow label={t('settings.brand.footerText.label')} hint={t('settings.brand.footerText.hint')}>
           <textarea className="field" rows="3"
-            placeholder="Recibes este correo porque te suscribiste en acme.com. Puedes actualizar tus preferencias o darte de baja cuando quieras."
+            placeholder={t('settings.brand.footerText.placeholder')}
             value={brand.footer || ''}
             onChange={e=>set('footer', e.target.value)}/>
         </SRow>
@@ -1267,8 +1284,19 @@ function DeliveryInner() {
 
 // ───────────────────────────── Editor ─────────────────────────────
 function EditorSection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [ed, setEd] = React.useState(() => window.stStorage.getWSSetting('editor', {}));
-  const set = (k,v) => { const n = {...ed, [k]:v}; setEd(n); window.stStorage.setWSSetting('editor', n); onChange(); };
+  // Re-read when the language changes elsewhere (e.g. cmd-palette), so the
+  // select reflects the current value.
+  React.useEffect(() => { setEd(window.stStorage.getWSSetting('editor', {})); }, [lang]);
+  const set = (k,v) => {
+    const n = {...ed, [k]:v};
+    setEd(n);
+    window.stStorage.setWSSetting('editor', n);
+    if (k === 'lang') window.stI18n.setLang(v);
+    onChange();
+  };
 
   const Seg = ({value, options, onPick}) => (
     <div style={{display:'inline-flex',background:'var(--surface-2)',padding:3,borderRadius:'var(--r-sm)',gap:2,border:'1px solid var(--line)'}}>
@@ -1291,71 +1319,73 @@ function EditorSection({ onChange }) {
 
   return (
     <>
-      <SoonBanner msg="Las preferencias del editor se guardan en este espacio, pero el editor aún no las consulta. Está en cola para una próxima versión."/>
-      <SGroup title="Apariencia">
-        <SRow label="Tema" hint="Claro, oscuro o sincronizado con el sistema operativo.">
+      <SoonBanner msg={t('settings.editor.soon')}/>
+      <SGroup title={t('settings.editor.group.appearance')}>
+        <SRow label={t('settings.editor.theme.label')} hint={t('settings.editor.theme.hint')}>
           <Seg value={ed.theme||'system'} onPick={v=>set('theme',v)} options={[
-            {id:'light',label:'Claro',icon:'sun'},
-            {id:'dark',label:'Oscuro',icon:'moon'},
-            {id:'system',label:'Sistema'},
+            {id:'light',label:t('settings.editor.theme.light'),icon:'sun'},
+            {id:'dark',label:t('settings.editor.theme.dark'),icon:'moon'},
+            {id:'system',label:t('settings.editor.theme.system')},
           ]}/>
         </SRow>
-        <SRow label="Idioma de la interfaz" hint="Cambia textos de menús y diálogos.">
-          <select className="field" value={ed.lang||'es'} onChange={e=>set('lang',e.target.value)} style={{width:200}}>
-            <option value="es">Español</option>
+        <SRow label={t('settings.editor.lang')} hint={t('settings.editor.lang.hint')}>
+          <select className="field" value={ed.lang||lang} onChange={e=>set('lang',e.target.value)} style={{width:200}}>
             <option value="en">English</option>
+            <option value="es">Español</option>
             <option value="pt">Português</option>
             <option value="fr">Français</option>
+            <option value="ja">日本語</option>
+            <option value="zh">中文 (简体)</option>
           </select>
         </SRow>
-        <SRow label="Densidad" hint="Más compacto muestra más en pantalla a costa de espacio.">
+        <SRow label={t('settings.editor.density.label')} hint={t('settings.editor.density.hint')}>
           <Seg value={ed.density||'comfortable'} onPick={v=>set('density',v)} options={[
-            {id:'compact',label:'Compacto'},
-            {id:'comfortable',label:'Cómodo'},
-            {id:'spacious',label:'Amplio'},
+            {id:'compact',label:t('settings.editor.density.compact')},
+            {id:'comfortable',label:t('settings.editor.density.comfortable')},
+            {id:'spacious',label:t('settings.editor.density.spacious')},
           ]}/>
         </SRow>
       </SGroup>
 
-      <SGroup title="Canvas">
-        <SRow label="Grid del canvas" hint="Tamaño de la cuadrícula visible al editar.">
+      <SGroup title={t('settings.editor.group.canvas')}>
+        <SRow label={t('settings.editor.grid.label')} hint={t('settings.editor.grid.hint')}>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
             <input type="range" min="8" max="32" step="4" value={ed.grid||16} onChange={e=>set('grid',Number(e.target.value))} style={{flex:1,maxWidth:200}}/>
             <span style={{fontSize:12,fontFamily:'var(--font-mono)',color:'var(--fg-2)',width:40}}>{ed.grid||16} px</span>
           </div>
         </SRow>
-        <SRow label="Regla visible" hint="Muestra marcas de píxeles en los bordes del canvas.">
+        <SRow label={t('settings.editor.ruler.label')} hint={t('settings.editor.ruler.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ed.ruler!==false} onChange={e=>set('ruler',e.target.checked)}/><span/></label>
         </SRow>
-        <SRow label="Autoalinear al grid" hint="Los bloques se ajustan automáticamente a la cuadrícula al moverlos.">
+        <SRow label={t('settings.editor.snap.label')} hint={t('settings.editor.snap.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ed.snap!==false} onChange={e=>set('snap',e.target.checked)}/><span/></label>
         </SRow>
       </SGroup>
 
-      <SGroup title="Guardado">
-        <SRow label="Autoguardado" hint="Guardado automático mientras editas. Se puede revertir desde el historial.">
+      <SGroup title={t('settings.editor.group.save')}>
+        <SRow label={t('settings.editor.autosave.label')} hint={t('settings.editor.autosave.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ed.autosave!==false} onChange={e=>set('autosave',e.target.checked)}/><span/></label>
         </SRow>
-        <SRow label="Intervalo de autoguardado" hint="Cada cuántos segundos guardar.">
+        <SRow label={t('settings.editor.saveInterval.label')} hint={t('settings.editor.saveInterval.hint')}>
           <select className="field" value={ed.saveInterval||30} onChange={e=>set('saveInterval',Number(e.target.value))} style={{width:200}}>
-            <option value="10">Cada 10 segundos</option>
-            <option value="30">Cada 30 segundos</option>
-            <option value="60">Cada minuto</option>
-            <option value="300">Cada 5 minutos</option>
+            <option value="10">{t('settings.editor.saveInterval.10s')}</option>
+            <option value="30">{t('settings.editor.saveInterval.30s')}</option>
+            <option value="60">{t('settings.editor.saveInterval.1m')}</option>
+            <option value="300">{t('settings.editor.saveInterval.5m')}</option>
           </select>
         </SRow>
       </SGroup>
 
-      <SGroup title="Atajos de teclado">
+      <SGroup title={t('settings.editor.group.shortcuts')}>
         <div style={{border:'1px solid var(--line)',borderRadius:'var(--r-md)',overflow:'hidden'}}>
           {[
-            ['Guardar',        ['⌘','S']],
-            ['Deshacer',       ['⌘','Z']],
-            ['Rehacer',        ['⌘','⇧','Z']],
-            ['Duplicar bloque',['⌘','D']],
-            ['Eliminar bloque',['⌫']],
-            ['Vista previa',   ['⌘','P']],
-            ['Enviar prueba',  ['⌘','⇧','T']],
+            [t('settings.editor.shortcut.save'),       ['⌘','S']],
+            [t('settings.editor.shortcut.undo'),       ['⌘','Z']],
+            [t('settings.editor.shortcut.redo'),       ['⌘','⇧','Z']],
+            [t('settings.editor.shortcut.duplicate'),  ['⌘','D']],
+            [t('settings.editor.shortcut.delete'),     ['⌫']],
+            [t('settings.editor.shortcut.preview'),    ['⌘','P']],
+            [t('settings.editor.shortcut.sendTest'),   ['⌘','⇧','T']],
           ].map(([name,keys],i,arr) => (
             <div key={name} style={{display:'flex',alignItems:'center',padding:'10px 14px',borderBottom:i<arr.length-1?'1px solid var(--line)':'none',fontSize:12.5}}>
               <span style={{flex:1}}>{name}</span>
@@ -1372,6 +1402,8 @@ function EditorSection({ onChange }) {
 
 // ───────────────────────────── Variables ─────────────────────────────
 function VariablesSection({ onChange }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [vars, setVars] = React.useState(() => window.stStorage.getWSSetting('vars', null) || VARIABLES);
   const save = (next) => { setVars(next); window.stStorage.setWSSetting('vars', next); onChange(); };
   const setVal = (i,v) => save(vars.map((x,j)=>j===i?{...x,sample:v}:x));
@@ -1388,12 +1420,12 @@ function VariablesSection({ onChange }) {
       }}>
         <I.info size={14} style={{color:'var(--accent)',flexShrink:0,marginTop:1}}/>
         <div>
-          <b style={{color:'var(--fg-1)'}}>Defaults para plantillas nuevas.</b> Cada plantilla nueva hereda esta lista. Cambiarla aquí NO afecta a las que ya existen — esas se editan con el botón «Etiquetas» del editor.
+          <b style={{color:'var(--fg-1)'}}>{t('settings.variables.banner.title')}</b> {t('settings.variables.banner.body')}
         </div>
       </div>
-      <SGroup title="Etiquetas que heredan las plantillas nuevas">
+      <SGroup title={t('settings.variables.group.title')}>
         <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.55,paddingBottom:16}}>
-          Cuando creas una plantilla, se le copia esta lista. Desde ahí cada plantilla evoluciona independiente.
+          {t('settings.variables.description')}
         </div>
         <div style={{border:'1px solid var(--line)',borderRadius:'var(--r-md)',overflow:'hidden'}}>
           {vars.map((v,i) => (
@@ -1409,7 +1441,7 @@ function VariablesSection({ onChange }) {
             </div>
           ))}
         </div>
-        <button className="btn sm" style={{marginTop:12}}><I.plus size={12}/> Nueva variable</button>
+        <button className="btn sm" style={{marginTop:12}}><I.plus size={12}/> {t('settings.variables.btn.new')}</button>
       </SGroup>
     </>
   );
@@ -1417,19 +1449,21 @@ function VariablesSection({ onChange }) {
 
 // ───────────────────────────── Export ─────────────────────────────
 function ExportSection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [ex, setEx] = React.useState(() => window.stStorage.getWSSetting('export', {}));
   const set = (k,v) => { const n = {...ex, [k]:v}; setEx(n); window.stStorage.setWSSetting('export', n); onChange(); };
 
   return (
     <>
-      <SoonBanner msg="La preferencia de formato de exportación se guarda en este espacio, pero el flujo de exportar todavía es mock. Está en cola para una próxima versión."/>
-      <SGroup title="Formato por defecto">
-        <SRow label="Formato de descarga" hint="Se usa al elegir 'Exportar' sin abrir el modal.">
+      <SoonBanner msg={t('settings.export.soonMsg')}/>
+      <SGroup title={t('settings.export.group.defaultFormat')}>
+        <SRow label={t('settings.export.format.label')} hint={t('settings.export.format.hint')}>
           <div className="col" style={{gap:6}}>
             {[
-              {id:'html',  label:'HTML con estilos inline', d:'Lo más compatible. Gmail, Outlook, iOS, Android.'},
-              {id:'mjml',  label:'MJML (código fuente)',     d:'Editable en cualquier herramienta MJML.'},
-              {id:'zip',   label:'Paquete ZIP',              d:'HTML + imágenes + texto plano.'},
+              {id:'html',  label:t('settings.export.format.html.label'),  d:t('settings.export.format.html.desc')},
+              {id:'mjml',  label:t('settings.export.format.mjml.label'),  d:t('settings.export.format.mjml.desc')},
+              {id:'zip',   label:t('settings.export.format.zip.label'),   d:t('settings.export.format.zip.desc')},
             ].map(o => (
               <label key={o.id} style={{
                 display:'flex',gap:12,padding:'12px 14px',
@@ -1448,17 +1482,17 @@ function ExportSection({ onChange }) {
         </SRow>
       </SGroup>
 
-      <SGroup title="Opciones por defecto">
-        <SRow label="Minificar HTML" hint="Reduce el tamaño del archivo quitando espacios y saltos.">
+      <SGroup title={t('settings.export.group.defaultOptions')}>
+        <SRow label={t('settings.export.minify.label')} hint={t('settings.export.minify.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ex.minify!==false} onChange={e=>set('minify',e.target.checked)}/><span/></label>
         </SRow>
-        <SRow label="Incluir texto plano alternativo" hint="Versión solo-texto que ven clientes de correo antiguos y los filtros de spam.">
+        <SRow label={t('settings.export.plaintext.label')} hint={t('settings.export.plaintext.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ex.plaintext!==false} onChange={e=>set('plaintext',e.target.checked)}/><span/></label>
         </SRow>
-        <SRow label="Optimizar imágenes" hint="Convierte PNG a WebP y comprime hasta 80%. Reduce hasta 60% el peso del correo.">
+        <SRow label={t('settings.export.optimize.label')} hint={t('settings.export.optimize.hint')}>
           <label className="switch"><input type="checkbox" defaultChecked={ex.optimize!==false} onChange={e=>set('optimize',e.target.checked)}/><span/></label>
         </SRow>
-        <SRow label="Subdominio de imágenes" hint="Dónde se alojan las imágenes cuando exportas. Ayuda a la entregabilidad.">
+        <SRow label={t('settings.export.imgDomain.label')} hint={t('settings.export.imgDomain.hint')}>
           <div style={{display:'flex',alignItems:'center',background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)',padding:'2px 12px'}}>
             <span style={{fontSize:12,color:'var(--fg-3)',fontFamily:'var(--font-mono)'}}>https://</span>
             <input style={{flex:1,border:'none',background:'transparent',outline:'none',fontSize:13,padding:'8px 0',fontFamily:'var(--font-mono)'}} defaultValue={ex.imgDomain||'cdn.acme.com'} onChange={e=>set('imgDomain',e.target.value)}/>
@@ -1471,6 +1505,8 @@ function ExportSection({ onChange }) {
 
 // ───────────────────────────── Notifications ─────────────────────────────
 function NotifSection({ onChange }) {
+  window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [n, setN] = React.useState(() => window.stStorage.getWSSetting('notif', {}));
   const set = (k,v) => { const nn = {...n, [k]:v}; setN(nn); window.stStorage.setWSSetting('notif', nn); onChange(); };
 
@@ -1480,36 +1516,36 @@ function NotifSection({ onChange }) {
 
   return (
     <>
-      <SoonBanner msg="«Recordar autoguardado», «Aviso de exportación lista» y «Resultado del envío de prueba» ya respetan tu preferencia. El resto (imagen pesada, sonidos, actualizaciones, beta) se guardan en este espacio pero todavía no se aplican."/>
-      <SGroup title="Avisos dentro de la app">
-        <SRow label="Recordar autoguardado" hint="Te avisa en la esquina inferior cada vez que Simple Template guarda tu trabajo automáticamente. Apagado por defecto porque puede ser ruidoso si editas mucho.">
+      <SoonBanner msg={t('settings.notif.soonMsg')}/>
+      <SGroup title={t('settings.notif.group.inApp')}>
+        <SRow label={t('settings.notif.saved.label')} hint={t('settings.notif.saved.hint')}>
           <Switch k="saved" def={false}/>
         </SRow>
-        <SRow label="Aviso de imagen muy pesada" hint="Cuando arrastras una imagen mayor al límite recomendado para correo.">
+        <SRow label={t('settings.notif.heavyImg.label')} hint={t('settings.notif.heavyImg.hint')}>
           <Switch k="heavyImg"/>
         </SRow>
-        <SRow label="Aviso de exportación lista" hint="Cuando termina de generarse el HTML, MJML o ZIP de descarga.">
+        <SRow label={t('settings.notif.exportDone.label')} hint={t('settings.notif.exportDone.hint')}>
           <Switch k="exportDone"/>
         </SRow>
-        <SRow label="Resultado del envío de prueba" hint="Aparece cuando tu SMTP confirma (o falla) un envío de prueba.">
+        <SRow label={t('settings.notif.testDone.label')} hint={t('settings.notif.testDone.hint')}>
           <Switch k="testDone"/>
         </SRow>
       </SGroup>
 
-      <SGroup title="Sonido">
-        <SRow label="Sonidos de la app" hint="Un tono corto al guardar, exportar o enviar una prueba.">
+      <SGroup title={t('settings.notif.group.sound')}>
+        <SRow label={t('settings.notif.sound.label')} hint={t('settings.notif.sound.hint')}>
           <Switch k="sound" def={false}/>
         </SRow>
-        <SRow label="Volumen" hint="Solo se aplica a los sonidos de la app.">
+        <SRow label={t('settings.notif.volume.label')} hint={t('settings.notif.volume.hint')}>
           <input type="range" min="0" max="100" defaultValue={n.vol||60} onChange={e=>set('vol',Number(e.target.value))} style={{width:200}}/>
         </SRow>
       </SGroup>
 
-      <SGroup title="Actualizaciones">
-        <SRow label="Avisarme cuando haya una versión nueva" hint="Simple Template revisa GitHub una vez al día. La descarga es siempre manual.">
+      <SGroup title={t('settings.notif.group.updates')}>
+        <SRow label={t('settings.notif.updates.label')} hint={t('settings.notif.updates.hint')}>
           <Switch k="updates"/>
         </SRow>
-        <SRow label="Incluir versiones beta" hint="Recibe avisos de releases con el tag 'beta' o 'rc'. Pueden tener errores.">
+        <SRow label={t('settings.notif.beta.label')} hint={t('settings.notif.beta.hint')}>
           <Switch k="beta" def={false}/>
         </SRow>
       </SGroup>
@@ -1519,6 +1555,8 @@ function NotifSection({ onChange }) {
 
 // ───────────────────────────── IA ─────────────────────────────
 function AISection({ onChange }) {
+  const lang = window.stI18n.useLang();
+  const t = window.stI18n.t;
   const [ai, setAi] = React.useState(() => window.stStorage.getSetting('ai', {}));
   const set = (k,v) => { const next = {...ai, [k]:v}; setAi(next); window.stStorage.setSetting('ai', next); onChange(); };
 
@@ -1526,12 +1564,12 @@ function AISection({ onChange }) {
   // live from each provider's /models endpoint (or Ollama's /api/tags) via
   // stAI.listModels, with a free-text input so the user can always type a
   // newly-released model name we don't know about yet.
-  const PROVIDERS = [
-    { id:'anthropic', name:'Anthropic Claude', hint:'Mejores resultados para copy y HTML.', url:'https://console.anthropic.com' },
-    { id:'openai',    name:'OpenAI',           hint:'Versátil y con buen ecosistema.',       url:'https://platform.openai.com' },
-    { id:'google',    name:'Google Gemini',    hint:'Generoso con tokens; rápido.',          url:'https://aistudio.google.com' },
-    { id:'ollama',    name:'Ollama (local)',   hint:'Corre en tu máquina. Sin API key.',     url:'http://localhost:11434' },
-  ];
+  const PROVIDERS = React.useMemo(() => [
+    { id:'anthropic', name:'Anthropic Claude', hint:t('settings.ai.provider.anthropic.hint'), url:'https://console.anthropic.com' },
+    { id:'openai',    name:'OpenAI',           hint:t('settings.ai.provider.openai.hint'),    url:'https://platform.openai.com' },
+    { id:'google',    name:'Google Gemini',    hint:t('settings.ai.provider.google.hint'),    url:'https://aistudio.google.com' },
+    { id:'ollama',    name:'Ollama (local)',   hint:t('settings.ai.provider.ollama.hint'),    url:'http://localhost:11434' },
+  ], [lang]);
   const provider = PROVIDERS.find(p => p.id === (ai.provider||'anthropic'));
   const enabled = ai.enabled !== false;
 
