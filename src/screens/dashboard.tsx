@@ -424,6 +424,7 @@ function Dashboard({ onOpen, onNew }) {
 
   const rawItems = useTemplates();
   const trashedItems = useTrashedTemplates();
+  const blockRows = window.useBlocks();
   const occasions = useOccasions();
   const [occasionModal, setOccasionModal] = React.useState(null);
   const [moveMenu, setMoveMenu] = React.useState(null);
@@ -572,7 +573,7 @@ function Dashboard({ onOpen, onNew }) {
           <div className="nav-item" onClick={()=>onOpen('library')}>
             <I.layers size={15}/>
             <span>{t('sidebar.myBlocks')}</span>
-            <span className="count">10</span>
+            <span className="count">{blockRows.length}</span>
           </div>
           <div className="nav-item">
             <I.braces size={15}/>

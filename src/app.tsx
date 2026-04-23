@@ -8,9 +8,15 @@ function App() {
   // is React state and doesn't survive a renderer reload.
   const [screen, setScreen] = React.useState(() => {
     const s = window.stStorage.getSetting('screen', 'dashboard');
-    return (s === 'editor' || s === 'preview') ? 'dashboard' : s;
+    // Editor/preview/block-editor need React state (tpl or block) that
+    // doesn't survive a renderer reload — route persisted screens back to
+    // somewhere safe.
+    if (s === 'editor' || s === 'preview') return 'dashboard';
+    if (s === 'editor-block') return 'library';
+    return s;
   });
   const [tpl, setTpl] = React.useState(null);
+  const [blockBeingEdited, setBlockBeingEdited] = React.useState(null);
   const [modal, setModal] = React.useState(null);
   const [settingsSection, setSettingsSection] = React.useState('account');
   const [onboard, setOnboard] = React.useState(() => !window.stStorage.getSetting('onboard', false));
@@ -53,9 +59,10 @@ function App() {
   // editor/preview belong to the previous workspace → route back to dashboard.
   React.useEffect(() => {
     const h = () => {
-      if (screen === 'editor' || screen === 'preview') {
+      if (screen === 'editor' || screen === 'preview' || screen === 'editor-block') {
         setScreen('dashboard');
         setTpl(null);
+        setBlockBeingEdited(null);
         window.toast && window.toast({
           kind: 'info',
           title: t('app.workspace.changed.title'),
@@ -101,7 +108,14 @@ function App() {
 
   const openEditor = (t) => {
     setTpl(t);
+    setBlockBeingEdited(null);
     setScreen('editor');
+  };
+
+  const openBlockEditor = (blk) => {
+    setBlockBeingEdited(blk);
+    setTpl(null);
+    setScreen('editor-block');
   };
 
   const openFromGallery = async (preset) => {
@@ -168,7 +182,17 @@ function App() {
         )}
 
         {screen==='library' && (
-          <Library onBack={()=>setScreen('dashboard')}/>
+          <Library
+            onBack={()=>setScreen('dashboard')}
+            onOpenBlock={(blk)=>openBlockEditor(blk)}
+          />
+        )}
+
+        {screen==='editor-block' && (
+          <Editor
+            block={blockBeingEdited}
+            onBack={()=>{ setBlockBeingEdited(null); setScreen('library'); }}
+          />
         )}
 
         {screen==='images' && (

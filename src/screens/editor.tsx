@@ -1,5 +1,19 @@
 // Editor — section-based canvas
 
+// Maps a saved block's `kind` to the i18n key that labels its category in
+// the library. Reused by the editor breadcrumb and the "Mis bloques" panel
+// in ContentPanel.
+const KIND_LABEL_KEY = {
+  header: 'library.cat.headers',
+  footer: 'library.cat.footers',
+  cta: 'library.cat.ctas',
+  testimonial: 'library.cat.testimonials',
+  product: 'library.cat.products',
+  social: 'library.cat.social',
+  signature: 'library.cat.signatures',
+  custom: 'library.cat.custom',
+};
+
 function BlockTile({ b, onClick }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
@@ -20,19 +34,21 @@ function BlockTile({ b, onClick }) {
   );
 }
 
-function ContentPanel({ onAddBlock, onAddSection }) {
+function ContentPanel({ onAddBlock, onAddSection, onAddSavedBlock }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
   const [q, setQ] = React.useState('');
+  // `onAddSection` / `onAddSavedBlock` are null in block-editing mode, where
+  // inserting new sections or the library would make no sense.
   const cats = [
-    { h:t('editor.category.sectionsReady'), isSection:true, items: SECTION_PRESETS },
+    onAddSection ? { h:t('editor.category.sectionsReady'), isSection:true, items: SECTION_PRESETS } : null,
     { h:t('editor.category.basics'), items: BLOCKS_BASIC },
     { h:t('editor.category.content'), items: BLOCKS_CONTENT },
     { h:t('editor.category.ecom'), items: BLOCKS_ECOM },
     { h:t('editor.category.social'), items: BLOCKS_SOCIAL },
     { h:t('editor.category.media'), items: BLOCKS_MEDIA },
     { h:t('editor.category.advanced'), items: BLOCKS_ADV },
-  ];
+  ].filter(Boolean);
   const nameOf = (b) => (b.nameKey ? t(b.nameKey) : b.name) || '';
   const f = (arr) => arr.filter(b => nameOf(b).toLowerCase().includes(q.toLowerCase()));
   return (
@@ -45,6 +61,7 @@ function ContentPanel({ onAddBlock, onAddSection }) {
         <div style={{fontSize:11,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>{t('editor.contentPanel.hint')}</div>
       </div>
       <div className="side-body">
+        {onAddSavedBlock && <SavedBlocksPanel q={q} onAdd={onAddSavedBlock} />}
         {cats.map(c => {
           const items = f(c.items);
           if (!items.length) return null;
@@ -83,6 +100,75 @@ function ContentPanel({ onAddBlock, onAddSection }) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// "Mis bloques" panel inside the editor's left Content tab. Lists the
+// workspace's saved blocks grouped by kind; each tile is draggable with
+// `text/x-mc-saved-block` (consumed by SectionInsertBtn + the empty
+// canvas drop zone). Click inserts at the end of the doc.
+function SavedBlocksPanel({ q, onAdd }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
+  const rows = window.useBlocks();
+  const filtered = React.useMemo(() => {
+    const needle = (q || '').toLowerCase().trim();
+    return rows.filter((r) => !needle || (r.name || '').toLowerCase().includes(needle));
+  }, [rows, q]);
+  if (rows.length === 0) return null;
+  const grouped = filtered.reduce((acc, r) => {
+    const key = r.kind || 'custom';
+    (acc[key] = acc[key] || []).push(r);
+    return acc;
+  }, {});
+  const order = ['header', 'footer', 'cta', 'testimonial', 'product', 'social', 'signature', 'custom'];
+  return (
+    <div className="block-cat">
+      <h4>{t('editor.category.savedBlocks')}</h4>
+      {order.map((k) => {
+        const list = grouped[k];
+        if (!list || list.length === 0) return null;
+        return (
+          <div key={k} style={{ marginBottom: 8 }}>
+            <div style={{
+              fontSize: 10,
+              color: 'var(--fg-3)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              fontWeight: 600,
+              marginBottom: 4,
+            }}>{t(KIND_LABEL_KEY[k] || 'library.cat.custom')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 4 }}>
+              {list.map((r) => (
+                <button
+                  key={r.id}
+                  className="block-tile"
+                  draggable
+                  onClick={() => onAdd(r.id)}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/x-mc-saved-block', r.id);
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
+                  title={r.name}
+                  style={{ justifyContent: 'flex-start', height: 'auto', padding: '8px 10px' }}
+                >
+                  <div className="block-ic"><I.layers size={14} /></div>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textAlign: 'left',
+                  }}>{r.name}</div>
+                  {r.starred && <I.star2 size={10} style={{ marginLeft: 'auto', color: 'var(--warn)' }} />}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -470,9 +556,14 @@ function useEditorPrefs() {
   return prefs;
 }
 
-function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars, onReview }) {
+function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOpenVars, onReview }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
+  // Mode: template (full email, many sections) vs block (a single reusable
+  // section). Drives the load/save path, the title/back semantics, and which
+  // chrome is hidden (section-add, preview/export/test buttons, etc.).
+  const isBlockMode = !!block && !template;
+  const entity = isBlockMode ? block : template;
   const [doc, setDoc] = React.useState([]);
   const [vars, setVars] = React.useState([]);
   const [loaded, setLoaded] = React.useState(false);
@@ -480,7 +571,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
   const [device, setDevice] = React.useState('desktop');
   const [leftTab, setLeftTab] = React.useState('content');
   const [rightTab, setRightTab] = React.useState('props');
-  const [name, setName] = React.useState(template?.name || t('editor.untitledTemplate'));
+  const [name, setName] = React.useState(entity?.name || t('editor.untitledTemplate'));
   const [zoom, setZoom] = React.useState(100);
   const [improveBlock, setImproveBlock] = React.useState(null);
   // When the user clicks an empty image placeholder in the canvas we want to
@@ -493,8 +584,10 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
   });
   const editorPrefs = useEditorPrefs();
 
-  const templateIdRef = React.useRef(template?.id || null);
+  const templateIdRef = React.useRef(entity?.id || null);
   const templateJsonRef = React.useRef(null);
+  const isBlockModeRef = React.useRef(isBlockMode);
+  isBlockModeRef.current = isBlockMode;
   const saveTimerRef = React.useRef(null);
   const savingRef = React.useRef(false);
   const skipNextSaveRef = React.useRef(true);
@@ -555,7 +648,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
     lastPushAtRef.current = 0;
     skipHistoryRef.current = true;
     refreshHistoryState();
-  }, [template?.id, refreshHistoryState]);
+  }, [entity?.id, refreshHistoryState]);
 
   const undo = React.useCallback(() => {
     if (!undoStackRef.current.length) return;
@@ -630,34 +723,49 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
     };
   }, []);
 
-  // ─── Load doc from storage when the template id changes ──────────
+  // ─── Load doc from storage when the entity id changes ──────────
+  // Two modes converge into the same doc shape (an array of sections).
+  // Templates carry {sections:[...]}; blocks carry a single `section` that
+  // we wrap into a 1-section array so the rest of the editor is oblivious.
   React.useEffect(() => {
-    if (!template?.id) { setLoaded(true); return; }
+    if (!entity?.id) { setLoaded(true); return; }
     let cancelled = false;
-    templateIdRef.current = template.id;
+    templateIdRef.current = entity.id;
     skipNextSaveRef.current = true;
     (async () => {
-      const tpl = await window.stTemplates.read(template.id);
-      if (cancelled) return;
-      templateJsonRef.current = tpl;
-      const sections = tpl?.doc?.sections;
-      setDoc(Array.isArray(sections) ? sections : []);
-      // Backward-compat: pre-Bundle G.1 templates don't have a `vars` field.
-      // Inherit from workspace defaults so they're not blank — the next save
-      // will persist the inherited list into this template.
-      const loadedVars = Array.isArray(tpl?.vars)
-        ? tpl.vars
-        : (window.stStorage.getWSSetting('vars', null) || window.VARIABLES || []);
-      setVars(loadedVars);
-      setName(tpl?.name || template.name || t('editor.untitledTemplate'));
-      // Reset selection to the first section (or clear if empty)
-      const firstId = Array.isArray(sections) && sections[0]?.id;
-      setSel(firstId ? { type:'section', id:firstId } : null);
+      if (isBlockMode) {
+        const blk = await window.stBlocks.read(entity.id);
+        if (cancelled) return;
+        templateJsonRef.current = blk;
+        const section = blk?.section;
+        const sections = section ? [section] : [];
+        setDoc(sections);
+        // Blocks reuse the workspace default vars — no per-block override yet.
+        setVars(window.stStorage.getWSSetting('vars', null) || window.VARIABLES || []);
+        setName(blk?.name || entity.name || t('editor.untitledTemplate'));
+        setSel(section ? { type:'section', id: section.id } : null);
+      } else {
+        const tpl = await window.stTemplates.read(entity.id);
+        if (cancelled) return;
+        templateJsonRef.current = tpl;
+        const sections = tpl?.doc?.sections;
+        setDoc(Array.isArray(sections) ? sections : []);
+        // Backward-compat: pre-Bundle G.1 templates don't have a `vars` field.
+        // Inherit from workspace defaults so they're not blank — the next save
+        // will persist the inherited list into this template.
+        const loadedVars = Array.isArray(tpl?.vars)
+          ? tpl.vars
+          : (window.stStorage.getWSSetting('vars', null) || window.VARIABLES || []);
+        setVars(loadedVars);
+        setName(tpl?.name || entity.name || t('editor.untitledTemplate'));
+        const firstId = Array.isArray(sections) && sections[0]?.id;
+        setSel(firstId ? { type:'section', id:firstId } : null);
+      }
       setLoaded(true);
       setSaveState('idle');
     })();
     return () => { cancelled = true; };
-  }, [template?.id]);
+  }, [entity?.id, isBlockMode]);
 
   // ─── Debounced save ──────────────────────────────────────────────
   // Serialized: if a save is in flight, a new flush waits for it to complete
@@ -672,15 +780,32 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
     savingRef.current = true;
     setSaveState('saving');
     try {
-      const patched = {
-        ...(templateJsonRef.current || {}),
-        id: templateIdRef.current,
-        schemaVersion: 1,
-        name: nameRef.current,
-        doc: { sections: docRef.current },
-        vars: varsRef.current,
-      };
-      const result = await window.stTemplates.write(templateIdRef.current, patched);
+      let patched;
+      let result;
+      if (isBlockModeRef.current) {
+        // A block persists its full object with the edited section written
+        // back in. Sections past index 0 are ignored — the block model is
+        // single-section, and the section-insert chrome is hidden anyway.
+        const section = docRef.current[0] || null;
+        patched = {
+          ...(templateJsonRef.current || {}),
+          id: templateIdRef.current,
+          schemaVersion: 1,
+          name: nameRef.current,
+          section,
+        };
+        result = await window.stBlocks.write(templateIdRef.current, patched);
+      } else {
+        patched = {
+          ...(templateJsonRef.current || {}),
+          id: templateIdRef.current,
+          schemaVersion: 1,
+          name: nameRef.current,
+          doc: { sections: docRef.current },
+          vars: varsRef.current,
+        };
+        result = await window.stTemplates.write(templateIdRef.current, patched);
+      }
       if (result) {
         templateJsonRef.current = patched;
         setSaveState('idle');
@@ -864,6 +989,34 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
     setSel({type:'section',id:newId});
   };
 
+  // Inserts a saved block's section at `atIndex`. Clones with fresh ids so
+  // re-using the same saved block twice in a template doesn't collide on
+  // React keys or editor selection. Template mode only — the ContentPanel
+  // and drop handlers that invoke this are hidden in block mode.
+  const addSavedBlock = async (blockId, atIndex=null) => {
+    const blk = await window.stBlocks.read(blockId);
+    const src = blk?.section;
+    if (!src) return;
+    const mkId = (prefix) => `${prefix}_${Math.random().toString(36).slice(2, 8)}`;
+    const newSection = {
+      id: mkId('s'),
+      name: blk.name || t('editor.section.defaultName'),
+      layout: src.layout || '1col',
+      style: { ...(src.style || defaultSectionStyle()) },
+      columns: (src.columns || []).map((col) => ({
+        w: col.w,
+        blocks: (col.blocks || []).map((b) => ({ ...b, id: mkId('b') })),
+      })),
+    };
+    setDoc(d => {
+      if (atIndex === null || atIndex >= d.length) return [...d, newSection];
+      const copy = [...d];
+      copy.splice(atIndex, 0, newSection);
+      return copy;
+    });
+    setSel({ type:'section', id: newSection.id });
+  };
+
   return (
     <div className="editor" data-view={device}>
       <div className="editor-top">
@@ -872,7 +1025,9 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
         <div className="name">
           <input value={name} onChange={e=>setName(e.target.value)}/>
           <div className="meta">
-            {template?.folder || templateJsonRef.current?.folder || t('editor.noFolder')} · {t('editor.sectionsCount', { n: doc.length })}
+            {isBlockMode
+              ? <>{t('editor.blockBadge')}{block?.kind ? <> · {t(KIND_LABEL_KEY[block.kind] || 'library.cat.custom')}</> : null}</>
+              : <>{template?.folder || templateJsonRef.current?.folder || t('editor.noFolder')} · {t('editor.sectionsCount', { n: doc.length })}</>}
           </div>
         </div>
 
@@ -893,12 +1048,17 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
           <button className="btn icon ghost sm" onClick={()=>window.dispatchEvent(new CustomEvent('st:cmd-open'))} title={t('editor.toolbar.searchTooltip')} aria-label={t('editor.toolbar.search')}><I.search size={13}/></button>
         </div>
 
-        {/* Zone D — actions */}
-        <button className="btn ghost sm" onClick={onOpenVars}><I.braces size={13}/> {t('editor.action.tags')}</button>
-        <button className="btn ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onPreview(); }}><I.eye size={13}/> {t('editor.action.preview')}</button>
-        <button className="btn ghost sm" onClick={onReview} title={t('editor.action.reviewTooltip')} data-tour="review-btn"><I.check size={13}/> {t('editor.action.review')}</button>
-        <button className="btn sm" onClick={onTestSend}><I.send size={13}/> {t('editor.action.testSend')}</button>
-        <button className="btn primary sm" onClick={onExport} data-tour="export-btn"><I.download size={13}/> {t('editor.action.export')}</button>
+        {/* Zone D — actions. Blocks don't have variables or a send flow, so
+             only the "back" (via name input) and save state chrome remain. */}
+        {!isBlockMode && (
+          <>
+            <button className="btn ghost sm" onClick={onOpenVars}><I.braces size={13}/> {t('editor.action.tags')}</button>
+            <button className="btn ghost sm" onClick={async ()=>{ await flushSaveRef.current(); onPreview(); }}><I.eye size={13}/> {t('editor.action.preview')}</button>
+            <button className="btn ghost sm" onClick={onReview} title={t('editor.action.reviewTooltip')} data-tour="review-btn"><I.check size={13}/> {t('editor.action.review')}</button>
+            <button className="btn sm" onClick={onTestSend}><I.send size={13}/> {t('editor.action.testSend')}</button>
+            <button className="btn primary sm" onClick={onExport} data-tour="export-btn"><I.download size={13}/> {t('editor.action.export')}</button>
+          </>
+        )}
       </div>
 
       <div className="editor-body">
@@ -908,7 +1068,13 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
             <Tab label={t('editor.leftTab.layers')} active={leftTab==='layers'} onClick={()=>setLeftTab('layers')}/>
             <Tab label={t('editor.leftTab.history')} active={leftTab==='history'} onClick={()=>setLeftTab('history')}/>
           </div>
-          {leftTab==='content' && <ContentPanel onAddBlock={addBlockToEnd} onAddSection={addSection}/>}
+          {leftTab==='content' && (
+            <ContentPanel
+              onAddBlock={addBlockToEnd}
+              onAddSection={isBlockMode ? null : addSection}
+              onAddSavedBlock={isBlockMode ? null : (id)=>addSavedBlock(id, null)}
+            />
+          )}
           {leftTab==='layers' && <LayersPanel doc={doc} selected={sel} onSelect={setSel}/>}
           {leftTab==='history' && <HistoryPanel/>}
         </aside>
@@ -929,12 +1095,21 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
                 <div
                   style={{background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--r-md)',padding:'20px 0'}}
                   onDragOver={(e)=>{
-                    if (Array.from(e.dataTransfer.types).includes('text/x-mc-section')) {
+                    if (isBlockMode) return;
+                    const types = Array.from(e.dataTransfer.types);
+                    if (types.includes('text/x-mc-section') || types.includes('text/x-mc-saved-block')) {
                       e.preventDefault();
                       e.dataTransfer.dropEffect = 'copy';
                     }
                   }}
                   onDrop={(e)=>{
+                    if (isBlockMode) return;
+                    const savedId = e.dataTransfer.getData('text/x-mc-saved-block');
+                    if (savedId) {
+                      e.preventDefault();
+                      addSavedBlock(savedId, 0);
+                      return;
+                    }
                     const id = e.dataTransfer.getData('text/x-mc-section');
                     if (!id) return;
                     const p = resolvePreset(id);
@@ -954,14 +1129,21 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
                     ]}
                   />
                 </div>
-              ) : (<>
-              <SectionInsertBtn
-                onClick={()=>addBlankSection(0)}
-                onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, 0); }}
-              />
-              {doc.map((s, si) => (
-                <React.Fragment key={s.id}>
+              ) : doc.flatMap((s, si) => {
+                const items = [];
+                if (si === 0 && !isBlockMode) {
+                  items.push(
+                    <SectionInsertBtn
+                      key={`ins-${s.id}-before`}
+                      onClick={()=>addBlankSection(0)}
+                      onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, 0); }}
+                      onDropSavedBlock={(id)=>addSavedBlock(id, 0)}
+                    />
+                  );
+                }
+                items.push(
                   <SectionView
+                    key={`sec-${s.id}`}
                     section={s}
                     selected={sel?.type==='section' && sel.id===s.id}
                     selectedBlockId={sel?.type==='block' ? sel.id : null}
@@ -977,13 +1159,19 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
                     onDropBlock={(colIdx, atIdx, blockType)=>addBlankBlockInColumn(s.id, colIdx, atIdx, blockType)}
                     onEditBlock={(block, patch)=>editBlockContent(s.id, block, patch)}
                   />
-                  <SectionInsertBtn
-                    onClick={()=>addBlankSection(si+1)}
-                    onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, si+1); }}
-                  />
-                </React.Fragment>
-              ))}
-              </>)}
+                );
+                if (!isBlockMode) {
+                  items.push(
+                    <SectionInsertBtn
+                      key={`ins-${s.id}-after`}
+                      onClick={()=>addBlankSection(si+1)}
+                      onDropPreset={(id)=>{ const p=resolvePreset(id); if (p) addSection(p, si+1); }}
+                      onDropSavedBlock={(id)=>addSavedBlock(id, si+1)}
+                    />
+                  );
+                }
+                return items;
+              })}
             </div>
           </div>
           <div className="canvas-foot">
@@ -1018,7 +1206,7 @@ function Editor({ template, onBack, onPreview, onExport, onTestSend, onOpenVars,
           editBlockContent(picker.sectionId, picker.block, patch);
         }}
       />
-      {showTour && <EditorTour onClose={()=>setShowTour(false)}/>}
+      {showTour && !isBlockMode && <EditorTour onClose={()=>setShowTour(false)}/>}
     </div>
   );
 }
@@ -1161,7 +1349,7 @@ function ImproveAIModal({ block, onClose, onApply }) {
   );
 }
 
-function SectionInsertBtn({ onClick, onDropPreset }) {
+function SectionInsertBtn({ onClick, onDropPreset, onDropSavedBlock }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
   const [over, setOver] = React.useState(false);
@@ -1169,15 +1357,24 @@ function SectionInsertBtn({ onClick, onDropPreset }) {
     <div
       className={`section-insert${over?' drop-active':''}`}
       onDragOver={(e)=>{
-        if (!onDropPreset) return;
-        if (Array.from(e.dataTransfer.types).includes('text/x-mc-section')) {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-          setOver(true);
-        }
+        const types = Array.from(e.dataTransfer.types);
+        const hasPreset = onDropPreset && types.includes('text/x-mc-section');
+        const hasSaved  = onDropSavedBlock && types.includes('text/x-mc-saved-block');
+        if (!hasPreset && !hasSaved) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        setOver(true);
       }}
       onDragLeave={()=>setOver(false)}
       onDrop={(e)=>{
+        const savedId = onDropSavedBlock ? e.dataTransfer.getData('text/x-mc-saved-block') : '';
+        if (savedId) {
+          e.preventDefault();
+          e.stopPropagation();
+          setOver(false);
+          onDropSavedBlock(savedId);
+          return;
+        }
         if (!onDropPreset) return;
         const id = e.dataTransfer.getData('text/x-mc-section');
         if (!id) return;
