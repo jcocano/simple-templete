@@ -1,6 +1,7 @@
 node_modules
 dist
 out
+release
 .DS_Store
 
 # AI tooling — all agent/IDE AI artifacts are local-only, not shared via git
