@@ -1,6 +1,8 @@
 // Library of saved blocks
 
 function Library({ onBack }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const renderMini = (kind) => {
     const styles = {
       header: <div style={{width:'100%',padding:'10px 14px',background:'#fff',border:'1px solid #eee',display:'flex',alignItems:'center',justifyContent:'space-between'}}><div style={{fontWeight:700,fontSize:11}}>Acme</div><div style={{fontSize:9,color:'#999'}}>Menu</div></div>,
@@ -13,38 +15,47 @@ function Library({ onBack }) {
     };
     return styles[kind] || <div>—</div>;
   };
-  const [cat, setCat] = React.useState('Todos');
+  const [cat, setCat] = React.useState('all');
   const [q, setQ] = React.useState('');
 
-  const CATS = ['Todos','Cabeceras','Footers','CTAs','Testimonios','Productos','Social'];
-  const CAT_MAP = {
-    'Cabeceras':'header', 'Footers':'footer', 'CTAs':'cta',
-    'Testimonios':'testimonial', 'Productos':'product', 'Social':'social',
-  };
+  const CATS = [
+    { id:'all',         label: t('library.cat.all') },
+    { id:'header',      label: t('library.cat.headers') },
+    { id:'footer',      label: t('library.cat.footers') },
+    { id:'cta',         label: t('library.cat.ctas') },
+    { id:'testimonial', label: t('library.cat.testimonials') },
+    { id:'product',     label: t('library.cat.products') },
+    { id:'social',      label: t('library.cat.social') },
+  ];
   const filtered = SAVED_BLOCKS.filter(b => {
-    const matchCat = cat==='Todos' || b.kind === CAT_MAP[cat];
+    const matchCat = cat==='all' || b.kind === cat;
     const matchQ = !q.trim() || b.name.toLowerCase().includes(q.toLowerCase());
     return matchCat && matchQ;
   });
+  const currentCatLabel = (CATS.find(c => c.id === cat) || CATS[0]).label;
+
+  const countKey = filtered.length === 1 ? 'library.count.one' : 'library.count.other';
+  const countText = t(countKey, { n: filtered.length })
+    + ((q || cat !== 'all') ? ' ' + t('library.countOf', { total: SAVED_BLOCKS.length }) : '');
 
   return (
     <div className="editor">
       <div className="editor-top">
-        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> Biblioteca</button>
-        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>Bloques guardados</div>
-        <span className="chip">{filtered.length} bloque{filtered.length===1?'':'s'}{q||cat!=='Todos'?` de ${SAVED_BLOCKS.length}`:''}</span>
+        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> {t('library.back')}</button>
+        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>{t('library.title')}</div>
+        <span className="chip">{countText}</span>
         <div className="grow"/>
         <div className="search">
           <span className="si"><I.search size={14}/></span>
-          <input placeholder="Buscar bloques…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <input placeholder={t('library.search.placeholder')} value={q} onChange={e=>setQ(e.target.value)}/>
         </div>
         <ThemeToggleBtn/>
-        <button className="btn primary sm" onClick={()=>window.toast && window.toast({kind:'ok', title:'Bloque guardado en tu biblioteca', msg:'Podrás reusarlo en cualquier plantilla.'})}><I.plus size={13}/> Guardar nuevo</button>
+        <button className="btn primary sm" onClick={()=>window.toast && window.toast({kind:'ok', title: t('library.toast.saved.title'), msg: t('library.toast.saved.msg')})}><I.plus size={13}/> {t('library.saveNew')}</button>
       </div>
 
       <div style={{display:'flex',gap:6,padding:'12px 24px',borderBottom:'1px solid var(--line)',background:'var(--surface)',overflowX:'auto'}}>
         {CATS.map(c => (
-          <button key={c} className={`btn sm ${c===cat?'primary':''}`} onClick={()=>setCat(c)}>{c}</button>
+          <button key={c.id} className={`btn sm ${c.id===cat?'primary':''}`} onClick={()=>setCat(c.id)}>{c.label}</button>
         ))}
       </div>
 
@@ -53,22 +64,22 @@ function Library({ onBack }) {
           <EmptyState
             illustration={q ? 'search' : 'no-blocks'}
             title={q
-              ? `Nada que coincida con «${q}»`
-              : cat==='Todos'
-                ? 'Aún no guardas bloques'
-                : `Nada en «${cat}» todavía`}
+              ? t('library.empty.search.title', { q })
+              : cat==='all'
+                ? t('library.empty.none.title')
+                : t('library.empty.cat.title', { cat: currentCatLabel })}
             msg={q
-              ? 'Prueba con otra palabra, o cambia de categoría en la barra de arriba.'
-              : cat==='Todos'
-                ? 'Cuando diseñes una cabecera, un botonazo de llamada a la acción o un footer que te guste, guárdalo aquí. Luego lo arrastras a cualquier plantilla.'
-                : 'Guarda algo que uses a menudo y lo tendrás a mano en segundos.'}
+              ? t('library.empty.search.msg')
+              : cat==='all'
+                ? t('library.empty.none.msg')
+                : t('library.empty.cat.msg')}
             primaryAction={q
-              ? { label:'Limpiar búsqueda', icon:'x', onClick:()=>setQ('') }
-              : { label:'Crear uno nuevo', icon:'plus', onClick:()=>window.toast && window.toast({kind:'info', title:'Abre una plantilla, diseña el bloque y pulsa «Guardar bloque» en su barra.'}) }}
-            secondaryAction={cat!=='Todos' && !q ? { label:'Ver todos', icon:'grid', onClick:()=>setCat('Todos') } : null}
-            tips={!q && cat==='Todos' ? [
-              'Tus bloques quedan disponibles en el editor bajo «Mis bloques».',
-              'Las variables {{nombre}} se guardan y se rellenan solas al reusar el bloque.',
+              ? { label: t('library.empty.clearSearch'), icon:'x', onClick:()=>setQ('') }
+              : { label: t('library.empty.createNew'), icon:'plus', onClick:()=>window.toast && window.toast({kind:'info', title: t('library.toast.createHint')}) }}
+            secondaryAction={cat!=='all' && !q ? { label: t('library.empty.viewAll'), icon:'grid', onClick:()=>setCat('all') } : null}
+            tips={!q && cat==='all' ? [
+              t('library.tip.available'),
+              t('library.tip.vars'),
             ] : []}
           />
         ) : (
@@ -78,7 +89,7 @@ function Library({ onBack }) {
                 <div className="lp">{renderMini(b.kind)}</div>
                 <div className="lm">
                   <div className="lt">{b.name}</div>
-                  <div className="ls">Usado en {b.usedIn} plantillas · <span style={{fontFamily:'var(--font-mono)'}}>&lt;mj-{b.kind}&gt;</span></div>
+                  <div className="ls">{t('library.usedIn', { n: b.usedIn })} · <span style={{fontFamily:'var(--font-mono)'}}>&lt;mj-{b.kind}&gt;</span></div>
                 </div>
               </div>
             ))}

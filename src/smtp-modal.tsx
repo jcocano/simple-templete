@@ -7,21 +7,25 @@ function extractDomain(email) {
   return at >= 0 ? email.slice(at + 1).toLowerCase().trim() : null;
 }
 
-// Minimal stand-in template used when the user runs "Guardar y probar" from
+// Minimal stand-in template used when the user runs "Save and test" from
 // Settings without an editor open — we still want to send a real email so the
 // user can confirm deliverability end-to-end.
 function buildConnectivityTestTemplate(fromEmail = '') {
+  const t = window.stI18n.t;
+  const subject = t('smtp.connTest.subject');
+  const heading = t('smtp.connTest.heading');
+  const body = t('smtp.connTest.body', { fromEmail: fromEmail ? ` (${fromEmail})` : '' });
   return {
-    name: 'Simple Template — prueba de conexión',
+    name: subject,
     vars: [],
-    meta: { subject: 'Simple Template — prueba de conexión' },
+    meta: { subject },
     doc: {
       sections: [{
         id: 'sec-test', layout: '1col',
         style: { bg: '#ffffff', text: '#1a1a17', padding: 32, align: 'center', font: 'inter' },
         columns: [{ w: 100, blocks: [
-          { id: 'b-head', type: 'heading', data: { content: { text: '✅ Tu SMTP está funcionando' }, style: { size: 22, align: 'center', weight: 600 } } },
-          { id: 'b-body', type: 'text', data: { content: { body: `Este correo fue enviado desde Simple Template usando la configuración SMTP que acabás de guardar${fromEmail ? ` (${fromEmail})` : ''}. Si lo ves en tu bandeja, podés empezar a mandar pruebas de tus plantillas.` }, style: { size: 14, align: 'center' } } },
+          { id: 'b-head', type: 'heading', data: { content: { text: heading }, style: { size: 22, align: 'center', weight: 600 } } },
+          { id: 'b-body', type: 'text', data: { content: { body }, style: { size: 14, align: 'center' } } },
         ]}],
       }],
     },
@@ -32,96 +36,89 @@ function buildConnectivityTestTemplate(fromEmail = '') {
 // host/port/security. The `appPasswordUrl` opens the user's browser directly
 // at the provider's app-password generation page; for providers that require
 // 2FA first, the UI copy flags that.
+// Translatable strings (name [for smtp only], hint, steps, note, appLabel) are
+// looked up via t('smtp.provider.<id>.<field>') — see getProviders().
 const DELIVERY_PROVIDERS = [
   {
     id:'gmail', name:'Gmail', color:'#ea4335', letter:'G', kind:'appPassword',
-    hint:'Conectá con una contraseña de aplicación de Google',
     smtp: { host:'smtp.gmail.com', port:587, security:'tls' },
     appPasswordUrl: 'https://myaccount.google.com/apppasswords',
-    steps: [
-      'Activá la verificación en 2 pasos en tu cuenta de Google si aún no la tenés.',
-      'Abrí "Contraseñas de aplicación" y generá una llamada "Simple Template".',
-      'Pegá la contraseña (16 caracteres sin espacios) acá abajo.',
-    ],
+    stepsCount: 3,
   },
   {
     id:'outlook', name:'Outlook', color:'#0078d4', letter:'O', kind:'appPassword',
-    hint:'Conectá con una contraseña de aplicación de Microsoft',
     smtp: { host:'smtp-mail.outlook.com', port:587, security:'tls' },
     appPasswordUrl: 'https://account.microsoft.com/security',
-    steps: [
-      'Activá la verificación en 2 pasos en tu cuenta Microsoft si aún no la tenés.',
-      'En "Seguridad avanzada", creá una contraseña de aplicación.',
-      'Pegala acá abajo. Solo funciona con cuentas personales (outlook.com, hotmail.com, live.com).',
-    ],
-    note: 'Las cuentas corporativas (Microsoft 365) requieren OAuth y no están soportadas todavía.',
+    stepsCount: 3,
+    hasNote: true,
   },
   {
     id:'yahoo', name:'Yahoo Mail', color:'#6001d2', letter:'Y', kind:'appPassword',
-    hint:'Conectá con una contraseña de aplicación de Yahoo',
     smtp: { host:'smtp.mail.yahoo.com', port:587, security:'tls' },
     appPasswordUrl: 'https://login.yahoo.com/account/security',
-    steps: [
-      'Abrí la seguridad de tu cuenta de Yahoo.',
-      'Generá una contraseña de aplicación para "Simple Template".',
-      'Pegala acá abajo.',
-    ],
+    stepsCount: 3,
   },
   {
     id:'icloud', name:'iCloud Mail', color:'#1f1f1f', letter:'', kind:'appPassword',
-    hint:'Conectá con una contraseña específica de Apple ID',
     smtp: { host:'smtp.mail.me.com', port:587, security:'tls' },
     appPasswordUrl: 'https://appleid.apple.com',
-    steps: [
-      'Entrá a tu Apple ID.',
-      'En "Inicio de sesión y seguridad", elegí "Contraseñas específicas de app".',
-      'Generá una nueva y pegala acá abajo.',
-    ],
+    stepsCount: 3,
   },
   {
     id:'gmail-oauth', name:'Gmail Workspace (OAuth)', color:'#ea4335', letter:'G', kind:'oauth',
-    hint:'Para cuentas corporativas — registrás tu propia app OAuth',
     setupUrl: 'https://console.cloud.google.com/apis/credentials',
     appLabel: 'Google Cloud Console',
     requiresClientSecret: true,
     requiresTenant: false,
-    steps: [
-      'Abrí Google Cloud Console → creá un proyecto (o usá uno existente).',
-      'En "APIs y servicios" → "Pantalla de consentimiento de OAuth", configurá la app (External, nombre, tu correo, scope sensible gmail.send).',
-      'En "Credenciales" → creá un Client ID tipo "Desktop app".',
-      'Copiá el Client ID y el Client Secret que Google te da, y pegalos acá abajo.',
-    ],
-    note: 'Google exige verificación de app para scope gmail.send en apps públicas. Como la app es tuya, se mantiene en modo "Testing" con hasta 100 usuarios de prueba sin verificación.',
+    stepsCount: 4,
+    hasNote: true,
   },
   {
     id:'microsoft-oauth', name:'Microsoft 365 (OAuth)', color:'#0078d4', letter:'M', kind:'oauth',
-    hint:'Para cuentas corporativas M365 — registrás tu propia app en Azure',
     setupUrl: 'https://portal.azure.com/',
     appLabel: 'Azure Portal',
     requiresClientSecret: false,
     requiresTenant: true,
-    steps: [
-      'Abrí Azure Portal → Microsoft Entra ID (Azure AD) → Registros de aplicaciones → Nueva.',
-      'Tipo "Public client (mobile/desktop)". Redirect URI: http://localhost (agregar "Permitir flujos públicos" en Authentication).',
-      'API permissions → Microsoft Graph → Delegated → SMTP.Send + offline_access.',
-      'Copiá Application (client) ID y Directory (tenant) ID, y pegalos acá abajo. Usá "common" como tenant para multi-tenant.',
-    ],
+    stepsCount: 4,
   },
   {
-    id:'smtp', name:'Correo personalizado', color:'#5b5bf0', letter:'✱', kind:'smtp',
-    hint:'Configura tu propio servidor SMTP',
+    id:'smtp', color:'#5b5bf0', letter:'✱', kind:'smtp',
+    // `name` comes from t('smtp.provider.smtp.name') — translated.
   },
 ];
+
+// Return DELIVERY_PROVIDERS enriched with localized `name` (only for smtp),
+// `hint`, `steps`, and `note` based on the current language.
+function getProviders() {
+  const t = window.stI18n.t;
+  return DELIVERY_PROVIDERS.map(p => {
+    const steps = [];
+    for (let i = 1; i <= (p.stepsCount || 0); i++) {
+      steps.push(t(`smtp.provider.${p.id}.step.${i}`));
+    }
+    const out = {
+      ...p,
+      name: p.name || t(`smtp.provider.${p.id}.name`),
+      hint: t(`smtp.provider.${p.id}.hint`),
+    };
+    if (p.stepsCount) out.steps = steps;
+    if (p.hasNote) out.note = t(`smtp.provider.${p.id}.note`);
+    return out;
+  });
+}
 
 const MAX_RECIPIENTS = 5;
 
 function DeliveryModal({ onClose, embedded = false }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   // Defaults pulled from the user's global account profile so the SMTP form
   // arrives pre-filled with the right "from" name/email instead of hardcoded
   // demo values. Per-workspace SMTP credentials still live in safeStorage.
   const account = window.stStorage.getSetting('account', {}) || {};
   const accountEmail = account.email || '';
   const accountName = account.name || '';
+  const providers = React.useMemo(() => getProviders(), [lang]);
   const DEFAULT_CFG = {
     fromName: accountName,
     fromEmail: accountEmail,
@@ -155,7 +152,7 @@ function DeliveryModal({ onClose, embedded = false }) {
     return () => { alive = false; };
   }, [provider]);
 
-  const p = DELIVERY_PROVIDERS.find(x => x.id === provider);
+  const p = providers.find(x => x.id === provider);
 
   const choose = (id) => {
     setProvider(id);
@@ -163,7 +160,7 @@ function DeliveryModal({ onClose, embedded = false }) {
     // For guided providers (Gmail/Outlook/Yahoo/iCloud), seed the SMTP fields
     // with the provider's hardcoded host/port/security so the user never sees
     // or edits them. They only need to supply their email + app password.
-    const pr = DELIVERY_PROVIDERS.find(x => x.id === id);
+    const pr = providers.find(x => x.id === id);
     if (pr?.kind === 'appPassword' && pr.smtp) {
       setCfg(c => ({
         ...c,
@@ -248,7 +245,7 @@ function DeliveryModal({ onClose, embedded = false }) {
     setAuthorizing(false);
     if (!result.ok) {
       setState('err');
-      setError(result.error || 'Falló la autorización OAuth.');
+      setError(result.error || t('smtp.oauth.failed'));
       return;
     }
     // Persist tokens + cfg immediately so auth survives even if the user
@@ -307,14 +304,15 @@ function DeliveryModal({ onClose, embedded = false }) {
       setState('sent');
       setConnected(true);
       window.stStorage.setWSSetting('delivery:connected', true);
+      const n = (cfg.recipients || []).length;
       window.notify && window.notify('testDone', {
         kind: 'ok',
-        title: `Prueba enviada a ${(cfg.recipients || []).length} destinatario${(cfg.recipients||[]).length>1?'s':''}`,
-        msg: 'Suele tardar un par de minutos en llegar.',
+        title: t(n === 1 ? 'smtp.toast.sent.title.one' : 'smtp.toast.sent.title.other', { n }),
+        msg: t('smtp.toast.sent.msg'),
       });
     } else {
       setState('err');
-      setError(result.error || 'Error desconocido al enviar.');
+      setError(result.error || t('smtp.error.unknown'));
     }
   };
   const disconnect = () => {
@@ -328,10 +326,10 @@ function DeliveryModal({ onClose, embedded = false }) {
   const step1Body = (
     <>
       <div style={{padding:'4px 0 8px',fontSize:13,color:'var(--fg-2)',lineHeight:1.55,marginBottom:16}}>
-        Elige desde qué cuenta quieres enviar las pruebas de este template. Podrás enviar hasta <b>{MAX_RECIPIENTS} destinatarios simultáneos</b> por prueba.
+        {t('smtp.step1.intro.prefix')} <b>{t('smtp.step1.intro.max', { n: MAX_RECIPIENTS })}</b> {t('smtp.step1.intro.suffix')}
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-        {DELIVERY_PROVIDERS.map(pr => (
+        {providers.map(pr => (
           <button key={pr.id} onClick={()=>choose(pr.id)} style={{
             display:'flex',alignItems:'center',gap:14,
             padding:'16px 18px',
@@ -355,7 +353,7 @@ function DeliveryModal({ onClose, embedded = false }) {
             <div style={{minWidth:0,flex:1}}>
               <div style={{fontSize:14,fontWeight:500,marginBottom:2,display:'flex',alignItems:'center',gap:6}}>
                 {pr.name}
-                {pr.kind==='smtp' && <span className="chip" style={{height:18,fontSize:10}}>Avanzado</span>}
+                {pr.kind==='smtp' && <span className="chip" style={{height:18,fontSize:10}}>{t('smtp.badge.advanced')}</span>}
               </div>
               <div style={{fontSize:11.5,color:'var(--fg-3)'}}>{pr.hint}</div>
             </div>
@@ -365,8 +363,7 @@ function DeliveryModal({ onClose, embedded = false }) {
       <div style={{marginTop:18,padding:12,background:'var(--surface-2)',borderRadius:'var(--r-md)',fontSize:12,color:'var(--fg-2)',lineHeight:1.55,display:'flex',gap:10}}>
         <I.info size={14} style={{color:'var(--fg-3)',marginTop:2,flexShrink:0}}/>
         <div>
-          Estos ajustes son <b>solo para pruebas del template</b> (máx. {MAX_RECIPIENTS} destinatarios por envío).
-          Para campañas masivas a listas de contactos es una función aparte.
+          {t('smtp.step1.note.prefix')} <b>{t('smtp.step1.note.bold')}</b> {t('smtp.step1.note.suffix', { n: MAX_RECIPIENTS })}
         </div>
       </div>
     </>
@@ -388,7 +385,7 @@ function DeliveryModal({ onClose, embedded = false }) {
           <div style={{fontSize:14,fontWeight:500}}>{p.name}</div>
           <div style={{fontSize:11.5,color:'var(--fg-3)'}}>{p.hint}</div>
         </div>
-        {connected && <span className="chip ok"><I.check size={10}/> Conectado</span>}
+        {connected && <span className="chip ok"><I.check size={10}/> {t('smtp.status.connected')}</span>}
       </div>
 
       {/* App-password flow (gmail/outlook/yahoo/icloud) */}
@@ -402,7 +399,7 @@ function DeliveryModal({ onClose, embedded = false }) {
             display:'flex',flexDirection:'column',gap:10,
           }}>
             <div style={{fontSize:12.5,fontWeight:500,color:'var(--fg)'}}>
-              {p.name} usa una contraseña de aplicación
+              {t('smtp.appPass.heading', { name: p.name })}
             </div>
             <ol style={{margin:0,paddingLeft:18,fontSize:12,color:'var(--fg-2)',lineHeight:1.6,display:'flex',flexDirection:'column',gap:2}}>
               {(p.steps || []).map((s, i) => <li key={i}>{s}</li>)}
@@ -423,22 +420,22 @@ function DeliveryModal({ onClose, embedded = false }) {
               className="btn"
               onClick={openAppPasswordPage}
               style={{alignSelf:'flex-start'}}>
-              <I.send size={13}/> Abrir {p.name} para generar contraseña
+              <I.send size={13}/> {t('smtp.appPass.openBtn', { name: p.name })}
             </button>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Tu correo de {p.name}</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.email.label', { name: p.name })}</label>
             <input
               className="field"
               type="email"
               value={cfg.user}
               onChange={e=>updateUser(e.target.value)}
-              placeholder="tu.correo@ejemplo.com"/>
+              placeholder={t('smtp.field.email.placeholder')}/>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Contraseña de aplicación</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.appPass.label')}</label>
             <input
               className="field"
               type="password"
@@ -446,18 +443,18 @@ function DeliveryModal({ onClose, embedded = false }) {
               onChange={e=>update('pass',e.target.value)}
               placeholder="••••••••••••••••"/>
             <div style={{fontSize:11,color:'var(--fg-3)',marginTop:4,lineHeight:1.5}}>
-              No es tu contraseña normal — es la que generaste en el paso 2.
+              {t('smtp.field.appPass.hint')}
             </div>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Correo desde el que envías</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.fromEmail.label')}</label>
             <input
               className="field"
               type="email"
               value={cfg.fromEmail}
               onChange={e=>update('fromEmail',e.target.value)}
-              placeholder={cfg.user || 'tu.correo@ejemplo.com'}/>
+              placeholder={cfg.user || t('smtp.field.email.placeholder')}/>
             {domainMismatch && (
               <div style={{
                 marginTop:6,padding:'8px 10px',
@@ -468,8 +465,7 @@ function DeliveryModal({ onClose, embedded = false }) {
               }}>
                 <I.info size={12} style={{marginTop:2,flexShrink:0}}/>
                 <span>
-                  El "From" usa <b>@{fromDomain}</b> pero la cuenta es <b>@{userDomain}</b>.
-                  {p.name} descarta correos cuyo From no coincide con la cuenta autenticada.
+                  {t('smtp.warn.domainMismatch.appPass', { fromDomain, userDomain, name: p.name })}
                 </span>
               </div>
             )}
@@ -482,21 +478,21 @@ function DeliveryModal({ onClose, embedded = false }) {
         <div className="col" style={{gap:14}}>
           <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:10}}>
             <div>
-              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Servidor SMTP</label>
-              <input className="field" value={cfg.host} onChange={e=>update('host',e.target.value)} placeholder="smtp.tuempresa.com"/>
+              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.host.label')}</label>
+              <input className="field" value={cfg.host} onChange={e=>update('host',e.target.value)} placeholder={t('smtp.field.host.placeholder')}/>
             </div>
             <div>
-              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Puerto</label>
+              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.port.label')}</label>
               <input className="field" type="number" value={cfg.port} onChange={e=>update('port',Number(e.target.value))}/>
             </div>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Seguridad</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.security.label')}</label>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
               {[
-                {id:'tls',label:'TLS',d:'Puerto 587 (recomendado)'},
-                {id:'ssl',label:'SSL',d:'Puerto 465'},
+                {id:'tls',label:'TLS',d: t('smtp.security.tls.desc')},
+                {id:'ssl',label:'SSL',d: t('smtp.security.ssl.desc')},
               ].map(o => (
                 <label key={o.id} style={{
                   padding:'10px 12px',
@@ -518,18 +514,18 @@ function DeliveryModal({ onClose, embedded = false }) {
           <div className="divider"/>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Usuario</label>
-            <input className="field" value={cfg.user} onChange={e=>updateUser(e.target.value)} placeholder="tu-cuenta@tuempresa.com"/>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.user.label')}</label>
+            <input className="field" value={cfg.user} onChange={e=>updateUser(e.target.value)} placeholder={t('smtp.field.user.placeholder')}/>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Contraseña</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.password.label')}</label>
             <input className="field" type="password" value={cfg.pass} onChange={e=>update('pass',e.target.value)} placeholder="••••••••••••"/>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Correo desde el que envías</label>
-            <input className="field" type="email" value={cfg.fromEmail} onChange={e=>update('fromEmail',e.target.value)} placeholder="pruebas@tuempresa.com"/>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.fromEmail.label')}</label>
+            <input className="field" type="email" value={cfg.fromEmail} onChange={e=>update('fromEmail',e.target.value)} placeholder={t('smtp.field.fromEmail.placeholder')}/>
             {domainMismatch && (
               <div style={{
                 marginTop:6,padding:'8px 10px',
@@ -540,9 +536,7 @@ function DeliveryModal({ onClose, embedded = false }) {
               }}>
                 <I.info size={12} style={{marginTop:2,flexShrink:0}}/>
                 <span>
-                  El "From" usa <b>@{fromDomain}</b> pero el servidor SMTP es <b>@{userDomain}</b>.
-                  Gmail y otros filtros descartan como spam los correos con dominios que no coinciden.
-                  Cambiá el From a una dirección <b>@{userDomain}</b> para que tu prueba llegue.
+                  {t('smtp.warn.domainMismatch.smtp', { fromDomain, userDomain })}
                 </span>
               </div>
             )}
@@ -561,7 +555,7 @@ function DeliveryModal({ onClose, embedded = false }) {
             display:'flex',flexDirection:'column',gap:10,
           }}>
             <div style={{fontSize:12.5,fontWeight:500,color:'var(--fg)'}}>
-              Registrá tu propia app OAuth en {p.appLabel}
+              {t('smtp.oauth.heading', { appLabel: p.appLabel })}
             </div>
             <ol style={{margin:0,paddingLeft:18,fontSize:12,color:'var(--fg-2)',lineHeight:1.6,display:'flex',flexDirection:'column',gap:2}}>
               {(p.steps || []).map((s, i) => <li key={i}>{s}</li>)}
@@ -579,36 +573,36 @@ function DeliveryModal({ onClose, embedded = false }) {
               </div>
             )}
             <button className="btn" onClick={openSetupPage} style={{alignSelf:'flex-start'}}>
-              <I.send size={13}/> Abrir {p.appLabel}
+              <I.send size={13}/> {t('smtp.oauth.openBtn', { appLabel: p.appLabel })}
             </button>
           </div>
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Client ID</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.clientId.label')}</label>
             <input
               className="field"
               value={cfg.clientId || ''}
               onChange={e=>update('clientId', e.target.value.trim())}
-              placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"/>
+              placeholder={t('smtp.field.clientId.placeholder')}/>
           </div>
 
           {p.requiresTenant && (
             <div>
-              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Tenant ID</label>
+              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.tenantId.label')}</label>
               <input
                 className="field"
                 value={cfg.tenantId || ''}
                 onChange={e=>update('tenantId', e.target.value.trim())}
-                placeholder="common (multi-tenant) o el ID de tu organización"/>
+                placeholder={t('smtp.field.tenantId.placeholder')}/>
               <div style={{fontSize:11,color:'var(--fg-3)',marginTop:4,lineHeight:1.5}}>
-                Usá <code style={{fontFamily:'var(--font-mono)'}}>common</code> si registraste la app como multi-tenant.
+                {t('smtp.field.tenantId.hint.prefix')} <code style={{fontFamily:'var(--font-mono)'}}>common</code> {t('smtp.field.tenantId.hint.suffix')}
               </div>
             </div>
           )}
 
           {p.requiresClientSecret && (
             <div>
-              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Client Secret</label>
+              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.clientSecret.label')}</label>
               <input
                 className="field"
                 type="password"
@@ -616,19 +610,19 @@ function DeliveryModal({ onClose, embedded = false }) {
                 onChange={e=>update('clientSecret', e.target.value)}
                 placeholder="GOCSPX-••••••••••••"/>
               <div style={{fontSize:11,color:'var(--fg-3)',marginTop:4,lineHeight:1.5}}>
-                Google exige un "secret" incluso para apps desktop. Se guarda cifrado en tu equipo.
+                {t('smtp.field.clientSecret.hint')}
               </div>
             </div>
           )}
 
           <div>
-            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Tu correo de {p.name.split(' ')[0]}</label>
+            <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.email.label', { name: p.name.split(' ')[0] })}</label>
             <input
               className="field"
               type="email"
               value={cfg.user}
               onChange={e=>updateUser(e.target.value)}
-              placeholder="tu.correo@ejemplo.com"/>
+              placeholder={t('smtp.field.email.placeholder')}/>
           </div>
 
           {/* Authorize / re-authorize button */}
@@ -639,8 +633,8 @@ function DeliveryModal({ onClose, embedded = false }) {
               disabled={!canAuthorize || authorizing}
               style={{alignSelf:'flex-start'}}>
               {authorizing
-                ? <><I.loader size={13}/> Abriendo navegador…</>
-                : <><I.check size={13}/> Autorizar con {p.name.split(' ')[0]}</>}
+                ? <><I.loader size={13}/> {t('smtp.oauth.openingBrowser')}</>
+                : <><I.check size={13}/> {t('smtp.oauth.authorizeBtn', { name: p.name.split(' ')[0] })}</>}
             </button>
           ) : (
             <div style={{
@@ -651,22 +645,22 @@ function DeliveryModal({ onClose, embedded = false }) {
               display:'flex',alignItems:'center',gap:10,
             }}>
               <I.check size={14}/>
-              <span style={{flex:1}}>Autorizado. Token válido.</span>
+              <span style={{flex:1}}>{t('smtp.oauth.authorized')}</span>
               <button className="btn sm" onClick={handleAuthorize} disabled={authorizing}>
-                {authorizing ? <><I.loader size={12}/> …</> : 'Re-autorizar'}
+                {authorizing ? <><I.loader size={12}/> …</> : t('smtp.oauth.reauthorize')}
               </button>
             </div>
           )}
 
           {cfg.tokens?.accessToken && (
             <div>
-              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>Correo desde el que envías</label>
+              <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>{t('smtp.field.fromEmail.label')}</label>
               <input
                 className="field"
                 type="email"
                 value={cfg.fromEmail}
                 onChange={e=>update('fromEmail', e.target.value)}
-                placeholder={cfg.user || 'tu.correo@ejemplo.com'}/>
+                placeholder={cfg.user || t('smtp.field.email.placeholder')}/>
               {domainMismatch && (
                 <div style={{
                   marginTop:6,padding:'8px 10px',
@@ -677,8 +671,7 @@ function DeliveryModal({ onClose, embedded = false }) {
                 }}>
                   <I.info size={12} style={{marginTop:2,flexShrink:0}}/>
                   <span>
-                    El "From" usa <b>@{fromDomain}</b> pero la cuenta es <b>@{userDomain}</b>.
-                    {p.name.split(' ')[0]} rechaza correos cuyo From no coincide con la cuenta autorizada.
+                    {t('smtp.warn.domainMismatch.oauth', { fromDomain, userDomain, name: p.name.split(' ')[0] })}
                   </span>
                 </div>
               )}
@@ -700,7 +693,7 @@ function DeliveryModal({ onClose, embedded = false }) {
             }}>
               <I.check size={16} style={{color:'var(--ok)',flexShrink:0}}/>
               <div style={{flex:1,fontSize:13}}>
-                Conectado como <b>{cfg.fromEmail || cfg.user || 'tu cuenta'}</b>
+                {t('smtp.connectedAs.prefix')} <b>{cfg.fromEmail || cfg.user || t('smtp.connectedAs.fallback')}</b>
               </div>
             </div>
           )}
@@ -708,19 +701,19 @@ function DeliveryModal({ onClose, embedded = false }) {
           {connected && (
             <div style={{marginBottom:14}}>
               <label style={{fontSize:12.5,fontWeight:500,display:'block',marginBottom:6}}>
-                Tu nombre al enviar
+                {t('smtp.field.fromName.label')}
               </label>
               <input
                 className="field"
                 value={cfg.fromName}
                 onChange={e=>update('fromName',e.target.value)}
-                placeholder={accountName || 'Tu nombre'}/>
+                placeholder={accountName || t('smtp.field.fromName.placeholder')}/>
             </div>
           )}
 
           <div style={{padding:14,background:'var(--surface-2)',borderRadius:'var(--r-md)'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
-              <label style={{fontSize:12.5,fontWeight:500}}>Destinatarios de prueba</label>
+              <label style={{fontSize:12.5,fontWeight:500}}>{t('smtp.recipients.label')}</label>
               <span style={{fontSize:11,color:'var(--fg-3)',fontVariantNumeric:'tabular-nums'}}>
                 {(cfg.recipients||[]).length} / {MAX_RECIPIENTS}
               </span>
@@ -754,13 +747,13 @@ function DeliveryModal({ onClose, embedded = false }) {
                     }
                   }}
                   onBlur={addRecip}
-                  placeholder={cfg.recipients?.length ? 'añadir otro…' : 'correo@ejemplo.com'}
+                  placeholder={cfg.recipients?.length ? t('smtp.recipients.addAnother') : t('smtp.recipients.placeholder')}
                   style={{flex:1,minWidth:140,border:'none',outline:'none',background:'transparent',fontSize:13,padding:'0 4px',height:26}}/>
               )}
             </div>
             <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>
-              Escribe un correo y presiona <span className="kbd">Enter</span>.
-              Máximo <b>{MAX_RECIPIENTS} destinatarios</b> por prueba — pensado para que tu equipo revise el template antes de publicarlo.
+              {t('smtp.recipients.hint.prefix')} <span className="kbd">Enter</span>.
+              {' '}{t('smtp.recipients.hint.max.prefix')} <b>{t('smtp.recipients.hint.max.bold', { n: MAX_RECIPIENTS })}</b> {t('smtp.recipients.hint.max.suffix')}
             </div>
           </div>
         </>
@@ -777,8 +770,7 @@ function DeliveryModal({ onClose, embedded = false }) {
         }}>
           <I.check size={16} style={{marginTop:1,flexShrink:0}}/>
           <div>
-            <b>¡Enviado!</b> La prueba salió a {(cfg.recipients||[]).length} destinatario{(cfg.recipients||[]).length!==1?'s':''}.
-            Suele llegar en menos de un minuto.
+            <b>{t('smtp.sent.title')}</b> {t((cfg.recipients||[]).length === 1 ? 'smtp.sent.msg.one' : 'smtp.sent.msg.other', { n: (cfg.recipients||[]).length })}
           </div>
         </div>
       )}
@@ -791,7 +783,7 @@ function DeliveryModal({ onClose, embedded = false }) {
           display:'flex',gap:10,
         }}>
           <I.x size={16} style={{marginTop:1,flexShrink:0}}/>
-          <div><b>No pudimos enviar.</b> {error || 'Revisá el servidor, usuario y contraseña.'}</div>
+          <div><b>{t('smtp.sendFailed')}</b> {error || t('smtp.sendFailed.hint')}</div>
         </div>
       )}
 
@@ -800,17 +792,17 @@ function DeliveryModal({ onClose, embedded = false }) {
         <div style={{display:'flex',gap:8,marginTop:20,paddingTop:16,borderTop:'1px solid var(--line)'}}>
           {connected ? (
             <>
-              <button className="btn danger" onClick={disconnect} style={{marginRight:'auto'}}>Desconectar</button>
+              <button className="btn danger" onClick={disconnect} style={{marginRight:'auto'}}>{t('smtp.btn.disconnect')}</button>
               <button className="btn primary" onClick={sendTest} disabled={state==='sending' || !canSend()}>
-                {state==='sending' ? <><I.loader size={13}/> Enviando…</> : <><I.send size={13}/> Enviar prueba</>}
+                {state==='sending' ? <><I.loader size={13}/> {t('smtp.btn.sending')}</> : <><I.send size={13}/> {t('smtp.btn.sendTest')}</>}
               </button>
             </>
           ) : (
             <>
-              <button className="btn ghost" onClick={()=>{setProvider(null);setState('idle');}} style={{marginRight:'auto'}}>← Cambiar proveedor</button>
+              <button className="btn ghost" onClick={()=>{setProvider(null);setState('idle');}} style={{marginRight:'auto'}}>{t('smtp.btn.changeProvider')}</button>
               {(p.kind==='smtp' || p.kind==='appPassword' || p.kind==='oauth') && (
                 <button className="btn primary" onClick={sendTest} disabled={state==='sending' || !canSend()}>
-                  {state==='sending' ? <><I.loader size={13}/> Guardando…</> : <><I.check size={13}/> Guardar y probar</>}
+                  {state==='sending' ? <><I.loader size={13}/> {t('smtp.btn.saving')}</> : <><I.check size={13}/> {t('smtp.btn.saveAndTest')}</>}
                 </button>
               )}
             </>
@@ -832,10 +824,10 @@ function DeliveryModal({ onClose, embedded = false }) {
   if (!provider) {
     return (
       <Modal
-        title="Envío de pruebas del template"
-        sub="Conecta una cuenta para enviar este diseño a tu equipo de revisión"
+        title={t('smtp.modal.title')}
+        sub={t('smtp.modal.sub')}
         onClose={onClose}
-        footer={<button className="btn ghost" onClick={onClose}>Cerrar</button>}>
+        footer={<button className="btn ghost" onClick={onClose}>{t('smtp.btn.close')}</button>}>
         {step1Body}
       </Modal>
     );
@@ -843,25 +835,25 @@ function DeliveryModal({ onClose, embedded = false }) {
 
   return (
     <Modal
-      title="Envío de pruebas del template"
-      sub={`Conectando con ${p.name}`}
+      title={t('smtp.modal.title')}
+      sub={t('smtp.modal.connecting', { name: p.name })}
       onClose={onClose}
       footer={<>
         {connected ? (
           <>
-            <button className="btn danger" onClick={disconnect} style={{marginRight:'auto'}}>Desconectar</button>
-            <button className="btn ghost" onClick={onClose}>Cerrar</button>
+            <button className="btn danger" onClick={disconnect} style={{marginRight:'auto'}}>{t('smtp.btn.disconnect')}</button>
+            <button className="btn ghost" onClick={onClose}>{t('smtp.btn.close')}</button>
             <button className="btn primary" onClick={sendTest} disabled={state==='sending' || !canSend()}>
-              {state==='sending' ? <><I.loader size={13}/> Enviando…</> : <><I.send size={13}/> Enviar prueba</>}
+              {state==='sending' ? <><I.loader size={13}/> {t('smtp.btn.sending')}</> : <><I.send size={13}/> {t('smtp.btn.sendTest')}</>}
             </button>
           </>
         ) : (
           <>
-            <button className="btn ghost" onClick={()=>{setProvider(null);setState('idle');}} style={{marginRight:'auto'}}>← Cambiar proveedor</button>
-            <button className="btn ghost" onClick={onClose}>Cancelar</button>
+            <button className="btn ghost" onClick={()=>{setProvider(null);setState('idle');}} style={{marginRight:'auto'}}>{t('smtp.btn.changeProvider')}</button>
+            <button className="btn ghost" onClick={onClose}>{t('smtp.btn.cancel')}</button>
             {(p.kind==='smtp' || p.kind==='appPassword' || p.kind==='oauth') && (
               <button className="btn primary" onClick={sendTest} disabled={state==='sending' || !canSend()}>
-                {state==='sending' ? <><I.loader size={13}/> Guardando…</> : <><I.check size={13}/> Guardar y probar</>}
+                {state==='sending' ? <><I.loader size={13}/> {t('smtp.btn.saving')}</> : <><I.check size={13}/> {t('smtp.btn.saveAndTest')}</>}
               </button>
             )}
           </>

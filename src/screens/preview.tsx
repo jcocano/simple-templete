@@ -1,6 +1,8 @@
 // Vista previa — un solo correo, 2 switches (dispositivo y tema)
 
 function Preview({ template, onBack }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [device, setDevice] = React.useState('desktop'); // desktop | mobile
   const [theme, setTheme]   = React.useState('light');   // light | dark
   const [doc, setDoc] = React.useState([]);
@@ -112,7 +114,7 @@ function Preview({ template, onBack }) {
             fontFamily:'var(--font-display)',
             fontSize: isMobile?14:15,fontWeight:600,color:chromeFg,
             whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',
-          }}>{tplMeta?.meta?.subject || tplMeta?.name || template?.name || 'Vista previa'}</div>
+          }}>{tplMeta?.meta?.subject || tplMeta?.name || template?.name || t('preview.title')}</div>
           <div style={{fontSize:11.5,color:chromeSub,marginTop:2,display:'flex',alignItems:'center',gap:6}}>
             <span style={{fontWeight:500,color:chromeFg}}>Acme Studio</span>
             <span>&lt;hola@acme.com&gt;</span>
@@ -152,53 +154,53 @@ function Preview({ template, onBack }) {
     <div className="editor" style={{background:'var(--bg)'}}>
       {/* Top bar */}
       <div className="editor-top">
-        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> Editor</button>
-        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>Vista previa</div>
-        <span className="chip">{tplMeta?.name || template?.name || 'Plantilla'}</span>
+        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> {t('preview.back')}</button>
+        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>{t('preview.title')}</div>
+        <span className="chip">{tplMeta?.name || template?.name || t('preview.template')}</span>
 
         <div className="grow"/>
 
         {/* Switch 1 — Dispositivo */}
-        <div className="seg" role="tablist" aria-label="Dispositivo">
+        <div className="seg" role="tablist" aria-label={t('preview.device')}>
           <button
             className={device==='desktop'?'on':''}
             onClick={()=>setDevice('desktop')}
-            title="Escritorio"
-            aria-label="Escritorio"
+            title={t('preview.desktop')}
+            aria-label={t('preview.desktop')}
           >
             <I.monitor size={13}/>
           </button>
           <button
             className={device==='mobile'?'on':''}
             onClick={()=>setDevice('mobile')}
-            title="Móvil"
-            aria-label="Móvil"
+            title={t('preview.mobile')}
+            aria-label={t('preview.mobile')}
           >
             <I.phone size={13}/>
           </button>
         </div>
 
         {/* Switch 2 — Tema */}
-        <div className="seg" role="tablist" aria-label="Tema">
+        <div className="seg" role="tablist" aria-label={t('preview.theme')}>
           <button
             className={theme==='light'?'on':''}
             onClick={()=>setTheme('light')}
-            title="Claro"
-            aria-label="Claro"
+            title={t('preview.light')}
+            aria-label={t('preview.light')}
           >
             <I.sun size={13}/>
           </button>
           <button
             className={theme==='dark'?'on':''}
             onClick={()=>setTheme('dark')}
-            title="Oscuro"
-            aria-label="Oscuro"
+            title={t('preview.dark')}
+            aria-label={t('preview.dark')}
           >
             <I.moon size={13}/>
           </button>
         </div>
 
-        <button className="btn sm"><I.send size={13}/> Enviar prueba</button>
+        <button className="btn sm"><I.send size={13}/> {t('preview.sendTest')}</button>
       </div>
 
       {/* Stage del cliente de correo */}
@@ -238,7 +240,7 @@ function Preview({ template, onBack }) {
             boxShadow: isDark ? '0 8px 32px -12px rgba(0,0,0,.8)' : 'none',
           }}>
             {doc.length === 0
-              ? <div style={{padding:'40px 24px',textAlign:'center',color:'#8e8b7e',fontSize:13}}>Esta plantilla aún no tiene contenido.</div>
+              ? <div style={{padding:'40px 24px',textAlign:'center',color:'#8e8b7e',fontSize:13}}>{t('preview.empty')}</div>
               : doc.map(renderSection)}
           </div>
         </div>

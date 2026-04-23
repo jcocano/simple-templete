@@ -1,0 +1,10 @@
+{
+  "blockControls.align.center":     { "en": "Center",           "es": "Centrar",           "pt": "Centralizar",          "fr": "Centrer",           "ja": "中央",             "zh": "居中" },
+  "blockControls.align.justify":    { "en": "Justify",          "es": "Justificar",        "pt": "Justificar",           "fr": "Justifier",         "ja": "両端揃え",         "zh": "两端对齐" },
+  "blockControls.align.left":       { "en": "Left",             "es": "Izquierda",         "pt": "Esquerda",             "fr": "Gauche",            "ja": "左揃え",           "zh": "左对齐" },
+  "blockControls.align.right":      { "en": "Right",            "es": "Derecha",           "pt": "Direita",              "fr": "Droite",            "ja": "右揃え",           "zh": "右对齐" },
+  "blockControls.font.system":      { "en": "System",           "es": "Sistema",           "pt": "Sistema",              "fr": "Système",           "ja": "システム",         "zh": "系统" },
+  "blockControls.spacing.linked":   { "en": "Linked values",    "es": "Valores enlazados", "pt": "Valores vinculados",   "fr": "Valeurs liées",     "ja": "リンクされた値",   "zh": "关联值" },
+  "blockControls.spacing.padding":  { "en": "Padding",          "es": "Padding",           "pt": "Padding",              "fr": "Padding",           "ja": "パディング",       "zh": "内边距" },
+  "blockControls.spacing.unlinked": { "en": "Individual values","es": "Valores individuales","pt": "Valores individuais","fr": "Valeurs individuelles","ja": "個別の値",       "zh": "独立值" }
+}

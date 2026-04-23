@@ -1,0 +1,34 @@
+{
+  "settings.nav.workspace":       { "en": "Workspaces",           "es": "Espacios de trabajo",    "pt": "Espaços de trabalho", "fr": "Espaces de travail",   "ja": "ワークスペース",      "zh": "工作区" },
+  "settings.nav.workspace.desc":  { "en": "Create, rename or switch between workspaces.", "es": "Crear, renombrar o cambiar entre espacios de trabajo.", "pt": "Criar, renomear ou alternar entre espaços de trabalho.", "fr": "Créer, renommer ou basculer entre les espaces.", "ja": "ワークスペースの作成、名前変更、切替。", "zh": "创建、重命名或切换工作区。" },
+
+  "settings.nav.account":         { "en": "Account",              "es": "Cuenta",                 "pt": "Conta",               "fr": "Compte",               "ja": "アカウント",          "zh": "账户" },
+  "settings.nav.account.desc":    { "en": "Your profile, library stats and local data.", "es": "Tu perfil, estadísticas de biblioteca y datos locales.", "pt": "Seu perfil, estatísticas da biblioteca e dados locais.", "fr": "Ton profil, les stats de bibliothèque et les données locales.", "ja": "プロフィール、ライブラリ統計、ローカルデータ。", "zh": "个人资料、库统计和本地数据。" },
+
+  "settings.nav.brand":           { "en": "Brand",                "es": "Marca",                  "pt": "Marca",               "fr": "Marque",               "ja": "ブランド",            "zh": "品牌" },
+  "settings.nav.brand.desc":      { "en": "Logo, colors, fonts and legal footer.", "es": "Logo, colores, fuentes y footer legal.", "pt": "Logo, cores, fontes e rodapé legal.", "fr": "Logo, couleurs, polices et pied de page légal.", "ja": "ロゴ、色、フォント、法的フッター。", "zh": "Logo、颜色、字体与法律页脚。" },
+
+  "settings.nav.appearance":      { "en": "Appearance",           "es": "Apariencia",             "pt": "Aparência",           "fr": "Apparence",            "ja": "外観",                "zh": "外观" },
+  "settings.nav.appearance.desc": { "en": "Theme, palette, density and typography of the app itself.", "es": "Tema, paleta, densidad y tipografía de la app.", "pt": "Tema, paleta, densidade e tipografia do app.", "fr": "Thème, palette, densité et typographie de l’app.", "ja": "アプリのテーマ、パレット、密度、タイポグラフィ。", "zh": "应用自身的主题、配色、密度与字体。" },
+
+  "settings.nav.editor":          { "en": "Editor",               "es": "Editor",                 "pt": "Editor",              "fr": "Éditeur",              "ja": "エディター",          "zh": "编辑器" },
+  "settings.nav.editor.desc":     { "en": "Interface language, canvas grid, autosave and shortcuts.", "es": "Idioma de la interfaz, grid del canvas, autoguardado y atajos.", "pt": "Idioma da interface, grade do canvas, salvamento automático e atalhos.", "fr": "Langue de l’interface, grille du canvas, sauvegarde auto et raccourcis.", "ja": "インターフェースの言語、キャンバスグリッド、自動保存、ショートカット。", "zh": "界面语言、画布网格、自动保存与快捷键。" },
+
+  "settings.nav.storage":         { "en": "Storage",              "es": "Almacenamiento",         "pt": "Armazenamento",       "fr": "Stockage",             "ja": "ストレージ",          "zh": "存储" },
+  "settings.nav.storage.desc":    { "en": "Where your uploaded images live.", "es": "Dónde se alojan tus imágenes subidas.", "pt": "Onde suas imagens enviadas ficam hospedadas.", "fr": "Où vivent tes images importées.", "ja": "アップロードした画像の保存先。", "zh": "你上传的图片存放位置。" },
+
+  "settings.nav.delivery":        { "en": "Test sending",         "es": "Envío de pruebas",       "pt": "Envio de testes",     "fr": "Envoi de tests",       "ja": "テスト送信",          "zh": "测试发送" },
+  "settings.nav.delivery.desc":   { "en": "Connect an SMTP or OAuth account to send template tests.", "es": "Conectá una cuenta SMTP u OAuth para enviar pruebas de plantillas.", "pt": "Conecte uma conta SMTP ou OAuth para enviar testes de modelos.", "fr": "Connecte un compte SMTP ou OAuth pour envoyer des tests de modèles.", "ja": "テンプレートのテストを送るために SMTP または OAuth アカウントを接続します。", "zh": "连接 SMTP 或 OAuth 账户以发送模板测试。" },
+
+  "settings.nav.variables":       { "en": "Variables",            "es": "Variables",              "pt": "Variáveis",           "fr": "Variables",            "ja": "変数",                "zh": "变量" },
+  "settings.nav.variables.desc":  { "en": "Workspace-level defaults for template tags.", "es": "Valores por defecto a nivel espacio para las etiquetas.", "pt": "Padrões a nível de espaço para as etiquetas.", "fr": "Valeurs par défaut des étiquettes au niveau de l’espace.", "ja": "テンプレートタグのワークスペース既定値。", "zh": "模板标签的工作区级默认值。" },
+
+  "settings.nav.export":          { "en": "Export",               "es": "Exportación",            "pt": "Exportação",          "fr": "Exportation",          "ja": "エクスポート",        "zh": "导出" },
+  "settings.nav.export.desc":     { "en": "Default format and options when exporting the email.", "es": "Formato y opciones por defecto al exportar el correo.", "pt": "Formato e opções padrão ao exportar o e-mail.", "fr": "Format et options par défaut à l’export.", "ja": "メールをエクスポートする際の既定フォーマットとオプション。", "zh": "导出邮件时的默认格式与选项。" },
+
+  "settings.nav.ai":              { "en": "Artificial intelligence", "es": "Inteligencia artificial", "pt": "Inteligência artificial", "fr": "Intelligence artificielle", "ja": "人工知能",          "zh": "人工智能" },
+  "settings.nav.ai.desc":         { "en": "Provider, API key, model and conversation history.", "es": "Proveedor, API key, modelo e historial de conversaciones.", "pt": "Provedor, chave de API, modelo e histórico de conversas.", "fr": "Fournisseur, clé API, modèle et historique des conversations.", "ja": "プロバイダー、API キー、モデル、会話履歴。", "zh": "服务商、API 密钥、模型与对话历史。" },
+
+  "settings.nav.notif":           { "en": "Notifications",         "es": "Notificaciones",         "pt": "Notificações",        "fr": "Notifications",        "ja": "通知",                "zh": "通知" },
+  "settings.nav.notif.desc":      { "en": "In-app toasts, sounds and update preferences.", "es": "Toasts dentro de la app, sonidos y preferencias de actualización.", "pt": "Toasts dentro do app, sons e preferências de atualização.", "fr": "Toasts dans l’app, sons et préférences de mises à jour.", "ja": "アプリ内トースト、サウンド、アップデートの設定。", "zh": "应用内提示、声音与更新偏好。" }
+}

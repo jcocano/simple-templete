@@ -95,12 +95,20 @@ function ColorInput({ value='#000000', onChange }) {
 }
 
 function AlignBar({ value='left', onChange, options=['left','center','right','justify'] }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const ic = { left:'align-l', center:'align-c', right:'align-r', justify:'align-j' };
   const labels = { left:'⟸', center:'≡', right:'⟹', justify:'≣' };
+  const titles = {
+    left: t('blockControls.align.left'),
+    center: t('blockControls.align.center'),
+    right: t('blockControls.align.right'),
+    justify: t('blockControls.align.justify'),
+  };
   return (
     <div className="seg" style={{width:'100%'}}>
       {options.map(o => (
-        <button key={o} className={value===o?'on':''} onClick={()=>onChange(o)} title={o}
+        <button key={o} className={value===o?'on':''} onClick={()=>onChange(o)} title={titles[o] || o}
           style={{flex:1,fontFamily:'monospace',fontSize:13}}>
           {labels[o]}
         </button>
@@ -118,6 +126,8 @@ function Toggle({ value, onChange }) {
 }
 
 function FontPicker({ value='inter', onChange }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const fonts = [
     { id:'inter', name:'Inter', stack:'Inter, sans-serif' },
     { id:'inter-tight', name:'Inter Tight', stack:'"Inter Tight", sans-serif' },
@@ -130,7 +140,7 @@ function FontPicker({ value='inter', onChange }) {
     { id:'ibm-plex-mono', name:'IBM Plex Mono', stack:'"IBM Plex Mono", monospace' },
     { id:'georgia', name:'Georgia', stack:'Georgia, serif' },
     { id:'helvetica', name:'Helvetica', stack:'Helvetica, Arial, sans-serif' },
-    { id:'system', name:'Sistema', stack:'-apple-system, system-ui, sans-serif' },
+    { id:'system', name:t('blockControls.font.system'), stack:'-apple-system, system-ui, sans-serif' },
   ];
   const cur = fonts.find(f=>f.id===value) || fonts[0];
   return (
@@ -172,7 +182,10 @@ function Group({ title, children, collapsible=false, defaultOpen=true }) {
 }
 
 // SpacingBox — caja visual para padding/margin (4 lados)
-function SpacingBox({ value=[0,0,0,0], onChange, label='Padding', max=80 }) {
+function SpacingBox({ value=[0,0,0,0], onChange, label, max=80 }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
+  const resolvedLabel = label || t('blockControls.spacing.padding');
   const [top,right,bottom,left] = value;
   const upd = (i, v) => {
     const n = [...value]; n[i] = v; onChange(n);
@@ -185,10 +198,10 @@ function SpacingBox({ value=[0,0,0,0], onChange, label='Padding', max=80 }) {
   return (
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-        <span style={{fontSize:11.5,color:'var(--fg-3)'}}>{label}</span>
+        <span style={{fontSize:11.5,color:'var(--fg-3)'}}>{resolvedLabel}</span>
         <button
           onClick={()=>setLinked(!linked)}
-          title={linked?'Valores enlazados':'Valores individuales'}
+          title={linked?t('blockControls.spacing.linked'):t('blockControls.spacing.unlinked')}
           style={{
             width:22,height:22,borderRadius:4,
             border:'1px solid var(--line)',
@@ -222,7 +235,7 @@ function SpacingBox({ value=[0,0,0,0], onChange, label='Padding', max=80 }) {
             background:'var(--accent-soft)',borderRadius:3,
             minHeight:32,display:'grid',placeItems:'center',
             fontSize:9,color:'var(--accent)',fontFamily:'var(--font-mono)',
-          }}>{label[0]}</div>
+          }}>{resolvedLabel[0]}</div>
           <SpacingField v={right} onChange={v=>upd(1,v)} max={max}/>
           <div/>
           <SpacingField v={bottom} onChange={v=>upd(2,v)} max={max}/>

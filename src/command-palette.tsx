@@ -3,6 +3,8 @@
 // Comandos registrados desde fuera vía window.registerCommands([...])
 
 function CommandPalette({ onNavigate, onClose }) {
+  const t = window.stI18n.t;
+  const lang = window.stI18n.useLang();
   const [q, setQ] = React.useState('');
   const [sel, setSel] = React.useState(0);
   const inputRef = React.useRef(null);
@@ -20,42 +22,48 @@ function CommandPalette({ onNavigate, onClose }) {
   const cmds = React.useMemo(() => {
     const TEMPLATES = window.TEMPLATES || [];
     const BLOCK_CATALOG = window.BLOCK_CATALOG || [];
+    const gA = t('cmd.group.actions');
+    const gG = t('cmd.group.goto');
+    const gS = t('cmd.group.settings');
+    const gT = t('cmd.group.appearance');
     const base = [
-      // Acciones rápidas
-      { id:'new',     t:'Crear plantilla nueva',        s:'Abre la galería de ejemplos', g:'Acciones', icon:'plus',      run:()=>onNavigate('gallery') },
-      { id:'ai-gen',  t:'Generar plantilla con IA',     s:'Describe el correo y la IA lo arma',       g:'Acciones', icon:'sparkles',  run:()=>onNavigate('ai-generate') },
-      { id:'review',  t:'Revisar antes de enviar',      s:'Checklist pre-envío: alt-text, contraste, links…', g:'Acciones', icon:'eye', run:()=>onNavigate('review') },
-      { id:'export',  t:'Exportar o enviar prueba',     s:'HTML, MJML o correo de prueba',            g:'Acciones', icon:'send',      run:()=>onNavigate('export') },
-      { id:'vars',    t:'Etiquetas de la plantilla',    s:'Editar las {{etiquetas}} de este correo',   g:'Acciones', icon:'braces',    run:()=>onNavigate('vars') },
-      // Navegación
-      { id:'n-dash',  t:'Ir a Mis plantillas',          s:'Biblioteca principal',                      g:'Ir a',    icon:'grid',      run:()=>onNavigate('dashboard') },
-      { id:'n-gal',   t:'Ir a Galería de ejemplos',     s:'Plantillas listas por ocasión',             g:'Ir a',    icon:'layers',    run:()=>onNavigate('gallery') },
-      { id:'n-lib',   t:'Ir a Bloques guardados',       s:'Tus bloques reutilizables',                 g:'Ir a',    icon:'folder',    run:()=>onNavigate('library') },
-      { id:'n-img',   t:'Ir a Biblioteca de imágenes',  s:'Todas tus imágenes subidas',                g:'Ir a',    icon:'image',     run:()=>onNavigate('images') },
-      { id:'n-prev',  t:'Ver vista previa',             s:'Multi-dispositivo',                         g:'Ir a',    icon:'eye',       run:()=>onNavigate('preview') },
-      // Ajustes
-      { id:'s-all',   t:'Abrir ajustes',                s:'Perfil, marca, envío, IA…',                 g:'Ajustes', icon:'settings',  run:()=>onNavigate('settings') },
-      { id:'s-ai',    t:'Ajustes → Inteligencia artificial', s:'API key, proveedor, modelo',         g:'Ajustes', icon:'sparkles',  run:()=>onNavigate('settings:ai') },
-      { id:'s-brand', t:'Ajustes → Marca',              s:'Colores, fuente, logo, footer legal',       g:'Ajustes', icon:'palette',   run:()=>onNavigate('settings:brand') },
-      { id:'s-store', t:'Ajustes → Almacenamiento',     s:'Dónde se alojan tus imágenes',              g:'Ajustes', icon:'image',     run:()=>onNavigate('settings:storage') },
-      { id:'s-deli',  t:'Ajustes → Envío de pruebas',   s:'Cuenta SMTP para pruebas',                  g:'Ajustes', icon:'send',      run:()=>onNavigate('settings:delivery') },
-      // Tema
-      { id:'theme-t', t:'Alternar tema claro/oscuro',  s:'Cambia al opuesto',                         g:'Apariencia', icon:'sun',    run:()=>onNavigate('theme:toggle') },
-      { id:'theme-l', t:'Cambiar a tema claro',         s:'Modo día',                                  g:'Apariencia', icon:'sun',    run:()=>onNavigate('theme:light') },
-      { id:'theme-d', t:'Cambiar a tema oscuro',        s:'Modo noche',                                g:'Apariencia', icon:'moon',   run:()=>onNavigate('theme:dark') },
+      // Quick actions
+      { id:'new',     t:t('cmd.new'),          s:t('cmd.new.sub'),          g:gA, icon:'plus',      run:()=>onNavigate('gallery') },
+      { id:'ai-gen',  t:t('cmd.ai'),           s:t('cmd.ai.sub'),           g:gA, icon:'sparkles',  run:()=>onNavigate('ai-generate') },
+      { id:'review',  t:t('cmd.review'),       s:t('cmd.review.sub'),       g:gA, icon:'eye',       run:()=>onNavigate('review') },
+      { id:'export',  t:t('cmd.export'),       s:t('cmd.export.sub'),       g:gA, icon:'send',      run:()=>onNavigate('export') },
+      { id:'vars',    t:t('cmd.vars'),         s:t('cmd.vars.sub'),         g:gA, icon:'braces',    run:()=>onNavigate('vars') },
+      // Navigation
+      { id:'n-dash',  t:t('cmd.goto.dash'),    s:t('cmd.goto.dash.sub'),    g:gG, icon:'grid',      run:()=>onNavigate('dashboard') },
+      { id:'n-gal',   t:t('cmd.goto.gallery'), s:t('cmd.goto.gallery.sub'), g:gG, icon:'layers',    run:()=>onNavigate('gallery') },
+      { id:'n-lib',   t:t('cmd.goto.library'), s:t('cmd.goto.library.sub'), g:gG, icon:'folder',    run:()=>onNavigate('library') },
+      { id:'n-img',   t:t('cmd.goto.images'),  s:t('cmd.goto.images.sub'),  g:gG, icon:'image',     run:()=>onNavigate('images') },
+      { id:'n-prev',  t:t('cmd.goto.preview'), s:t('cmd.goto.preview.sub'), g:gG, icon:'eye',       run:()=>onNavigate('preview') },
+      // Settings
+      { id:'s-all',   t:t('cmd.settings.all'),      s:t('cmd.settings.all.sub'),      g:gS, icon:'settings', run:()=>onNavigate('settings') },
+      { id:'s-ai',    t:t('cmd.settings.ai'),       s:t('cmd.settings.ai.sub'),       g:gS, icon:'sparkles', run:()=>onNavigate('settings:ai') },
+      { id:'s-brand', t:t('cmd.settings.brand'),    s:t('cmd.settings.brand.sub'),    g:gS, icon:'palette',  run:()=>onNavigate('settings:brand') },
+      { id:'s-store', t:t('cmd.settings.storage'),  s:t('cmd.settings.storage.sub'),  g:gS, icon:'image',    run:()=>onNavigate('settings:storage') },
+      { id:'s-deli',  t:t('cmd.settings.delivery'), s:t('cmd.settings.delivery.sub'), g:gS, icon:'send',     run:()=>onNavigate('settings:delivery') },
+      // Theme
+      { id:'theme-t', t:t('cmd.theme.toggle'), s:t('cmd.theme.toggle.sub'), g:gT, icon:'sun',  run:()=>onNavigate('theme:toggle') },
+      { id:'theme-l', t:t('cmd.theme.light'),  s:t('cmd.theme.light.sub'),  g:gT, icon:'sun',  run:()=>onNavigate('theme:light') },
+      { id:'theme-d', t:t('cmd.theme.dark'),   s:t('cmd.theme.dark.sub'),   g:gT, icon:'moon', run:()=>onNavigate('theme:dark') },
     ];
-    // Plantillas reales
-    const tpls = TEMPLATES.slice(0, 20).map(t => ({
-      id:'t-'+t.id, t:t.name, s:`Plantilla · ${t.folder}`, g:'Plantillas', icon:'mail',
-      run:()=>onNavigate('template:'+t.id, t)
+    const gTpl = t('cmd.group.templates');
+    const gBlk = t('cmd.group.blocks');
+    // Real templates
+    const tpls = TEMPLATES.slice(0, 20).map(tp => ({
+      id:'t-'+tp.id, t:tp.name, s:t('cmd.tpl.item', {folder: tp.folder}), g:gTpl, icon:'mail',
+      run:()=>onNavigate('template:'+tp.id, tp)
     }));
-    // Bloques del catálogo
+    // Catalog blocks
     const blocks = BLOCK_CATALOG.slice(0, 15).map(b => ({
-      id:'b-'+b.type, t:`Insertar bloque: ${b.name}`, s:`Tipo ${b.type}`, g:'Bloques', icon:b.icon||'grid',
+      id:'b-'+b.type, t:t('cmd.block.insert', {name: b.name}), s:t('cmd.block.type', {type: b.type}), g:gBlk, icon:b.icon||'grid',
       run:()=>onNavigate('insert:'+b.type)
     }));
     return [...base, ...tpls, ...blocks];
-  }, [onNavigate]);
+  }, [onNavigate, lang]);
 
   const filtered = React.useMemo(() => {
     if (!q.trim()) return cmds;
@@ -111,7 +119,7 @@ function CommandPalette({ onNavigate, onClose }) {
             value={q}
             onChange={e=>setQ(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Busca una acción, plantilla, bloque…"
+            placeholder={t('cmd.placeholder')}
             style={{
               flex:1,background:'transparent',border:'none',outline:'none',
               fontSize:15,color:'var(--fg)',
@@ -124,12 +132,12 @@ function CommandPalette({ onNavigate, onClose }) {
           {flat.length === 0 && (
             <EmptyState
               illustration="search"
-              title={`Nada que coincida con «${q}»`}
-              msg="Prueba con otras palabras. Puedes buscar por acción («exportar»), por bloque («botón»), o por sección de ajustes."
+              title={t('cmd.empty.title', {q})}
+              msg={t('cmd.empty.msg')}
               compact
               tips={[
-                'Escribe ⇥ para navegar con teclado',
-                'Pulsa Esc para cerrar esta búsqueda',
+                t('cmd.tip.tab'),
+                t('cmd.tip.esc'),
               ]}
             />
           )}
@@ -177,11 +185,11 @@ function CommandPalette({ onNavigate, onClose }) {
           padding:'8px 18px',borderTop:'1px solid var(--line)',background:'var(--surface-2)',
           display:'flex',alignItems:'center',gap:14,fontSize:11,color:'var(--fg-3)',
         }}>
-          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>↑↓</span> navegar</span>
-          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>↵</span> ejecutar</span>
-          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>esc</span> cerrar</span>
+          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>↑↓</span> {t('cmd.foot.nav')}</span>
+          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>↵</span> {t('cmd.foot.exec')}</span>
+          <span style={{display:'flex',alignItems:'center',gap:4}}><span className="kbd" style={{fontSize:10}}>esc</span> {t('cmd.foot.close')}</span>
           <div style={{flex:1}}/>
-          <span>{flat.length} comando{flat.length===1?'':'s'}</span>
+          <span>{t(flat.length===1 ? 'cmd.foot.count.one' : 'cmd.foot.count.other', {n: flat.length})}</span>
         </div>
       </div>
     </div>

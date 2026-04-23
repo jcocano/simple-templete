@@ -12,11 +12,11 @@ const TEMPLATES = [
 ];
 
 const FOLDERS = [
-  { id:'all', name:'Todas mis plantillas', icon:'mail', count:24 },
-  { id:'starred', name:'Mis favoritas', icon:'star', count:3 },
-  { id:'recent', name:'Usadas recientemente', icon:'clock', count:8 },
-  { id:'shared', name:'Compartidas conmigo', icon:'folder', count:5 },
-  { id:'trash', name:'Papelera', icon:'trash', count:0 },
+  { id:'all', labelKey:'sidebar.folder.all', name:'Todas mis plantillas', icon:'mail', count:24 },
+  { id:'starred', labelKey:'sidebar.folder.starred', name:'Mis favoritas', icon:'star', count:3 },
+  { id:'recent', labelKey:'sidebar.folder.recent', name:'Usadas recientemente', icon:'clock', count:8 },
+  { id:'shared', labelKey:'sidebar.folder.shared', name:'Compartidas conmigo', icon:'folder', count:5 },
+  { id:'trash', labelKey:'sidebar.folder.trash', name:'Papelera', icon:'trash', count:0 },
 ];
 
 const CATS = [
@@ -29,49 +29,51 @@ const CATS = [
   { id:'surveys',     name:'Encuestas',        count:2 },
 ];
 
+// Block catalogs. `name` is kept for backwards-compat (mostly logs + legacy
+// filters); `nameKey` is the translation key that the UI should prefer.
 const BLOCKS_BASIC = [
-  { id:'text', name:'Texto', icon:'type' },
-  { id:'heading', name:'Título', icon:'type' },
-  { id:'image', name:'Imagen', icon:'image' },
-  { id:'icon', name:'Icono', icon:'sparkle' },
-  { id:'button', name:'Botón', icon:'button' },
-  { id:'divider', name:'Divisor', icon:'divider' },
-  { id:'spacer', name:'Espaciador', icon:'spacer' },
+  { id:'text',    nameKey:'block.name.text',     name:'Texto',      icon:'type' },
+  { id:'heading', nameKey:'block.name.heading',  name:'Título',     icon:'type' },
+  { id:'image',   nameKey:'block.name.image',    name:'Imagen',     icon:'image' },
+  { id:'icon',    nameKey:'block.name.icon',     name:'Icono',      icon:'sparkle' },
+  { id:'button',  nameKey:'block.name.button',   name:'Botón',      icon:'button' },
+  { id:'divider', nameKey:'block.name.divider',  name:'Divisor',    icon:'divider' },
+  { id:'spacer',  nameKey:'block.name.spacer',   name:'Espaciador', icon:'spacer' },
 ];
 const BLOCKS_LAYOUT = [
-  { id:'section', name:'Sección', icon:'hero' },
-  { id:'columns2', name:'2 Columnas', icon:'columns' },
-  { id:'columns3', name:'3 Columnas', icon:'grid' },
-  { id:'hero', name:'Hero', icon:'hero' },
+  { id:'section',  nameKey:'block.name.section',  name:'Sección',    icon:'hero' },
+  { id:'columns2', nameKey:'block.name.columns2', name:'2 Columnas', icon:'columns' },
+  { id:'columns3', nameKey:'block.name.columns3', name:'3 Columnas', icon:'grid' },
+  { id:'hero',     nameKey:'block.name.hero',     name:'Hero',       icon:'hero' },
 ];
 const BLOCKS_CONTENT = [
-  { id:'header', name:'Cabecera', icon:'layers' },
-  { id:'footer', name:'Footer', icon:'footer' },
-  { id:'cta', name:'CTA', icon:'send' },
-  { id:'testimonial', name:'Testimonio', icon:'heart' },
+  { id:'header',      nameKey:'block.name.header',      name:'Cabecera',   icon:'layers' },
+  { id:'footer',      nameKey:'block.name.footer',      name:'Footer',     icon:'footer' },
+  { id:'cta',         nameKey:'block.name.cta',         name:'CTA',        icon:'send' },
+  { id:'testimonial', nameKey:'block.name.testimonial', name:'Testimonio', icon:'heart' },
 ];
 const BLOCKS_SOCIAL = [
-  { id:'social', name:'Redes', icon:'heart' },
-  { id:'share', name:'Compartir', icon:'send' },
+  { id:'social', nameKey:'block.name.social', name:'Redes',     icon:'heart' },
+  { id:'share',  nameKey:'block.name.share',  name:'Compartir', icon:'send' },
 ];
 const BLOCKS_ECOM = [
-  { id:'product', name:'Producto', icon:'product' },
-  { id:'cart', name:'Carrito', icon:'product' },
-  { id:'receipt', name:'Recibo', icon:'product' },
+  { id:'product', nameKey:'block.name.product', name:'Producto', icon:'product' },
+  { id:'cart',    nameKey:'block.name.cart',    name:'Carrito',  icon:'product' },
+  { id:'receipt', nameKey:'block.name.receipt', name:'Recibo',   icon:'product' },
 ];
 const BLOCKS_MEDIA = [
-  { id:'video',     name:'Video / YouTube',  icon:'image' },
-  { id:'gif',       name:'GIF animado',      icon:'image' },
-  { id:'countdown', name:'Cuenta regresiva', icon:'clock' },
-  { id:'map',       name:'Mapa',             icon:'folder' },
-  { id:'qr',        name:'Código QR',        icon:'grid' },
-  { id:'signature', name:'Firma personal',   icon:'user' },
+  { id:'video',     nameKey:'block.name.video',     name:'Video / YouTube',  icon:'image' },
+  { id:'gif',       nameKey:'block.name.gif',       name:'GIF animado',      icon:'image' },
+  { id:'countdown', nameKey:'block.name.countdown', name:'Cuenta regresiva', icon:'clock' },
+  { id:'map',       nameKey:'block.name.map',       name:'Mapa',             icon:'folder' },
+  { id:'qr',        nameKey:'block.name.qr',        name:'Código QR',        icon:'grid' },
+  { id:'signature', nameKey:'block.name.signature', name:'Firma personal',   icon:'user' },
 ];
 const BLOCKS_ADV = [
-  { id:'html',      name:'HTML a la medida', icon:'code' },
-  { id:'table',     name:'Tabla de datos',   icon:'grid' },
-  { id:'accordion', name:'Desplegable',      icon:'layers' },
-  { id:'attachment',name:'Adjuntar archivo', icon:'upload' },
+  { id:'html',       nameKey:'block.name.html',       name:'HTML a la medida', icon:'code' },
+  { id:'table',      nameKey:'block.name.table',      name:'Tabla de datos',   icon:'grid' },
+  { id:'accordion',  nameKey:'block.name.accordion',  name:'Desplegable',      icon:'layers' },
+  { id:'attachment', nameKey:'block.name.attachment', name:'Adjuntar archivo', icon:'upload' },
 ];
 
 const SAVED_BLOCKS = [
@@ -215,14 +217,14 @@ const BLANK_DOC   = { sections: BLANK_SECTIONS };
 
 // Preset section templates (for "Añadir sección") — descriptive names
 const SECTION_PRESETS = [
-  { id:'p-blank',      name:'Empezar en blanco',      layout:'1col', preview:'blank' },
-  { id:'p-hero',       name:'Portada con saludo',     layout:'1col', preview:'hero' },
-  { id:'p-2col',       name:'Dos bloques lado a lado',layout:'2col', preview:'2col' },
-  { id:'p-3col',       name:'Tres beneficios',        layout:'3col', preview:'3col' },
-  { id:'p-cta',        name:'Botón grande centrado',  layout:'1col', preview:'cta' },
-  { id:'p-image-text', name:'Texto junto a imagen',   layout:'2col', preview:'imgtext' },
-  { id:'p-product',    name:'Dos productos',          layout:'2col', preview:'products' },
-  { id:'p-footer',     name:'Pie de página',          layout:'1col', preview:'footer' },
+  { id:'p-blank',      nameKey:'section.preset.blank',    name:'Empezar en blanco',       layout:'1col', preview:'blank' },
+  { id:'p-hero',       nameKey:'section.preset.hero',     name:'Portada con saludo',      layout:'1col', preview:'hero' },
+  { id:'p-2col',       nameKey:'section.preset.2col',     name:'Dos bloques lado a lado', layout:'2col', preview:'2col' },
+  { id:'p-3col',       nameKey:'section.preset.3col',     name:'Tres beneficios',         layout:'3col', preview:'3col' },
+  { id:'p-cta',        nameKey:'section.preset.cta',      name:'Botón grande centrado',   layout:'1col', preview:'cta' },
+  { id:'p-image-text', nameKey:'section.preset.imgtext',  name:'Texto junto a imagen',    layout:'2col', preview:'imgtext' },
+  { id:'p-product',    nameKey:'section.preset.products', name:'Dos productos',           layout:'2col', preview:'products' },
+  { id:'p-footer',     nameKey:'section.preset.footer',   name:'Pie de página',           layout:'1col', preview:'footer' },
 ];
 
 const SECTION_STYLE_PRESETS = [

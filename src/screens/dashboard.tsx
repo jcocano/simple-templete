@@ -281,25 +281,26 @@ function TplThumb({ t }) {
 // Dashboard cards only; no need for a shared lib yet.
 function formatRelative(sqlDate) {
   if (!sqlDate) return '';
+  const t = window.stI18n.t;
   // SQLite datetime('now') returns "YYYY-MM-DD HH:MM:SS" in UTC.
   const d = new Date(String(sqlDate).replace(' ', 'T') + 'Z');
   const diff = Date.now() - d.getTime();
-  if (diff < 60000) return 'hace un momento';
+  if (diff < 60000) return t('common.time.justNow');
   const m = Math.floor(diff / 60000);
-  if (m < 60) return `hace ${m} min`;
+  if (m < 60) return t('common.time.minutes', {n: m});
   const h = Math.floor(m / 60);
-  if (h < 24) return `hace ${h} h`;
+  if (h < 24) return t('common.time.hours', {n: h});
   const dd = Math.floor(h / 24);
-  if (dd < 7) return `hace ${dd} d`;
+  if (dd < 7) return t('common.time.days', {n: dd});
   const w = Math.floor(dd / 7);
-  if (w < 4) return `hace ${w} sem`;
+  if (w < 4) return t('common.time.weeks', {n: w});
   const mo = Math.floor(dd / 30);
-  return `hace ${mo} mes${mo > 1 ? 'es' : ''}`;
+  return t(mo === 1 ? 'common.time.months.one' : 'common.time.months.other', {n: mo});
 }
 
-const STATUS_LABEL = { draft: 'Borrador', published: 'Publicado' };
-
 function WorkspaceSwitcher({ onOpen }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const current = useCurrentWorkspace();
   const workspaces = useWorkspaces();
   const [open, setOpen] = React.useState(false);
@@ -341,7 +342,7 @@ function WorkspaceSwitcher({ onOpen }) {
   }, []);
 
   const account = window.stStorage.getSetting('account', {}) || {};
-  const name = account.name || 'Sin nombre';
+  const name = account.name || t('ws.noName');
 
   return (
     <div ref={ref} style={{position:'relative'}}>
@@ -350,13 +351,13 @@ function WorkspaceSwitcher({ onOpen }) {
         <div style={{minWidth:0,flex:1}}>
           <div style={{fontSize:12,fontWeight:500,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{name}</div>
           <div style={{fontSize:11,color:'var(--fg-3)',display:'flex',alignItems:'center',gap:4}}>
-            <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>Espacio {current?.name || '…'}</span>
+            <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{t('ws.currentPrefix', {name: current?.name || '…'})}</span>
             <I.chevronD size={10} style={{flexShrink:0}}/>
           </div>
         </div>
         <div style={{marginLeft:'auto',display:'flex',gap:4}} onClick={e=>e.stopPropagation()}>
           <ThemeToggleBtn/>
-          <button className="btn icon sm ghost" title="Ajustes" onClick={()=>onOpen && onOpen('settings')}><I.settings size={13}/></button>
+          <button className="btn icon sm ghost" title={t('ws.settings.tooltip')} onClick={()=>onOpen && onOpen('settings')}><I.settings size={13}/></button>
         </div>
       </div>
 
@@ -368,7 +369,7 @@ function WorkspaceSwitcher({ onOpen }) {
           boxShadow:'0 12px 32px rgba(0,0,0,.18), 0 0 0 1px var(--line)',
           zIndex:20,
         }}>
-          <div style={{fontSize:10,color:'var(--fg-3)',padding:'6px 10px',textTransform:'uppercase',letterSpacing:'.06em'}}>Cambiar de espacio</div>
+          <div style={{fontSize:10,color:'var(--fg-3)',padding:'6px 10px',textTransform:'uppercase',letterSpacing:'.06em'}}>{t('ws.switch')}</div>
           {workspaces.map(w => (
             <button key={w.id} className="btn ghost sm"
               style={{width:'100%',justifyContent:'flex-start',gap:8,fontWeight: w.id===current?.id ? 500 : 400}}
@@ -391,20 +392,20 @@ function WorkspaceSwitcher({ onOpen }) {
                   if (e.key === 'Enter') submitNew();
                   if (e.key === 'Escape') { setCreating(false); setNewName(''); }
                 }}
-                placeholder="Nombre del espacio"
+                placeholder={t('ws.name.placeholder')}
                 style={{flex:1,border:'1px solid var(--line)',background:'var(--surface-2)',padding:'4px 8px',borderRadius:'var(--r-sm)',fontSize:12,outline:'none'}}
               />
-              <button className="btn sm" onClick={submitNew} disabled={!newName.trim()}>Crear</button>
+              <button className="btn sm" onClick={submitNew} disabled={!newName.trim()}>{t('ws.create')}</button>
             </div>
           ) : (
             <button className="btn ghost sm" style={{width:'100%',justifyContent:'flex-start',gap:8}}
               onClick={()=>setCreating(true)}>
-              <I.plus size={12}/><span>Crear nuevo espacio…</span>
+              <I.plus size={12}/><span>{t('ws.createNew')}</span>
             </button>
           )}
           <button className="btn ghost sm" style={{width:'100%',justifyContent:'flex-start',gap:8}}
             onClick={()=>{ setOpen(false); onOpen && onOpen('settings', 'workspace'); }}>
-            <I.settings size={12}/><span>Ajustes del espacio…</span>
+            <I.settings size={12}/><span>{t('ws.settingsEntry')}</span>
           </button>
         </div>
       )}
@@ -413,6 +414,8 @@ function WorkspaceSwitcher({ onOpen }) {
 }
 
 function Dashboard({ onOpen, onNew }) {
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
   const [folder, setFolder] = React.useState('all');
   const [view, setView] = React.useState('grid');
   const [q, setQ] = React.useState('');
@@ -482,26 +485,26 @@ function Dashboard({ onOpen, onNew }) {
           <button
             className="btn icon sm ghost"
             style={{marginLeft:'auto'}}
-            title="Buscar cualquier cosa (⌘K)"
+            title={t('app.search.tooltip')}
             onClick={()=>window.dispatchEvent(new CustomEvent('st:cmd-open'))}
           >
             <I.search size={13}/>
           </button>
         </div>
         <nav>
-          <div className="nav-label">Mi biblioteca</div>
+          <div className="nav-label">{t('sidebar.nav.library')}</div>
           {FOLDERS.map(f => {
             const Ico = I[f.icon];
             const count = folderCounts[f.id] ?? f.count;
             return (
               <div key={f.id} className={`nav-item ${folder===f.id?'active':''}`} onClick={()=>setFolder(f.id)}>
                 <Ico size={15}/>
-                <span>{f.name}</span>
+                <span>{f.labelKey ? t(f.labelKey) : f.name}</span>
                 <span className="count">{count}</span>
               </div>
             );
           })}
-          <div className="nav-label">Por ocasión</div>
+          <div className="nav-label">{t('sidebar.nav.occasions')}</div>
           {occasions.map(oc => {
             const active = folder === `occ:${oc.id}`;
             const dropOver = dragOverOccId === oc.id;
@@ -533,13 +536,13 @@ function Dashboard({ onOpen, onNew }) {
                 <span style={{minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{oc.name}</span>
                 <span className="count oc-count-hideable">{count}</span>
                 <div className="oc-actions" onClick={e=>e.stopPropagation()}>
-                  <button className="btn icon sm ghost" title="Renombrar o cambiar color"
+                  <button className="btn icon sm ghost" title={t('sidebar.occasion.edit')}
                     onClick={()=>setOccasionModal({mode:'edit', occasion: oc})}>
                     <I.edit size={11}/>
                   </button>
-                  <button className="btn icon sm ghost" title="Borrar ocasión"
+                  <button className="btn icon sm ghost" title={t('sidebar.occasion.delete')}
                     onClick={()=>{
-                      if (window.confirm(`¿Borrar la ocasión «${oc.name}»? Las plantillas asignadas quedarán sin ocasión.`)) {
+                      if (window.confirm(t('sidebar.occasion.deleteConfirm', {name: oc.name}))) {
                         window.stOccasions.remove(oc.id);
                         if (folder === `occ:${oc.id}`) setFolder('all');
                       }
@@ -552,38 +555,38 @@ function Dashboard({ onOpen, onNew }) {
           })}
           <div className="nav-item" onClick={()=>setOccasionModal({mode:'new'})} style={{color:'var(--fg-3)'}}>
             <I.plus size={12}/>
-            <span>Nueva ocasión</span>
+            <span>{t('sidebar.occasion.new')}</span>
           </div>
-          <div className="nav-label">Mis cosas</div>
+          <div className="nav-label">{t('sidebar.nav.things')}</div>
           <div className="nav-item" onClick={()=>onOpen('library')}>
             <I.layers size={15}/>
-            <span>Mis bloques guardados</span>
+            <span>{t('sidebar.myBlocks')}</span>
             <span className="count">10</span>
           </div>
           <div className="nav-item">
             <I.braces size={15}/>
-            <span>Mis etiquetas</span>
+            <span>{t('sidebar.myTags')}</span>
           </div>
           <div className="nav-item" onClick={()=>onOpen('images')}>
             <I.image size={15}/>
-            <span>Mis imágenes</span>
+            <span>{t('sidebar.myImages')}</span>
           </div>
 
-          <div className="nav-label">Envíos y personas</div>
-          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title="Próximamente — por ahora solo puedes enviarte pruebas">
+          <div className="nav-label">{t('sidebar.nav.delivery')}</div>
+          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title={t('sidebar.contacts.tip')}>
             <I.user size={15}/>
-            <span>Listas de contactos</span>
-            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>PRONTO</span>
+            <span>{t('sidebar.contacts')}</span>
+            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>{t('sidebar.soon')}</span>
           </div>
-          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title="Próximamente">
+          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title={t('sidebar.soon.tip')}>
             <I.send size={15}/>
-            <span>Historial de envíos</span>
-            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>PRONTO</span>
+            <span>{t('sidebar.history')}</span>
+            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>{t('sidebar.soon')}</span>
           </div>
-          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title="Próximamente">
+          <div className="nav-item" style={{opacity:0.7,cursor:'not-allowed'}} title={t('sidebar.soon.tip')}>
             <I.eye size={15}/>
-            <span>Aperturas y clics</span>
-            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>PRONTO</span>
+            <span>{t('sidebar.opens')}</span>
+            <span className="count" style={{background:'color-mix(in oklab, var(--accent) 15%, transparent)',color:'var(--accent)',fontSize:9.5,letterSpacing:'.04em'}}>{t('sidebar.soon')}</span>
           </div>
         </nav>
         <div style={{marginTop:'auto',padding:12,borderTop:'1px solid var(--line)'}}>
@@ -594,33 +597,33 @@ function Dashboard({ onOpen, onNew }) {
       <main className="dash">
         <div className="dash-head">
           <div className="grow">
-            <h1>Mis plantillas</h1>
+            <h1>{t('dash.title')}</h1>
             <div className="sub">
-              {items.length} plantilla{items.length===1?'':'s'}
-              {rawItems[0]?.updated_at && <> · última edición {formatRelative(rawItems[0].updated_at)}</>}
+              {t(items.length===1 ? 'dash.count.one' : 'dash.count.other', {n: items.length})}
+              {rawItems[0]?.updated_at && <> · {t('dash.lastEdit', {when: formatRelative(rawItems[0].updated_at)})}</>}
             </div>
           </div>
           <button className="btn" onClick={()=>onOpen('gallery')}>
-            <I.grid size={14}/> Ver ejemplos listos
+            <I.grid size={14}/> {t('dash.btn.gallery')}
           </button>
           <button className="btn" onClick={()=>setAiOpen(true)} style={{borderColor:'color-mix(in oklab, var(--accent) 40%, var(--line))', color:'var(--accent)'}}>
-            <I.sparkles size={14}/> Generar con IA
+            <I.sparkles size={14}/> {t('dash.btn.ai')}
           </button>
           <button className="btn primary" onClick={onNew}>
-            <I.plus size={14}/> Crear plantilla nueva
+            <I.plus size={14}/> {t('dash.btn.new')}
           </button>
         </div>
 
         <div className="dash-toolbar">
           <div className="search">
             <span className="si"><I.search size={14}/></span>
-            <input placeholder="Busca por nombre, por ocasión, o por palabra…" value={q} onChange={e=>setQ(e.target.value)}/>
+            <input placeholder={t('dash.search.placeholder')} value={q} onChange={e=>setQ(e.target.value)}/>
           </div>
           <div className="grow"/>
           <select className="field" style={{width:190}} value={sort} onChange={e=>setSort(e.target.value)}>
-            <option value="updated">Las que tocaste primero</option>
-            <option value="name">Por nombre (A-Z)</option>
-            <option value="status">Por estado</option>
+            <option value="updated">{t('dash.sort.updated')}</option>
+            <option value="name">{t('dash.sort.name')}</option>
+            <option value="status">{t('dash.sort.status')}</option>
           </select>
           <div className="seg">
             <button className={view==='grid'?'on':''} onClick={()=>setView('grid')}><I.grid size={14}/></button>
@@ -633,28 +636,28 @@ function Dashboard({ onOpen, onNew }) {
             <EmptyState
               illustration={q ? 'search' : 'no-templates'}
               title={q
-                ? `Nada que coincida con «${q}»`
-                : folder==='trash'   ? 'La papelera está vacía'
-                : folder==='starred' ? 'Aún no tienes favoritas'
-                : folder==='shared'  ? 'Nadie ha compartido plantillas contigo'
-                : folder==='recent'  ? 'Todavía no has abierto nada'
-                : 'Aquí irán tus plantillas'}
+                ? t('dash.empty.search.title', {q})
+                : folder==='trash'   ? t('dash.empty.trash.title')
+                : folder==='starred' ? t('dash.empty.starred.title')
+                : folder==='shared'  ? t('dash.empty.shared.title')
+                : folder==='recent'  ? t('dash.empty.recent.title')
+                : t('dash.empty.all.title')}
               msg={q
-                ? 'Prueba con otra palabra, o limpia el filtro para ver todo.'
-                : folder==='trash'   ? 'Las plantillas que elimines quedan aquí para que puedas restaurarlas. Después de vaciar la papelera se borran para siempre.'
-                : folder==='starred' ? 'Pulsa la estrella en cualquier plantilla para tenerla siempre a mano.'
-                : folder==='shared'  ? 'Cuando alguien de tu equipo te comparta algo aparecerá aquí con su avatar.'
-                : folder==='recent'  ? 'Las plantillas que abras aparecerán aquí en orden de uso.'
-                : 'Crea una desde cero o empieza con uno de los ejemplos de la galería. Todas quedan guardadas aquí.'}
+                ? t('dash.empty.search.msg')
+                : folder==='trash'   ? t('dash.empty.trash.msg')
+                : folder==='starred' ? t('dash.empty.starred.msg')
+                : folder==='shared'  ? t('dash.empty.shared.msg')
+                : folder==='recent'  ? t('dash.empty.recent.msg')
+                : t('dash.empty.all.msg')}
               primaryAction={q
-                ? { label:'Limpiar búsqueda', icon:'x', onClick:()=>setQ('') }
+                ? { label:t('dash.empty.btn.clearSearch'), icon:'x', onClick:()=>setQ('') }
                 : folder==='trash'
-                  ? { label:'Volver a mis plantillas', icon:'chevronL', onClick:()=>setFolder('all') }
-                  : { label:'Crear plantilla nueva', icon:'plus', onClick:onNew }}
-              secondaryAction={!q && folder!=='trash' ? { label:'Abrir galería', icon:'grid', onClick:()=>onOpen('gallery') } : null}
+                  ? { label:t('dash.empty.btn.backAll'), icon:'chevronL', onClick:()=>setFolder('all') }
+                  : { label:t('dash.empty.btn.newTemplate'), icon:'plus', onClick:onNew }}
+              secondaryAction={!q && folder!=='trash' ? { label:t('dash.empty.btn.openGallery'), icon:'grid', onClick:()=>onOpen('gallery') } : null}
               tips={!q && folder==='all' ? [
-                'Cada cambio se guarda solo, no hace falta pulsar guardar.',
-                'Pulsa ⌘K en cualquier momento para buscar acciones.',
+                t('dash.empty.tip1'),
+                t('dash.empty.tip2'),
               ] : []}
             />
           )}
@@ -663,40 +666,40 @@ function Dashboard({ onOpen, onNew }) {
               {!inTrash && (
                 <div className="tpl-new" onClick={onNew}>
                   <div className="plus"><I.plus size={18}/></div>
-                  <div style={{fontSize:13,fontWeight:500}}>Crear plantilla nueva</div>
-                  <div style={{fontSize:11,color:'var(--fg-3)'}}>En blanco, o partiendo de un ejemplo</div>
+                  <div style={{fontSize:13,fontWeight:500}}>{t('dash.tile.new.title')}</div>
+                  <div style={{fontSize:11,color:'var(--fg-3)'}}>{t('dash.tile.new.sub')}</div>
                 </div>
               )}
-              {items.map(t => {
-                const oc = occasionByTplId[t.id];
+              {items.map(tpl => {
+                const oc = occasionByTplId[tpl.id];
                 return (
-                <div key={t.id} className="tpl-card"
+                <div key={tpl.id} className="tpl-card"
                   draggable={!inTrash}
-                  onClick={inTrash ? undefined : ()=>onOpen('editor', t)}
+                  onClick={inTrash ? undefined : ()=>onOpen('editor', tpl)}
                   onDragStart={(e)=>{
                     if (inTrash) return;
-                    e.dataTransfer.setData('text/x-mc-template', t.id);
+                    e.dataTransfer.setData('text/x-mc-template', tpl.id);
                     e.dataTransfer.effectAllowed = 'move';
                     e.currentTarget.classList.add('dragging');
                   }}
                   onDragEnd={(e)=>e.currentTarget.classList.remove('dragging')}
                   style={inTrash ? {cursor:'default',opacity:0.85} : undefined}>
                   <div className="tpl-thumb">
-                    {inTrash && <div className="badge"><div className="chip">En papelera</div></div>}
-                    {!inTrash && t.starred && <div className="badge"><div className="chip accent"><I.star size={10}/> Favorita</div></div>}
-                    {!inTrash && t.status==='draft' && !t.starred && <div className="badge"><div className="chip">Sin publicar</div></div>}
+                    {inTrash && <div className="badge"><div className="chip">{t('dash.badge.trash')}</div></div>}
+                    {!inTrash && tpl.starred && <div className="badge"><div className="chip accent"><I.star size={10}/> {t('dash.badge.favorite')}</div></div>}
+                    {!inTrash && tpl.status==='draft' && !tpl.starred && <div className="badge"><div className="chip">{t('dash.badge.unpublished')}</div></div>}
                     <div className="tpl-actions">
                       {inTrash ? (
                         <>
-                          <button className="btn icon sm" title="Restaurar"
-                            onClick={e=>{ e.stopPropagation(); window.stTemplates.restore(t.id); }}>
+                          <button className="btn icon sm" title={t('dash.action.restore')}
+                            onClick={e=>{ e.stopPropagation(); window.stTemplates.restore(tpl.id); }}>
                             <I.undo size={12}/>
                           </button>
-                          <button className="btn icon sm" title="Eliminar para siempre"
+                          <button className="btn icon sm" title={t('dash.action.purge')}
                             onClick={e=>{
                               e.stopPropagation();
-                              if (window.confirm(`Eliminar «${t.name}» para siempre? No se puede recuperar.`)) {
-                                window.stTemplates.purge(t.id);
+                              if (window.confirm(t('dash.confirm.purge', {name: tpl.name}))) {
+                                window.stTemplates.purge(tpl.id);
                               }
                             }}>
                             <I.trash size={12}/>
@@ -704,45 +707,45 @@ function Dashboard({ onOpen, onNew }) {
                         </>
                       ) : (
                         <>
-                          <button className="btn icon sm" title={t.starred?'Quitar de favoritas':'Marcar como favorita'}
-                            onClick={e=>{ e.stopPropagation(); window.stTemplates.toggleStar(t.id); }}>
-                            {t.starred ? <I.star2 size={12}/> : <I.star size={12}/>}
+                          <button className="btn icon sm" title={tpl.starred ? t('dash.action.star.remove') : t('dash.action.star.add')}
+                            onClick={e=>{ e.stopPropagation(); window.stTemplates.toggleStar(tpl.id); }}>
+                            {tpl.starred ? <I.star2 size={12}/> : <I.star size={12}/>}
                           </button>
-                          <button className="btn icon sm" title="Duplicar"
-                            onClick={e=>{ e.stopPropagation(); window.stTemplates.duplicate(t.id); }}>
+                          <button className="btn icon sm" title={t('dash.action.duplicate')}
+                            onClick={e=>{ e.stopPropagation(); window.stTemplates.duplicate(tpl.id); }}>
                             <I.copy size={12}/>
                           </button>
-                          <button className="btn icon sm" title="Mover a ocasión…"
+                          <button className="btn icon sm" title={t('dash.action.moveOccasion')}
                             onClick={e=>{
                               e.stopPropagation();
                               const r = e.currentTarget.getBoundingClientRect();
-                              setMoveMenu({ templateId: t.id, x: r.right - 220, y: r.bottom + 4 });
+                              setMoveMenu({ templateId: tpl.id, x: r.right - 220, y: r.bottom + 4 });
                             }}>
                             <I.dotsV size={12}/>
                           </button>
-                          <button className="btn icon sm" title="Mover a la papelera"
-                            onClick={e=>{ e.stopPropagation(); window.stTemplates.remove(t.id); }}>
+                          <button className="btn icon sm" title={t('dash.action.trash')}
+                            onClick={e=>{ e.stopPropagation(); window.stTemplates.remove(tpl.id); }}>
                             <I.trash size={12}/>
                           </button>
                         </>
                       )}
                     </div>
-                    <TplThumb t={t}/>
+                    <TplThumb t={tpl}/>
                   </div>
                   <div className="tpl-meta">
-                    <div className="tpl-title">{t.name}</div>
+                    <div className="tpl-title">{tpl.name}</div>
                     <div className="tpl-sub">
                       {oc && <span className="oc-dot" style={{background:oc.color}}/>}
                       <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                        {t.folder || 'Sin carpeta'}
+                        {tpl.folder || t('dash.noFolder')}
                       </span>
                       <span className="tpl-dot"/>
                       {inTrash
-                        ? <span>Borrada {formatRelative(t.deleted_at)}</span>
+                        ? <span>{t('dash.trash.deletedAt', {when: formatRelative(tpl.deleted_at)})}</span>
                         : <>
-                            <span className={t.status==='published'?'ok':''}>{STATUS_LABEL[t.status] || 'Borrador'}</span>
+                            <span className={tpl.status==='published'?'ok':''}>{t(tpl.status==='published' ? 'dash.status.published' : 'dash.status.draft')}</span>
                             <span className="tpl-dot"/>
-                            <span>{formatRelative(t.updated_at)}</span>
+                            <span>{formatRelative(tpl.updated_at)}</span>
                           </>}
                     </div>
                   </div>
@@ -754,58 +757,58 @@ function Dashboard({ onOpen, onNew }) {
             <div style={{background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--r-lg)',overflow:'hidden'}}>
               <div style={{display:'grid',gridTemplateColumns:'32px 1fr 160px 140px 120px 40px',padding:'10px 16px',borderBottom:'1px solid var(--line)',fontSize:11,color:'var(--fg-3)',textTransform:'uppercase',letterSpacing:'0.04em',fontWeight:600}}>
                 <span/>
-                <span>Nombre</span><span>Ocasión</span><span>Estado</span><span>Última edición</span><span/>
+                <span>{t('dash.col.name')}</span><span>{t('dash.col.occasion')}</span><span>{t('dash.col.status')}</span><span>{t('dash.col.lastEdit')}</span><span/>
               </div>
-              {items.map(t => {
-                const oc = occasionByTplId[t.id];
+              {items.map(tpl => {
+                const oc = occasionByTplId[tpl.id];
                 return (
-                <div key={t.id}
+                <div key={tpl.id}
                   draggable={!inTrash}
-                  onClick={inTrash ? undefined : ()=>onOpen('editor',t)}
+                  onClick={inTrash ? undefined : ()=>onOpen('editor', tpl)}
                   onDragStart={(e)=>{
                     if (inTrash) return;
-                    e.dataTransfer.setData('text/x-mc-template', t.id);
+                    e.dataTransfer.setData('text/x-mc-template', tpl.id);
                     e.dataTransfer.effectAllowed = 'move';
                   }}
                   style={{display:'grid',gridTemplateColumns:'32px 1fr 160px 140px 120px 80px',padding:'12px 16px',borderBottom:'1px solid var(--line)',alignItems:'center',cursor:inTrash?'default':'pointer',fontSize:13,opacity:inTrash?0.85:1}}
                   onMouseEnter={e=>{ if(!inTrash) e.currentTarget.style.background='var(--surface-2)'; }}
                   onMouseLeave={e=>{ if(!inTrash) e.currentTarget.style.background=''; }}>
-                  <div>{!inTrash && t.starred && <I.star2 size={14} style={{color:'var(--warn)'}}/>}</div>
-                  <div style={{fontWeight:500}}>{t.name}</div>
+                  <div>{!inTrash && tpl.starred && <I.star2 size={14} style={{color:'var(--warn)'}}/>}</div>
+                  <div style={{fontWeight:500}}>{tpl.name}</div>
                   <div style={{color:'var(--fg-2)',display:'flex',alignItems:'center',gap:8,minWidth:0}}>
                     {oc && <span className="oc-dot" style={{background:oc.color}}/>}
-                    <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.folder || 'Sin carpeta'}</span>
+                    <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{tpl.folder || t('dash.noFolder')}</span>
                   </div>
                   <div>
                     {inTrash
-                      ? <span className="chip">En papelera</span>
-                      : <span className={`chip ${t.status==='published'?'ok':''}`}>{STATUS_LABEL[t.status] || 'Borrador'}</span>}
+                      ? <span className="chip">{t('dash.badge.trash')}</span>
+                      : <span className={`chip ${tpl.status==='published'?'ok':''}`}>{t(tpl.status==='published' ? 'dash.status.published' : 'dash.status.draft')}</span>}
                   </div>
                   <div style={{color:'var(--fg-3)',fontSize:12}}>
-                    {inTrash ? `Borrada ${formatRelative(t.deleted_at)}` : formatRelative(t.updated_at)}
+                    {inTrash ? t('dash.trash.deletedAt', {when: formatRelative(tpl.deleted_at)}) : formatRelative(tpl.updated_at)}
                   </div>
                   <div style={{display:'flex',gap:4,justifyContent:'flex-end'}} onClick={e=>e.stopPropagation()}>
                     {inTrash ? (
                       <>
-                        <button className="btn icon sm ghost" title="Restaurar"
-                          onClick={()=>window.stTemplates.restore(t.id)}>
+                        <button className="btn icon sm ghost" title={t('dash.action.restore')}
+                          onClick={()=>window.stTemplates.restore(tpl.id)}>
                           <I.undo size={13}/>
                         </button>
-                        <button className="btn icon sm ghost" title="Eliminar para siempre"
+                        <button className="btn icon sm ghost" title={t('dash.action.purge')}
                           onClick={()=>{
-                            if (window.confirm(`Eliminar «${t.name}» para siempre? No se puede recuperar.`)) {
-                              window.stTemplates.purge(t.id);
+                            if (window.confirm(t('dash.confirm.purge', {name: tpl.name}))) {
+                              window.stTemplates.purge(tpl.id);
                             }
                           }}>
                           <I.trash size={13}/>
                         </button>
                       </>
                     ) : (
-                      <button className="btn icon sm ghost" title="Mover a ocasión…"
+                      <button className="btn icon sm ghost" title={t('dash.action.moveOccasion')}
                         onClick={e=>{
                           e.stopPropagation();
                           const r = e.currentTarget.getBoundingClientRect();
-                          setMoveMenu({ templateId: t.id, x: r.right - 220, y: r.bottom + 4 });
+                          setMoveMenu({ templateId: tpl.id, x: r.right - 220, y: r.bottom + 4 });
                         }}>
                         <I.dotsV size={14}/>
                       </button>
@@ -1164,64 +1167,79 @@ function AIGenerateModal({ onClose, onGenerated }) {
   );
 }
 
-// Gallery of starter templates
+// Gallery of starter templates. Names and category labels are keyed — the
+// underlying `cat` id stays stable in English so we can match it against
+// a template's legacy folder string later.
 function Gallery({ onBack, onPick }) {
-  const starters = [
-    { id:'g0',  name:'Empezar en blanco',                 cat:'Todos',          color:'#ffffff', variant:'blank', blank:true },
-    { id:'g1',  name:'Newsletter — novedades del mes',    cat:'Newsletters',    color:'#e8e7fe', variant:'newsletter' },
-    { id:'g2',  name:'¡Bienvenida a bordo!',              cat:'Bienvenida',     color:'#ece3fc', variant:'welcome' },
-    { id:'g3',  name:'Gracias por tu compra',             cat:'Agradecimientos',color:'#dce9f7', variant:'receipt' },
-    { id:'g4',  name:'Promo de temporada — 40% off',      cat:'Ventas y promos',color:'#dde2fb', variant:'promo' },
-    { id:'g5',  name:'Te dejaste algo en el carrito',     cat:'Ventas y promos',color:'#e9e0f7', variant:'cart' },
-    { id:'g6',  name:'¿Cómo estuvo nuestro servicio?',    cat:'Encuestas',      color:'#e3e3f5', variant:'survey' },
-    { id:'g7',  name:'Recordatorio de tu cita',           cat:'Avisos',         color:'#e4eaf6', variant:'receipt' },
-    { id:'g8',  name:'Invitación a un evento',            cat:'Eventos',        color:'#ecdbea', variant:'welcome' },
-    { id:'g9',  name:'Aviso interno al equipo',           cat:'Avisos',         color:'#e8e5f3', variant:'internal' },
-    { id:'g10', name:'Feliz cumpleaños de la marca',      cat:'Agradecimientos',color:'#f4e3db', variant:'welcome' },
-    { id:'g11', name:'Últimos días del descuento',        cat:'Ventas y promos',color:'#f0ddd5', variant:'promo' },
+  const t = window.stI18n.t;
+  window.stI18n.useLang();
+  const STARTERS = [
+    { id:'g0',  catId:'all',        color:'#ffffff', variant:'blank', blank:true },
+    { id:'g1',  catId:'newsletters',color:'#e8e7fe', variant:'newsletter' },
+    { id:'g2',  catId:'welcome',    color:'#ece3fc', variant:'welcome' },
+    { id:'g3',  catId:'thanks',     color:'#dce9f7', variant:'receipt' },
+    { id:'g4',  catId:'sales',      color:'#dde2fb', variant:'promo' },
+    { id:'g5',  catId:'sales',      color:'#e9e0f7', variant:'cart' },
+    { id:'g6',  catId:'surveys',    color:'#e3e3f5', variant:'survey' },
+    { id:'g7',  catId:'notices',    color:'#e4eaf6', variant:'receipt' },
+    { id:'g8',  catId:'events',     color:'#ecdbea', variant:'welcome' },
+    { id:'g9',  catId:'notices',    color:'#e8e5f3', variant:'internal' },
+    { id:'g10', catId:'thanks',     color:'#f4e3db', variant:'welcome' },
+    { id:'g11', catId:'sales',      color:'#f0ddd5', variant:'promo' },
   ];
-  const cats = ['Todos','Bienvenida','Newsletters','Ventas y promos','Agradecimientos','Eventos','Avisos','Encuestas'];
-  const [cat, setCat] = React.useState('Todos');
-  const items = starters.filter(s => cat==='Todos' || s.cat===cat);
+  const CATS = ['all','welcome','newsletters','sales','thanks','events','notices','surveys'];
+  const [cat, setCat] = React.useState('all');
+  const items = STARTERS.filter(s => cat==='all' || s.catId===cat);
+  // Each starter becomes a "template" with a translated name + category label,
+  // plus a `folder` string for downstream code that expects that shape.
+  const decorate = (s) => ({
+    ...s,
+    name: t(`gallery.starter.${s.id}.name`),
+    cat:  t(`gallery.cat.${s.catId}`),
+    folder: t(`gallery.cat.${s.catId}`),
+  });
   return (
     <div className="editor">
       <div className="editor-top">
-        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> Volver a mis plantillas</button>
-        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>Ejemplos listos para usar</div>
+        <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> {t('gallery.back')}</button>
+        <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>{t('gallery.title')}</div>
         <div className="grow"/>
         <div className="search">
           <span className="si"><I.search size={14}/></span>
-          <input placeholder="Busca por ocasión…"/>
+          <input placeholder={t('gallery.search.placeholder')}/>
         </div>
         <ThemeToggleBtn/>
       </div>
       <div style={{display:'flex',gap:6,padding:'12px 24px',borderBottom:'1px solid var(--line)',background:'var(--surface)',overflowX:'auto'}}>
-        {cats.map(c => (
-          <button key={c} className={`btn sm ${cat===c?'primary':''}`} onClick={()=>setCat(c)}>{c}</button>
+        {CATS.map(c => (
+          <button key={c} className={`btn sm ${cat===c?'primary':''}`} onClick={()=>setCat(c)}>{t(`gallery.cat.${c}`)}</button>
         ))}
       </div>
       <div className="dash-body">
         {items.length === 0 ? (
           <EmptyState
             illustration="gallery"
-            title={`Nada en «${cat}» todavía`}
-            msg="Estamos añadiendo más ejemplos por ocasión cada mes. Mientras tanto, puedes empezar en blanco o pedirle a la IA que te arme algo."
-            primaryAction={{ label:'Ver todos los ejemplos', icon:'grid', onClick:()=>setCat('Todos') }}
-            secondaryAction={{ label:'Empezar en blanco', icon:'plus', onClick:()=>onPick(starters[0]) }}
+            title={t('gallery.empty.title', {cat: t(`gallery.cat.${cat}`)})}
+            msg={t('gallery.empty.msg')}
+            primaryAction={{ label:t('gallery.empty.btn.viewAll'), icon:'grid', onClick:()=>setCat('all') }}
+            secondaryAction={{ label:t('gallery.empty.btn.blank'), icon:'plus', onClick:()=>onPick(decorate(STARTERS[0])) }}
           />
         ) : (
         <div className="grid-tpl">
-          {items.map(s => (
-            <div key={s.id} className="tpl-card" onClick={()=>onPick(s)}>
-              <div className="tpl-thumb">
-                <TplThumb t={s}/>
+          {items.map(s => {
+            const d = decorate(s);
+            return (
+              <div key={s.id} className="tpl-card" onClick={()=>onPick(d)}>
+                <div className="tpl-thumb">
+                  <TplThumb t={d}/>
+                </div>
+                <div className="tpl-meta">
+                  <div className="tpl-title">{d.name}</div>
+                  <div className="tpl-sub">{d.cat}</div>
+                </div>
               </div>
-              <div className="tpl-meta">
-                <div className="tpl-title">{s.name}</div>
-                <div className="tpl-sub">{s.cat}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         )}
       </div>

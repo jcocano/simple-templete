@@ -1,0 +1,1438 @@
+{
+  "preview.title": {
+    "en": "Preview",
+    "es": "Vista previa",
+    "pt": "Pré-visualização",
+    "fr": "Aperçu",
+    "ja": "プレビュー",
+    "zh": "预览"
+  },
+  "preview.back": {
+    "en": "Editor",
+    "es": "Editor",
+    "pt": "Editor",
+    "fr": "Éditeur",
+    "ja": "エディター",
+    "zh": "编辑器"
+  },
+  "preview.template": {
+    "en": "Template",
+    "es": "Plantilla",
+    "pt": "Modelo",
+    "fr": "Modèle",
+    "ja": "テンプレート",
+    "zh": "模板"
+  },
+  "preview.device": {
+    "en": "Device",
+    "es": "Dispositivo",
+    "pt": "Dispositivo",
+    "fr": "Appareil",
+    "ja": "デバイス",
+    "zh": "设备"
+  },
+  "preview.desktop": {
+    "en": "Desktop",
+    "es": "Escritorio",
+    "pt": "Computador",
+    "fr": "Bureau",
+    "ja": "デスクトップ",
+    "zh": "桌面"
+  },
+  "preview.mobile": {
+    "en": "Mobile",
+    "es": "Móvil",
+    "pt": "Celular",
+    "fr": "Mobile",
+    "ja": "モバイル",
+    "zh": "手机"
+  },
+  "preview.theme": {
+    "en": "Theme",
+    "es": "Tema",
+    "pt": "Tema",
+    "fr": "Thème",
+    "ja": "テーマ",
+    "zh": "主题"
+  },
+  "preview.light": {
+    "en": "Light",
+    "es": "Claro",
+    "pt": "Claro",
+    "fr": "Clair",
+    "ja": "ライト",
+    "zh": "浅色"
+  },
+  "preview.dark": {
+    "en": "Dark",
+    "es": "Oscuro",
+    "pt": "Escuro",
+    "fr": "Sombre",
+    "ja": "ダーク",
+    "zh": "深色"
+  },
+  "preview.sendTest": {
+    "en": "Send test",
+    "es": "Enviar prueba",
+    "pt": "Enviar teste",
+    "fr": "Envoyer un test",
+    "ja": "テスト送信",
+    "zh": "发送测试"
+  },
+  "preview.empty": {
+    "en": "This template doesn’t have any content yet.",
+    "es": "Esta plantilla aún no tiene contenido.",
+    "pt": "Este modelo ainda não tem conteúdo.",
+    "fr": "Ce modèle n’a pas encore de contenu.",
+    "ja": "このテンプレートにはまだコンテンツがありません。",
+    "zh": "该模板还没有内容。"
+  },
+
+  "library.back": {
+    "en": "Library",
+    "es": "Biblioteca",
+    "pt": "Biblioteca",
+    "fr": "Bibliothèque",
+    "ja": "ライブラリ",
+    "zh": "库"
+  },
+  "library.title": {
+    "en": "Saved blocks",
+    "es": "Bloques guardados",
+    "pt": "Blocos salvos",
+    "fr": "Blocs enregistrés",
+    "ja": "保存したブロック",
+    "zh": "已保存的区块"
+  },
+  "library.count.one": {
+    "en": "{n} block",
+    "es": "{n} bloque",
+    "pt": "{n} bloco",
+    "fr": "{n} bloc",
+    "ja": "{n} ブロック",
+    "zh": "{n} 个区块"
+  },
+  "library.count.other": {
+    "en": "{n} blocks",
+    "es": "{n} bloques",
+    "pt": "{n} blocos",
+    "fr": "{n} blocs",
+    "ja": "{n} ブロック",
+    "zh": "{n} 个区块"
+  },
+  "library.countOf": {
+    "en": "of {total}",
+    "es": "de {total}",
+    "pt": "de {total}",
+    "fr": "sur {total}",
+    "ja": "/ {total} 件",
+    "zh": "共 {total} 个"
+  },
+  "library.search.placeholder": {
+    "en": "Search blocks…",
+    "es": "Buscar bloques…",
+    "pt": "Buscar blocos…",
+    "fr": "Rechercher des blocs…",
+    "ja": "ブロックを検索…",
+    "zh": "搜索区块…"
+  },
+  "library.saveNew": {
+    "en": "Save new",
+    "es": "Guardar nuevo",
+    "pt": "Salvar novo",
+    "fr": "Enregistrer",
+    "ja": "新規保存",
+    "zh": "保存新区块"
+  },
+  "library.toast.saved.title": {
+    "en": "Block saved to your library",
+    "es": "Bloque guardado en tu biblioteca",
+    "pt": "Bloco salvo na sua biblioteca",
+    "fr": "Bloc enregistré dans ta bibliothèque",
+    "ja": "ブロックをライブラリに保存しました",
+    "zh": "区块已保存到你的库中"
+  },
+  "library.toast.saved.msg": {
+    "en": "You can reuse it in any template.",
+    "es": "Podrás reusarlo en cualquier plantilla.",
+    "pt": "Você poderá reutilizá-lo em qualquer modelo.",
+    "fr": "Tu pourras le réutiliser dans n’importe quel modèle.",
+    "ja": "どのテンプレートでも再利用できます。",
+    "zh": "你可以在任何模板中复用它。"
+  },
+  "library.toast.createHint": {
+    "en": "Open a template, design the block and press “Save block” on its toolbar.",
+    "es": "Abre una plantilla, diseña el bloque y pulsa «Guardar bloque» en su barra.",
+    "pt": "Abra um modelo, desenhe o bloco e clique em “Salvar bloco” na barra dele.",
+    "fr": "Ouvre un modèle, conçois le bloc et clique sur « Enregistrer le bloc » dans sa barre.",
+    "ja": "テンプレートを開いてブロックをデザインし、ツールバーの「ブロックを保存」を押してください。",
+    "zh": "打开模板,设计区块,然后在其工具栏中点击“保存区块”。"
+  },
+  "library.cat.all": {
+    "en": "All",
+    "es": "Todos",
+    "pt": "Todos",
+    "fr": "Tous",
+    "ja": "すべて",
+    "zh": "全部"
+  },
+  "library.cat.headers": {
+    "en": "Headers",
+    "es": "Cabeceras",
+    "pt": "Cabeçalhos",
+    "fr": "En-têtes",
+    "ja": "ヘッダー",
+    "zh": "页眉"
+  },
+  "library.cat.footers": {
+    "en": "Footers",
+    "es": "Footers",
+    "pt": "Rodapés",
+    "fr": "Pieds de page",
+    "ja": "フッター",
+    "zh": "页脚"
+  },
+  "library.cat.ctas": {
+    "en": "CTAs",
+    "es": "CTAs",
+    "pt": "CTAs",
+    "fr": "CTAs",
+    "ja": "CTA",
+    "zh": "行动号召"
+  },
+  "library.cat.testimonials": {
+    "en": "Testimonials",
+    "es": "Testimonios",
+    "pt": "Depoimentos",
+    "fr": "Témoignages",
+    "ja": "お客様の声",
+    "zh": "推荐语"
+  },
+  "library.cat.products": {
+    "en": "Products",
+    "es": "Productos",
+    "pt": "Produtos",
+    "fr": "Produits",
+    "ja": "商品",
+    "zh": "产品"
+  },
+  "library.cat.social": {
+    "en": "Social",
+    "es": "Social",
+    "pt": "Social",
+    "fr": "Social",
+    "ja": "ソーシャル",
+    "zh": "社交"
+  },
+  "library.empty.search.title": {
+    "en": "Nothing matches «{q}»",
+    "es": "Nada que coincida con «{q}»",
+    "pt": "Nada corresponde a «{q}»",
+    "fr": "Rien ne correspond à «{q}»",
+    "ja": "「{q}」に一致するものはありません",
+    "zh": "没有与「{q}」匹配的结果"
+  },
+  "library.empty.search.msg": {
+    "en": "Try another word, or switch categories in the bar above.",
+    "es": "Prueba con otra palabra, o cambia de categoría en la barra de arriba.",
+    "pt": "Tente outra palavra ou troque de categoria na barra acima.",
+    "fr": "Essaie un autre mot ou change de catégorie dans la barre au-dessus.",
+    "ja": "別のキーワードを試すか、上のバーでカテゴリーを切り替えてください。",
+    "zh": "尝试其他关键词,或在上方栏中切换分类。"
+  },
+  "library.empty.none.title": {
+    "en": "You haven’t saved any blocks yet",
+    "es": "Aún no guardas bloques",
+    "pt": "Você ainda não salvou blocos",
+    "fr": "Tu n’as encore enregistré aucun bloc",
+    "ja": "まだブロックを保存していません",
+    "zh": "你还没有保存任何区块"
+  },
+  "library.empty.none.msg": {
+    "en": "When you design a header, a killer call-to-action or a footer you love, save it here. Then drag it into any template.",
+    "es": "Cuando diseñes una cabecera, un botonazo de llamada a la acción o un footer que te guste, guárdalo aquí. Luego lo arrastras a cualquier plantilla.",
+    "pt": "Quando você desenhar um cabeçalho, um botão de CTA matador ou um rodapé que curte, salve aqui. Depois é só arrastar para qualquer modelo.",
+    "fr": "Quand tu conçois un en-tête, un bouton d’appel à l’action ou un pied de page qui te plaît, enregistre-le ici. Ensuite, glisse-le dans n’importe quel modèle.",
+    "ja": "ヘッダーや印象的なCTAボタン、気に入ったフッターをデザインしたら、ここに保存しましょう。あとはどのテンプレートにもドラッグできます。",
+    "zh": "设计好一个页眉、亮眼的行动号召按钮或喜欢的页脚后,就保存在这里。之后可以拖到任何模板里。"
+  },
+  "library.empty.cat.title": {
+    "en": "Nothing in «{cat}» yet",
+    "es": "Nada en «{cat}» todavía",
+    "pt": "Nada em «{cat}» ainda",
+    "fr": "Rien dans «{cat}» pour l’instant",
+    "ja": "「{cat}」にはまだ何もありません",
+    "zh": "「{cat}」中还没有内容"
+  },
+  "library.empty.cat.msg": {
+    "en": "Save something you use often and you’ll have it at hand in seconds.",
+    "es": "Guarda algo que uses a menudo y lo tendrás a mano en segundos.",
+    "pt": "Salve algo que você usa com frequência para tê-lo à mão em segundos.",
+    "fr": "Enregistre ce que tu utilises souvent, tu l’auras sous la main en quelques secondes.",
+    "ja": "よく使うものを保存しておけば、数秒で取り出せます。",
+    "zh": "保存你常用的内容,几秒钟就能取用。"
+  },
+  "library.empty.clearSearch": {
+    "en": "Clear search",
+    "es": "Limpiar búsqueda",
+    "pt": "Limpar busca",
+    "fr": "Effacer la recherche",
+    "ja": "検索をクリア",
+    "zh": "清除搜索"
+  },
+  "library.empty.createNew": {
+    "en": "Create a new one",
+    "es": "Crear uno nuevo",
+    "pt": "Criar um novo",
+    "fr": "En créer un",
+    "ja": "新しく作成",
+    "zh": "新建一个"
+  },
+  "library.empty.viewAll": {
+    "en": "View all",
+    "es": "Ver todos",
+    "pt": "Ver todos",
+    "fr": "Voir tout",
+    "ja": "すべて表示",
+    "zh": "查看全部"
+  },
+  "library.tip.available": {
+    "en": "Your blocks are available in the editor under “My blocks”.",
+    "es": "Tus bloques quedan disponibles en el editor bajo «Mis bloques».",
+    "pt": "Seus blocos ficam disponíveis no editor em “Meus blocos”.",
+    "fr": "Tes blocs sont disponibles dans l’éditeur sous « Mes blocs ».",
+    "ja": "保存したブロックはエディターの「マイブロック」で使えます。",
+    "zh": "你的区块会显示在编辑器的“我的区块”中。"
+  },
+  "library.tip.vars": {
+    "en": "Variables like {{name}} are saved with the block and auto-fill when you reuse it.",
+    "es": "Las variables {{nombre}} se guardan y se rellenan solas al reusar el bloque.",
+    "pt": "Variáveis como {{nome}} são salvas e preenchidas automaticamente ao reusar o bloco.",
+    "fr": "Les variables comme {{nom}} sont enregistrées et remplies automatiquement quand tu réutilises le bloc.",
+    "ja": "{{name}} のような変数はブロックと一緒に保存され、再利用時に自動で埋まります。",
+    "zh": "像 {{name}} 这样的变量会随区块一起保存,复用时会自动填充。"
+  },
+  "library.usedIn": {
+    "en": "Used in {n} templates",
+    "es": "Usado en {n} plantillas",
+    "pt": "Usado em {n} modelos",
+    "fr": "Utilisé dans {n} modèles",
+    "ja": "{n} 件のテンプレートで使用",
+    "zh": "已在 {n} 个模板中使用"
+  },
+
+  "imageLib.back": {
+    "en": "Back",
+    "es": "Volver",
+    "pt": "Voltar",
+    "fr": "Retour",
+    "ja": "戻る",
+    "zh": "返回"
+  },
+  "imageLib.title": {
+    "en": "Image library",
+    "es": "Biblioteca de imágenes",
+    "pt": "Biblioteca de imagens",
+    "fr": "Bibliothèque d’images",
+    "ja": "画像ライブラリ",
+    "zh": "图片库"
+  },
+  "imageLib.count.one": {
+    "en": "{n} image",
+    "es": "{n} imagen",
+    "pt": "{n} imagem",
+    "fr": "{n} image",
+    "ja": "{n} 枚",
+    "zh": "{n} 张图片"
+  },
+  "imageLib.count.other": {
+    "en": "{n} images",
+    "es": "{n} imágenes",
+    "pt": "{n} imagens",
+    "fr": "{n} images",
+    "ja": "{n} 枚",
+    "zh": "{n} 张图片"
+  },
+  "imageLib.countOf": {
+    "en": "of {total}",
+    "es": "de {total}",
+    "pt": "de {total}",
+    "fr": "sur {total}",
+    "ja": "/ {total} 件",
+    "zh": "共 {total} 张"
+  },
+  "imageLib.search.placeholder": {
+    "en": "Search images…",
+    "es": "Buscar imágenes…",
+    "pt": "Buscar imagens…",
+    "fr": "Rechercher des images…",
+    "ja": "画像を検索…",
+    "zh": "搜索图片…"
+  },
+  "imageLib.destination": {
+    "en": "Destination",
+    "es": "Destino",
+    "pt": "Destino",
+    "fr": "Destination",
+    "ja": "保存先",
+    "zh": "存储位置"
+  },
+  "imageLib.upload": {
+    "en": "Upload images",
+    "es": "Subir imágenes",
+    "pt": "Enviar imagens",
+    "fr": "Téléverser des images",
+    "ja": "画像をアップロード",
+    "zh": "上传图片"
+  },
+  "imageLib.uploading": {
+    "en": "Uploading…",
+    "es": "Subiendo…",
+    "pt": "Enviando…",
+    "fr": "Téléversement…",
+    "ja": "アップロード中…",
+    "zh": "上传中…"
+  },
+  "imageLib.folder.all": {
+    "en": "Entire library",
+    "es": "Toda la biblioteca",
+    "pt": "Biblioteca inteira",
+    "fr": "Toute la bibliothèque",
+    "ja": "ライブラリ全体",
+    "zh": "整个库"
+  },
+  "imageLib.folder.uploads": {
+    "en": "Uploads",
+    "es": "Subidas",
+    "pt": "Enviadas",
+    "fr": "Envois",
+    "ja": "アップロード",
+    "zh": "上传"
+  },
+  "imageLib.folder.none": {
+    "en": "No folder",
+    "es": "Sin carpeta",
+    "pt": "Sem pasta",
+    "fr": "Sans dossier",
+    "ja": "フォルダなし",
+    "zh": "无文件夹"
+  },
+  "imageLib.folders": {
+    "en": "Folders",
+    "es": "Carpetas",
+    "pt": "Pastas",
+    "fr": "Dossiers",
+    "ja": "フォルダ",
+    "zh": "文件夹"
+  },
+  "imageLib.folders.hint": {
+    "en": "Folders appear automatically when you assign one while moving an image. They’re just names — no nesting.",
+    "es": "Las carpetas se crean solas cuando asignas una al mover una imagen. Son solo un nombre; no hay anidamiento.",
+    "pt": "As pastas surgem sozinhas quando você atribui uma ao mover uma imagem. São apenas nomes; não há aninhamento.",
+    "fr": "Les dossiers apparaissent automatiquement quand tu en assignes un en déplaçant une image. Ce ne sont que des noms, pas d’imbrication.",
+    "ja": "画像を移動する際にフォルダを指定すると自動的に作成されます。単なる名前で、入れ子構造はありません。",
+    "zh": "当你在移动图片时指定文件夹,它就会自动创建。它们只是名称,不支持嵌套。"
+  },
+  "imageLib.storageSettings": {
+    "en": "Storage settings",
+    "es": "Ajustes de almacenamiento",
+    "pt": "Configurações de armazenamento",
+    "fr": "Paramètres de stockage",
+    "ja": "ストレージ設定",
+    "zh": "存储设置"
+  },
+  "imageLib.error.title": {
+    "en": "Couldn’t upload.",
+    "es": "No pudimos subir.",
+    "pt": "Não foi possível enviar.",
+    "fr": "Impossible de téléverser.",
+    "ja": "アップロードできませんでした。",
+    "zh": "无法上传。"
+  },
+  "imageLib.error.upload": {
+    "en": "Couldn’t upload {name}.",
+    "es": "No se pudo subir {name}.",
+    "pt": "Não foi possível enviar {name}.",
+    "fr": "Impossible de téléverser {name}.",
+    "ja": "{name} をアップロードできませんでした。",
+    "zh": "无法上传 {name}。"
+  },
+  "imageLib.error.unexpected": {
+    "en": "Unexpected error while uploading.",
+    "es": "Error inesperado al subir.",
+    "pt": "Erro inesperado ao enviar.",
+    "fr": "Erreur inattendue pendant le téléversement.",
+    "ja": "アップロード中に予期しないエラーが発生しました。",
+    "zh": "上传时发生意外错误。"
+  },
+  "imageLib.fallback.name": {
+    "en": "image",
+    "es": "imagen",
+    "pt": "imagem",
+    "fr": "image",
+    "ja": "画像",
+    "zh": "图片"
+  },
+  "imageLib.confirm.delete": {
+    "en": "Remove «{name}» from the library?\n\nThis only deletes the local record. The file on your CDN is not deleted.",
+    "es": "Quitar «{name}» de la biblioteca?\n\nEsto solo elimina el registro local. El archivo en el CDN no se borra.",
+    "pt": "Remover «{name}» da biblioteca?\n\nIsso só apaga o registro local. O arquivo no CDN não é excluído.",
+    "fr": "Retirer «{name}» de la bibliothèque ?\n\nCela supprime seulement l’enregistrement local. Le fichier sur le CDN n’est pas supprimé.",
+    "ja": "「{name}」をライブラリから削除しますか？\n\nローカルの記録のみ削除されます。CDN 上のファイルは残ります。",
+    "zh": "要从库中移除「{name}」吗?\n\n只会删除本地记录。CDN 上的文件不会被删除。"
+  },
+  "imageLib.prompt.moveFolder": {
+    "en": "Move to folder (free-form name)",
+    "es": "Mover a carpeta (nombre libre)",
+    "pt": "Mover para pasta (nome livre)",
+    "fr": "Déplacer vers un dossier (nom libre)",
+    "ja": "フォルダに移動（名前は自由）",
+    "zh": "移动到文件夹（名称随意）"
+  },
+  "imageLib.toast.urlCopied": {
+    "en": "URL copied",
+    "es": "URL copiada",
+    "pt": "URL copiada",
+    "fr": "URL copiée",
+    "ja": "URL をコピーしました",
+    "zh": "已复制 URL"
+  },
+  "imageLib.toast.copyFail": {
+    "en": "Couldn’t copy",
+    "es": "No se pudo copiar",
+    "pt": "Não foi possível copiar",
+    "fr": "Impossible de copier",
+    "ja": "コピーできませんでした",
+    "zh": "无法复制"
+  },
+  "imageLib.empty.title": {
+    "en": "No images in this library yet",
+    "es": "Aún no hay imágenes en esta biblioteca",
+    "pt": "Ainda não há imagens nesta biblioteca",
+    "fr": "Aucune image dans cette bibliothèque pour l’instant",
+    "ja": "このライブラリにはまだ画像がありません",
+    "zh": "该库中还没有图片"
+  },
+  "imageLib.empty.msg": {
+    "en": "Upload your first image from here or drag it onto the screen. You can then use it in any template — the editor reads from this same library.",
+    "es": "Subí tu primera imagen desde aquí o arrastrala a la pantalla. Después podrás usarla en cualquier plantilla — el editor lee de esta misma biblioteca.",
+    "pt": "Envie sua primeira imagem por aqui ou arraste-a para a tela. Depois você poderá usá-la em qualquer modelo — o editor lê desta mesma biblioteca.",
+    "fr": "Téléverse ta première image ici ou glisse-la sur l’écran. Tu pourras ensuite l’utiliser dans n’importe quel modèle — l’éditeur lit la même bibliothèque.",
+    "ja": "ここから最初の画像をアップロードするか、画面にドラッグしてください。その後はどのテンプレートでも使えます — エディターも同じライブラリを参照します。",
+    "zh": "从这里上传第一张图片,或直接拖到屏幕上。之后就能在任何模板中使用——编辑器也会读取这同一个库。"
+  },
+  "imageLib.empty.upload": {
+    "en": "Upload image",
+    "es": "Subir imagen",
+    "pt": "Enviar imagem",
+    "fr": "Téléverser une image",
+    "ja": "画像をアップロード",
+    "zh": "上传图片"
+  },
+  "imageLib.empty.search.title": {
+    "en": "Nothing matches «{q}»",
+    "es": "Nada que coincida con «{q}»",
+    "pt": "Nada corresponde a «{q}»",
+    "fr": "Rien ne correspond à «{q}»",
+    "ja": "「{q}」に一致するものはありません",
+    "zh": "没有与「{q}」匹配的结果"
+  },
+  "imageLib.empty.folder.title": {
+    "en": "Nothing in «{folder}» yet",
+    "es": "Nada en «{folder}» todavía",
+    "pt": "Nada em «{folder}» ainda",
+    "fr": "Rien dans «{folder}» pour l’instant",
+    "ja": "「{folder}」にはまだ何もありません",
+    "zh": "「{folder}」中还没有内容"
+  },
+  "imageLib.empty.search.msg": {
+    "en": "Try another term or go back to the whole library.",
+    "es": "Prueba con otro término o vuelve a toda la biblioteca.",
+    "pt": "Tente outro termo ou volte para a biblioteca inteira.",
+    "fr": "Essaie un autre terme ou reviens à toute la bibliothèque.",
+    "ja": "別のキーワードを試すか、ライブラリ全体に戻ってください。",
+    "zh": "尝试其他关键词,或返回整个库。"
+  },
+  "imageLib.empty.viewAll": {
+    "en": "View all",
+    "es": "Ver todas",
+    "pt": "Ver todas",
+    "fr": "Tout voir",
+    "ja": "すべて表示",
+    "zh": "查看全部"
+  },
+  "imageLib.tip.local": {
+    "en": "Current destination: your computer (local disk). Images are embedded automatically when exporting or sending.",
+    "es": "Destino actual: tu equipo (disco local). Las imágenes se embeben automáticamente al exportar o enviar.",
+    "pt": "Destino atual: seu computador (disco local). As imagens são embutidas automaticamente ao exportar ou enviar.",
+    "fr": "Destination actuelle : ton ordinateur (disque local). Les images sont intégrées automatiquement à l’export ou à l’envoi.",
+    "ja": "現在の保存先: お使いの端末（ローカルディスク）。書き出しや送信時に画像は自動的に埋め込まれます。",
+    "zh": "当前存储位置:你的电脑（本地磁盘）。导出或发送时图片会自动内嵌。"
+  },
+  "imageLib.tip.base64": {
+    "en": "Current destination: Base64 embedded inside the email HTML.",
+    "es": "Destino actual: Base64 embebido dentro del HTML del correo.",
+    "pt": "Destino atual: Base64 embutido no HTML do e-mail.",
+    "fr": "Destination actuelle : Base64 intégré dans le HTML de l’e-mail.",
+    "ja": "現在の保存先: メール HTML 内に Base64 で埋め込み。",
+    "zh": "当前存储位置:内嵌在邮件 HTML 中的 Base64。"
+  },
+  "imageLib.tip.cdn": {
+    "en": "Current destination: {provider}. Images are uploaded to your CDN when saved.",
+    "es": "Destino actual: {provider}. Las imágenes se suben a tu CDN al guardarlas.",
+    "pt": "Destino atual: {provider}. As imagens são enviadas ao seu CDN ao salvar.",
+    "fr": "Destination actuelle : {provider}. Les images sont envoyées sur ton CDN à l’enregistrement.",
+    "ja": "現在の保存先: {provider}。保存時に CDN にアップロードされます。",
+    "zh": "当前存储位置:{provider}。保存时图片会上传到你的 CDN。"
+  },
+  "imageLib.tip.changeProvider": {
+    "en": "Change the provider in Settings → Storage if you want to publish images on a CDN.",
+    "es": "Cambia el proveedor en Ajustes → Almacenamiento si querés publicar las imágenes en un CDN.",
+    "pt": "Mude o provedor em Configurações → Armazenamento se quiser publicar as imagens em um CDN.",
+    "fr": "Change de fournisseur dans Paramètres → Stockage si tu veux publier les images sur un CDN.",
+    "ja": "CDN で画像を公開したい場合は、設定 → ストレージでプロバイダーを変更してください。",
+    "zh": "如果想把图片发布到 CDN,请在“设置 → 存储”中更换提供商。"
+  },
+  "imageLib.tip.insert": {
+    "en": "When you insert an image into a block, Simple Template picks it from here.",
+    "es": "Al insertar una imagen en un bloque, Simple Template la selecciona desde aquí.",
+    "pt": "Ao inserir uma imagem em um bloco, o Simple Template a escolhe daqui.",
+    "fr": "Quand tu insères une image dans un bloc, Simple Template la prend d’ici.",
+    "ja": "ブロックに画像を挿入すると、Simple Template はここから選びます。",
+    "zh": "当你在区块中插入图片时,Simple Template 会从这里选择。"
+  },
+  "imageLib.dropHint": {
+    "en": "Drag here or click",
+    "es": "Arrastra aquí o haz click",
+    "pt": "Arraste aqui ou clique",
+    "fr": "Glisse ici ou clique",
+    "ja": "ここにドラッグするかクリック",
+    "zh": "拖到这里或点击"
+  },
+  "imageLib.ok": {
+    "en": "OK",
+    "es": "OK",
+    "pt": "OK",
+    "fr": "OK",
+    "ja": "OK",
+    "zh": "好"
+  },
+  "imageLib.rename": {
+    "en": "Rename",
+    "es": "Renombrar",
+    "pt": "Renomear",
+    "fr": "Renommer",
+    "ja": "名前を変更",
+    "zh": "重命名"
+  },
+  "imageLib.meta.dimensions": {
+    "en": "Dimensions",
+    "es": "Dimensiones",
+    "pt": "Dimensões",
+    "fr": "Dimensions",
+    "ja": "サイズ",
+    "zh": "尺寸"
+  },
+  "imageLib.meta.size": {
+    "en": "Size",
+    "es": "Tamaño",
+    "pt": "Tamanho",
+    "fr": "Taille",
+    "ja": "容量",
+    "zh": "大小"
+  },
+  "imageLib.meta.folder": {
+    "en": "Folder",
+    "es": "Carpeta",
+    "pt": "Pasta",
+    "fr": "Dossier",
+    "ja": "フォルダ",
+    "zh": "文件夹"
+  },
+  "imageLib.meta.origin": {
+    "en": "Origin",
+    "es": "Origen",
+    "pt": "Origem",
+    "fr": "Origine",
+    "ja": "出所",
+    "zh": "来源"
+  },
+  "imageLib.meta.uploaded": {
+    "en": "Uploaded",
+    "es": "Subida",
+    "pt": "Enviada",
+    "fr": "Téléversée",
+    "ja": "アップロード日時",
+    "zh": "上传时间"
+  },
+  "imageLib.meta.url": {
+    "en": "URL",
+    "es": "URL",
+    "pt": "URL",
+    "fr": "URL",
+    "ja": "URL",
+    "zh": "URL"
+  },
+  "imageLib.copyUrl": {
+    "en": "Copy URL",
+    "es": "Copiar URL",
+    "pt": "Copiar URL",
+    "fr": "Copier l’URL",
+    "ja": "URL をコピー",
+    "zh": "复制 URL"
+  },
+  "imageLib.moveFolder": {
+    "en": "Move to folder",
+    "es": "Mover a carpeta",
+    "pt": "Mover para pasta",
+    "fr": "Déplacer vers un dossier",
+    "ja": "フォルダに移動",
+    "zh": "移动到文件夹"
+  },
+  "imageLib.remove": {
+    "en": "Remove from library",
+    "es": "Quitar de la biblioteca",
+    "pt": "Remover da biblioteca",
+    "fr": "Retirer de la bibliothèque",
+    "ja": "ライブラリから削除",
+    "zh": "从库中移除"
+  },
+
+  "onboarding.title": {
+    "en": "Make beautiful emails without writing code.",
+    "es": "Haz correos bonitos, sin saber de código.",
+    "pt": "Faça e-mails bonitos sem saber programar.",
+    "fr": "Crée de beaux e-mails sans savoir coder.",
+    "ja": "コードを書かずに、きれいなメールを作ろう。",
+    "zh": "不用写代码,也能做出漂亮的邮件。"
+  },
+  "onboarding.lede": {
+    "en": "Drag blocks, change colors and text, and send emails that look great in Gmail, Outlook and on mobile. No HTML, no hassle.",
+    "es": "Arrastra bloques, cambia colores y textos, y envía correos que se vean igual de bien en Gmail, Outlook y en el celular. Nada de HTML, nada de complicaciones.",
+    "pt": "Arraste blocos, mude cores e textos e envie e-mails que ficam bonitos no Gmail, Outlook e no celular. Sem HTML, sem complicação.",
+    "fr": "Glisse des blocs, change les couleurs et les textes, et envoie des e-mails aussi jolis sur Gmail, Outlook et mobile. Sans HTML, sans prise de tête.",
+    "ja": "ブロックをドラッグして色や文字を変え、Gmail でも Outlook でもスマホでもきれいに見えるメールを送りましょう。HTML も面倒な操作も不要です。",
+    "zh": "拖动区块、修改颜色和文字,在 Gmail、Outlook 和手机上都好看的邮件就这么简单。不用 HTML,不用折腾。"
+  },
+  "onboarding.step1.title": {
+    "en": "Assemble your email like a puzzle",
+    "es": "Arma tu correo como un rompecabezas",
+    "pt": "Monte seu e-mail como um quebra-cabeça",
+    "fr": "Assemble ton e-mail comme un puzzle",
+    "ja": "メールをパズルのように組み立てよう",
+    "zh": "像拼图一样拼出你的邮件"
+  },
+  "onboarding.step1.desc": {
+    "en": "Pick blocks: a cover, some text, an image, a button… arrange them however you like.",
+    "es": "Elige bloques: una portada, un texto, una imagen, un botón… los acomodas como tú quieras.",
+    "pt": "Escolha blocos: uma capa, um texto, uma imagem, um botão… e organize do seu jeito.",
+    "fr": "Choisis des blocs : une couverture, un texte, une image, un bouton… arrange-les comme tu veux.",
+    "ja": "カバー、文章、画像、ボタンなどのブロックを選び、好きな順に配置できます。",
+    "zh": "选择区块:封面、文字、图片、按钮……随意排列成你喜欢的样子。"
+  },
+  "onboarding.step2.title": {
+    "en": "Personalize with each person’s name",
+    "es": "Personaliza con el nombre de cada persona",
+    "pt": "Personalize com o nome de cada pessoa",
+    "fr": "Personnalise avec le prénom de chaque personne",
+    "ja": "相手ごとに名前を差し込んでパーソナライズ",
+    "zh": "为每个人定制名字"
+  },
+  "onboarding.step2.descBefore": {
+    "en": "Write",
+    "es": "Escribe",
+    "pt": "Escreva",
+    "fr": "Écris",
+    "ja": "「",
+    "zh": "写上"
+  },
+  "onboarding.step2.descAfter": {
+    "en": "and every recipient will see their own. We take care of the rest.",
+    "es": "y cada destinatario verá el suyo. Nosotros nos encargamos del resto.",
+    "pt": "e cada destinatário verá o dele. A gente cuida do resto.",
+    "fr": "et chaque destinataire verra le sien. On s’occupe du reste.",
+    "ja": "」と書くだけで、受信者ごとに自分の名前が表示されます。あとはこちらにおまかせ。",
+    "zh": ",每位收件人都会看到自己的名字。其余的交给我们。"
+  },
+  "onboarding.step3.title": {
+    "en": "See how it will look before sending",
+    "es": "Ve cómo se verá antes de enviar",
+    "pt": "Veja como vai ficar antes de enviar",
+    "fr": "Vois le rendu avant d’envoyer",
+    "ja": "送る前に見た目を確認しよう",
+    "zh": "发送前预览效果"
+  },
+  "onboarding.step3.desc": {
+    "en": "Check your email on computer and phone, in light and dark theme — side by side.",
+    "es": "Revisa tu correo en la compu y en el celular, en tema claro y oscuro — lado a lado.",
+    "pt": "Confira seu e-mail no computador e no celular, em tema claro e escuro — lado a lado.",
+    "fr": "Vérifie ton e-mail sur ordinateur et mobile, en thème clair et sombre — côte à côte.",
+    "ja": "パソコンとスマホで、ライトとダークのテーマを並べて確認できます。",
+    "zh": "在电脑和手机上、浅色和深色主题下并排查看效果。"
+  },
+  "onboarding.step4.title": {
+    "en": "Send it or save it for later",
+    "es": "Envía o guarda para después",
+    "pt": "Envie ou salve para depois",
+    "fr": "Envoie-le ou garde-le pour plus tard",
+    "ja": "送るもよし、後のために保存するもよし",
+    "zh": "立即发送或保存以备后用"
+  },
+  "onboarding.step4.desc": {
+    "en": "Send a test to your own inbox, send it to your subscribers, or save it for your team to use.",
+    "es": "Manda una prueba a tu correo, envíalo a tus suscriptores, o guárdalo para que lo use tu equipo.",
+    "pt": "Envie um teste para o seu e-mail, mande para seus inscritos ou salve para a sua equipe usar.",
+    "fr": "Envoie un test sur ta boîte, diffuse-le à tes abonnés, ou garde-le pour ton équipe.",
+    "ja": "テストを自分宛に送ったり、購読者に配信したり、チームで使えるように保存したりできます。",
+    "zh": "可以发测试到自己邮箱、群发给订阅者,或保存供团队使用。"
+  },
+  "onboarding.skip": {
+    "en": "Skip the tour",
+    "es": "Ver la app sin el recorrido",
+    "pt": "Pular o tour",
+    "fr": "Passer la visite",
+    "ja": "ツアーをスキップ",
+    "zh": "跳过引导"
+  },
+  "onboarding.helpBefore": {
+    "en": "Press",
+    "es": "Pulsa",
+    "pt": "Pressione",
+    "fr": "Appuie sur",
+    "ja": "困ったら",
+    "zh": "按"
+  },
+  "onboarding.helpAfter": {
+    "en": "whenever you need help",
+    "es": "cuando necesites ayuda",
+    "pt": "sempre que precisar de ajuda",
+    "fr": "quand tu as besoin d’aide",
+    "ja": "を押せばいつでもヘルプが開きます",
+    "zh": "随时获取帮助"
+  },
+  "onboarding.start": {
+    "en": "Start designing",
+    "es": "Empezar a diseñar",
+    "pt": "Começar a desenhar",
+    "fr": "Commencer à concevoir",
+    "ja": "デザインを始める",
+    "zh": "开始设计"
+  },
+
+  "emptyState.tips": {
+    "en": "Tips",
+    "es": "Consejos",
+    "pt": "Dicas",
+    "fr": "Astuces",
+    "ja": "ヒント",
+    "zh": "提示"
+  },
+
+  "review.title": {
+    "en": "Review before sending",
+    "es": "Revisar antes de enviar",
+    "pt": "Revisar antes de enviar",
+    "fr": "Vérifier avant d’envoyer",
+    "ja": "送信前にチェック",
+    "zh": "发送前检查"
+  },
+  "review.subtitle": {
+    "en": "Full check of your email",
+    "es": "Chequeo completo del correo",
+    "pt": "Verificação completa do e-mail",
+    "fr": "Contrôle complet de l’e-mail",
+    "ja": "メール全体のチェック",
+    "zh": "对邮件的完整检查"
+  },
+  "review.analyzing": {
+    "en": "Analyzing…",
+    "es": "Analizando…",
+    "pt": "Analisando…",
+    "fr": "Analyse…",
+    "ja": "解析中…",
+    "zh": "分析中…"
+  },
+  "review.analyzingFull": {
+    "en": "Analyzing the email…",
+    "es": "Analizando el correo…",
+    "pt": "Analisando o e-mail…",
+    "fr": "Analyse de l’e-mail…",
+    "ja": "メールを解析中…",
+    "zh": "正在分析邮件…"
+  },
+  "review.score.ready": {
+    "en": "Ready to send!",
+    "es": "¡Listo para enviar!",
+    "pt": "Pronto para enviar!",
+    "fr": "Prêt à envoyer !",
+    "ja": "送信の準備ができました！",
+    "zh": "可以发送了！"
+  },
+  "review.score.suggestions": {
+    "en": "A few suggestions",
+    "es": "Hay algunas sugerencias",
+    "pt": "Há algumas sugestões",
+    "fr": "Quelques suggestions",
+    "ja": "いくつか提案があります",
+    "zh": "有一些建议"
+  },
+  "review.score.problems": {
+    "en": "There are issues to fix",
+    "es": "Tiene problemas a revisar",
+    "pt": "Há problemas para revisar",
+    "fr": "Des problèmes à corriger",
+    "ja": "修正すべき問題があります",
+    "zh": "有需要修复的问题"
+  },
+  "review.summary": {
+    "en": "{total} checks · {ok} good · {warn} warnings · {error} failures",
+    "es": "{total} revisiones · {ok} bien · {warn} avisos · {error} fallas",
+    "pt": "{total} verificações · {ok} ok · {warn} avisos · {error} falhas",
+    "fr": "{total} vérifications · {ok} ok · {warn} avertissements · {error} erreurs",
+    "ja": "{total} 件のチェック · 良好 {ok} · 警告 {warn} · エラー {error}",
+    "zh": "{total} 项检查 · {ok} 正常 · {warn} 警告 · {error} 失败"
+  },
+  "review.foot.fixFirst": {
+    "en": "Fix the failures before sending",
+    "es": "Corrige las fallas antes de enviar",
+    "pt": "Corrija as falhas antes de enviar",
+    "fr": "Corrige les erreurs avant d’envoyer",
+    "ja": "送信前にエラーを修正してください",
+    "zh": "发送前请先修复失败项"
+  },
+  "review.foot.goodToGo": {
+    "en": "You can send with confidence!",
+    "es": "¡Ya puedes enviarlo con confianza!",
+    "pt": "Agora pode enviar com tranquilidade!",
+    "fr": "Tu peux l’envoyer en toute confiance !",
+    "ja": "安心して送信できます！",
+    "zh": "可以放心发送了！"
+  },
+  "review.close": {
+    "en": "Close",
+    "es": "Cerrar",
+    "pt": "Fechar",
+    "fr": "Fermer",
+    "ja": "閉じる",
+    "zh": "关闭"
+  },
+  "review.sendTest": {
+    "en": "Send test",
+    "es": "Enviar prueba",
+    "pt": "Enviar teste",
+    "fr": "Envoyer un test",
+    "ja": "テスト送信",
+    "zh": "发送测试"
+  },
+  "review.fixed": {
+    "en": "Fixed",
+    "es": "Corregido",
+    "pt": "Corrigido",
+    "fr": "Corrigé",
+    "ja": "修正済み",
+    "zh": "已修复"
+  },
+  "review.toast.fixed.title": {
+    "en": "Fixed",
+    "es": "Arreglado",
+    "pt": "Corrigido",
+    "fr": "Corrigé",
+    "ja": "修正しました",
+    "zh": "已修复"
+  },
+  "review.toast.fixed.msg": {
+    "en": "The automatic fix was applied.",
+    "es": "Se aplicó la corrección automática.",
+    "pt": "A correção automática foi aplicada.",
+    "fr": "La correction automatique a été appliquée.",
+    "ja": "自動修正を適用しました。",
+    "zh": "已应用自动修复。"
+  },
+
+  "review.cat.content": {
+    "en": "Content",
+    "es": "Contenido",
+    "pt": "Conteúdo",
+    "fr": "Contenu",
+    "ja": "コンテンツ",
+    "zh": "内容"
+  },
+  "review.cat.a11y": {
+    "en": "Accessibility",
+    "es": "Accesibilidad",
+    "pt": "Acessibilidade",
+    "fr": "Accessibilité",
+    "ja": "アクセシビリティ",
+    "zh": "可访问性"
+  },
+  "review.cat.compat": {
+    "en": "Compatibility",
+    "es": "Compatibilidad",
+    "pt": "Compatibilidade",
+    "fr": "Compatibilité",
+    "ja": "互換性",
+    "zh": "兼容性"
+  },
+  "review.cat.images": {
+    "en": "Images and weight",
+    "es": "Imágenes y peso",
+    "pt": "Imagens e peso",
+    "fr": "Images et poids",
+    "ja": "画像とサイズ",
+    "zh": "图片和体积"
+  },
+  "review.cat.links": {
+    "en": "Links",
+    "es": "Enlaces",
+    "pt": "Links",
+    "fr": "Liens",
+    "ja": "リンク",
+    "zh": "链接"
+  },
+  "review.cat.legal": {
+    "en": "Legal and delivery",
+    "es": "Legal y entrega",
+    "pt": "Jurídico e entrega",
+    "fr": "Légal et délivrabilité",
+    "ja": "法令と到達",
+    "zh": "法律与投递"
+  },
+
+  "review.check.c1.title": {
+    "en": "Subject is not empty",
+    "es": "Asunto no está vacío",
+    "pt": "Assunto não está vazio",
+    "fr": "L’objet n’est pas vide",
+    "ja": "件名が空ではありません",
+    "zh": "主题不为空"
+  },
+  "review.check.c1.detail": {
+    "en": "\"Hi {{name}}, November news\" · 38 characters (good)",
+    "es": "\"Hola {{nombre}}, novedades de noviembre\" · 38 caracteres (bien)",
+    "pt": "\"Olá {{nome}}, novidades de novembro\" · 38 caracteres (bom)",
+    "fr": "« Salut {{nom}}, les nouveautés de novembre » · 38 caractères (bien)",
+    "ja": "「{{name}} さん、11月のお知らせ」· 38文字（良好）",
+    "zh": "“你好 {{name}},十一月最新动态” · 38 个字符（良好）"
+  },
+  "review.check.c2.title": {
+    "en": "Preview text is short",
+    "es": "Preview text corto",
+    "pt": "Preview text curto",
+    "fr": "Texte de prévisualisation trop court",
+    "ja": "プレビューテキストが短い",
+    "zh": "预览文本过短"
+  },
+  "review.check.c2.detail": {
+    "en": "Only 22 characters. 40–90 is recommended so mail clients show it in full.",
+    "es": "Solo 22 caracteres. Se recomienda entre 40 y 90 para que los clientes de correo lo muestren completo.",
+    "pt": "Apenas 22 caracteres. Recomenda-se entre 40 e 90 para que os clientes de e-mail exibam por completo.",
+    "fr": "Seulement 22 caractères. On recommande entre 40 et 90 pour que les clients de messagerie l’affichent en entier.",
+    "ja": "22文字しかありません。メールクライアントで完全に表示させるには40〜90文字が推奨です。",
+    "zh": "只有 22 个字符。建议在 40–90 之间,这样邮件客户端才能完整显示。"
+  },
+  "review.check.c2.fix.0": {
+    "en": "Generate with AI",
+    "es": "Generar con IA",
+    "pt": "Gerar com IA",
+    "fr": "Générer avec l’IA",
+    "ja": "AI で生成",
+    "zh": "用 AI 生成"
+  },
+  "review.check.c2.fix.1": {
+    "en": "I edited it manually",
+    "es": "Edité manualmente",
+    "pt": "Editei manualmente",
+    "fr": "Je l’ai modifié à la main",
+    "ja": "手動で編集しました",
+    "zh": "我已手动编辑"
+  },
+  "review.check.c3.title": {
+    "en": "At least one CTA button",
+    "es": "Hay al menos un botón CTA",
+    "pt": "Há ao menos um botão CTA",
+    "fr": "Au moins un bouton d’appel à l’action",
+    "ja": "CTA ボタンが少なくとも 1 つあります",
+    "zh": "至少有一个行动号召按钮"
+  },
+  "review.check.c3.detail": {
+    "en": "1 button · \"See collection\"",
+    "es": "1 botón · \"Ver colección\"",
+    "pt": "1 botão · \"Ver coleção\"",
+    "fr": "1 bouton · « Voir la collection »",
+    "ja": "ボタン 1 件 · 「コレクションを見る」",
+    "zh": "1 个按钮 · “查看系列”"
+  },
+  "review.check.c4.title": {
+    "en": "{{name}} tag has no default value",
+    "es": "Etiqueta {{nombre}} sin valor por defecto",
+    "pt": "Tag {{nome}} sem valor padrão",
+    "fr": "Étiquette {{nom}} sans valeur par défaut",
+    "ja": "{{name}} タグにデフォルト値がありません",
+    "zh": "{{name}} 标签没有默认值"
+  },
+  "review.check.c4.detail": {
+    "en": "If a contact has no name, it will read \"Hi , November news…\".",
+    "es": "Si un contacto no tiene nombre, aparecerá \"Hola , novedades…\".",
+    "pt": "Se um contato não tiver nome, aparecerá \"Olá , novidades…\".",
+    "fr": "Si un contact n’a pas de prénom, on verra « Salut , les nouveautés… ».",
+    "ja": "名前のない連絡先には「 さん、お知らせ…」と表示されます。",
+    "zh": "如果某个联系人没有名字,就会显示“你好 ,最新动态…”。"
+  },
+  "review.check.c4.fix.0": {
+    "en": "Use \"friend\" as default",
+    "es": "Poner \"amigo\" como default",
+    "pt": "Usar \"amigo\" como padrão",
+    "fr": "Mettre « ami » par défaut",
+    "ja": "「ともだち」をデフォルトに",
+    "zh": "将“朋友”设为默认"
+  },
+  "review.check.c4.fix.1": {
+    "en": "Go to Tags",
+    "es": "Ir a Etiquetas",
+    "pt": "Ir para Tags",
+    "fr": "Aller aux étiquettes",
+    "ja": "タグ画面へ",
+    "zh": "前往标签"
+  },
+  "review.check.c5.title": {
+    "en": "Total length is appropriate",
+    "es": "Longitud total adecuada",
+    "pt": "Comprimento total adequado",
+    "fr": "Longueur totale adaptée",
+    "ja": "全体の長さは適切です",
+    "zh": "总长度合适"
+  },
+  "review.check.c5.detail": {
+    "en": "184 words · emails of 100–300 words tend to get more engagement",
+    "es": "184 palabras · correos de 100-300 palabras tienen mejor engagement",
+    "pt": "184 palavras · e-mails de 100 a 300 palavras tendem a ter mais engajamento",
+    "fr": "184 mots · les e-mails de 100 à 300 mots obtiennent plus d’engagement",
+    "ja": "184 語 · 100〜300 語のメールはエンゲージメントが高い傾向があります",
+    "zh": "184 个单词 · 100–300 字的邮件通常互动更好"
+  },
+
+  "review.check.a1.title": {
+    "en": "Image without alt text",
+    "es": "Imagen sin texto alternativo",
+    "pt": "Imagem sem texto alternativo",
+    "fr": "Image sans texte alternatif",
+    "ja": "代替テキストのない画像",
+    "zh": "图片缺少替代文本"
+  },
+  "review.check.a1.detail": {
+    "en": "The image \"hero-otono.jpg\" has no alt attribute. Screen readers won’t know what it is.",
+    "es": "La imagen \"hero-otono.jpg\" no tiene atributo alt. Los lectores de pantalla no sabrán qué es.",
+    "pt": "A imagem \"hero-otono.jpg\" não tem atributo alt. Leitores de tela não saberão do que se trata.",
+    "fr": "L’image « hero-otono.jpg » n’a pas d’attribut alt. Les lecteurs d’écran ne sauront pas ce que c’est.",
+    "ja": "画像「hero-otono.jpg」に alt 属性がありません。スクリーンリーダーが内容を読み取れません。",
+    "zh": "图片「hero-otono.jpg」缺少 alt 属性。屏幕阅读器将无法识别它。"
+  },
+  "review.check.a1.fix.0": {
+    "en": "Suggest alt with AI",
+    "es": "Sugerir alt con IA",
+    "pt": "Sugerir alt com IA",
+    "fr": "Suggérer un alt avec l’IA",
+    "ja": "AI で alt を提案",
+    "zh": "用 AI 建议 alt"
+  },
+  "review.check.a1.fix.1": {
+    "en": "Go to the block",
+    "es": "Ir al bloque",
+    "pt": "Ir para o bloco",
+    "fr": "Aller au bloc",
+    "ja": "ブロックへ移動",
+    "zh": "前往该区块"
+  },
+  "review.check.a2.title": {
+    "en": "Low contrast on a button",
+    "es": "Contraste bajo en un botón",
+    "pt": "Contraste baixo em um botão",
+    "fr": "Contraste faible sur un bouton",
+    "ja": "ボタンのコントラストが低い",
+    "zh": "按钮对比度过低"
+  },
+  "review.check.a2.detail": {
+    "en": "Blue button on a lilac background has 3.1:1 contrast. Minimum recommended: 4.5:1 (AA).",
+    "es": "Botón azul sobre fondo lila tiene contraste 3.1:1. Mínimo recomendado: 4.5:1 (AA).",
+    "pt": "Botão azul em fundo lilás tem contraste 3,1:1. Mínimo recomendado: 4,5:1 (AA).",
+    "fr": "Bouton bleu sur fond lilas : contraste de 3,1:1. Minimum recommandé : 4,5:1 (AA).",
+    "ja": "ライラック背景の青ボタンのコントラスト比は 3.1:1。推奨最小値は 4.5:1（AA）です。",
+    "zh": "紫丁色背景上的蓝色按钮对比度为 3.1:1。建议最低 4.5:1（AA）。"
+  },
+  "review.check.a2.fix.0": {
+    "en": "Darken the background",
+    "es": "Oscurecer el fondo",
+    "pt": "Escurecer o fundo",
+    "fr": "Assombrir le fond",
+    "ja": "背景を暗くする",
+    "zh": "加深背景"
+  },
+  "review.check.a2.fix.1": {
+    "en": "Lighten the text",
+    "es": "Aclarar el texto",
+    "pt": "Clarear o texto",
+    "fr": "Éclaircir le texte",
+    "ja": "テキストを明るくする",
+    "zh": "提亮文字"
+  },
+  "review.check.a3.title": {
+    "en": "Readable font sizes",
+    "es": "Tamaño de tipografía legible",
+    "pt": "Tamanho de tipografia legível",
+    "fr": "Tailles de typo lisibles",
+    "ja": "読みやすいフォントサイズ",
+    "zh": "字号易读"
+  },
+  "review.check.a3.detail": {
+    "en": "Body text at 16px, titles ≥ 22px",
+    "es": "Texto del cuerpo en 16px, títulos ≥ 22px",
+    "pt": "Texto do corpo em 16px, títulos ≥ 22px",
+    "fr": "Texte du corps en 16 px, titres ≥ 22 px",
+    "ja": "本文は 16px、見出しは 22px 以上",
+    "zh": "正文 16px,标题 ≥ 22px"
+  },
+  "review.check.a4.title": {
+    "en": "Correct semantic structure",
+    "es": "Estructura semántica correcta",
+    "pt": "Estrutura semântica correta",
+    "fr": "Structure sémantique correcte",
+    "ja": "セマンティック構造が正しい",
+    "zh": "语义结构正确"
+  },
+  "review.check.a4.detail": {
+    "en": "A single H1, logical H2/H3 hierarchy",
+    "es": "Un solo H1, jerarquía lógica de H2/H3",
+    "pt": "Apenas um H1, hierarquia lógica de H2/H3",
+    "fr": "Un seul H1, hiérarchie logique de H2/H3",
+    "ja": "H1 は 1 つだけ、H2/H3 の階層も適切",
+    "zh": "只有一个 H1,H2/H3 层级合理"
+  },
+
+  "review.check.k1.title": {
+    "en": "Use of CSS not supported in Outlook",
+    "es": "Uso de CSS no soportado en Outlook",
+    "pt": "Uso de CSS não suportado no Outlook",
+    "fr": "CSS non pris en charge par Outlook",
+    "ja": "Outlook で未対応の CSS を使用",
+    "zh": "使用了 Outlook 不支持的 CSS"
+  },
+  "review.check.k1.detail": {
+    "en": "Found 2 uses of \"flexbox\" and 1 of \"background-image on div\". Outlook silently ignores them.",
+    "es": "Se detectaron 2 usos de \"flexbox\" y 1 de \"background-image en div\". Outlook los ignora silenciosamente.",
+    "pt": "Detectamos 2 usos de \"flexbox\" e 1 de \"background-image em div\". O Outlook os ignora silenciosamente.",
+    "fr": "2 utilisations de « flexbox » et 1 de « background-image sur div » détectées. Outlook les ignore silencieusement.",
+    "ja": "「flexbox」を 2 か所、「div の background-image」を 1 か所検出しました。Outlook では静かに無視されます。",
+    "zh": "检测到 2 处 “flexbox” 和 1 处 “div 的 background-image”。Outlook 会静默忽略它们。"
+  },
+  "review.check.k1.fix.0": {
+    "en": "Convert to tables",
+    "es": "Convertir a tablas",
+    "pt": "Converter em tabelas",
+    "fr": "Convertir en tableaux",
+    "ja": "テーブルに変換",
+    "zh": "转为表格"
+  },
+  "review.check.k1.fix.1": {
+    "en": "Ignore Outlook",
+    "es": "Ignorar Outlook",
+    "pt": "Ignorar Outlook",
+    "fr": "Ignorer Outlook",
+    "ja": "Outlook を無視",
+    "zh": "忽略 Outlook"
+  },
+  "review.check.k2.title": {
+    "en": "Valid HTML",
+    "es": "HTML válido",
+    "pt": "HTML válido",
+    "fr": "HTML valide",
+    "ja": "HTML が有効",
+    "zh": "HTML 有效"
+  },
+  "review.check.k2.detail": {
+    "en": "No unclosed tags. Passes W3C validation.",
+    "es": "Sin etiquetas no cerradas. Pasa validación W3C.",
+    "pt": "Sem tags abertas. Passa na validação W3C.",
+    "fr": "Aucune balise non fermée. Validation W3C OK.",
+    "ja": "閉じ忘れのタグはありません。W3C 検証をパスします。",
+    "zh": "没有未闭合的标签。通过 W3C 校验。"
+  },
+  "review.check.k3.title": {
+    "en": "Max width 600px",
+    "es": "Ancho máximo 600px",
+    "pt": "Largura máxima 600px",
+    "fr": "Largeur maximale 600 px",
+    "ja": "最大幅 600px",
+    "zh": "最大宽度 600px"
+  },
+  "review.check.k3.detail": {
+    "en": "The email looks good on both web and mobile clients",
+    "es": "El correo se ve bien tanto en web como en clientes móviles",
+    "pt": "O e-mail fica bom tanto na web quanto em clientes móveis",
+    "fr": "L’e-mail s’affiche bien sur le web comme sur mobile",
+    "ja": "ウェブでもモバイルクライアントでも見栄えがよいです",
+    "zh": "邮件在网页和移动客户端上都显示良好"
+  },
+  "review.check.k4.title": {
+    "en": "Gmail dark mode",
+    "es": "Modo oscuro de Gmail",
+    "pt": "Modo escuro do Gmail",
+    "fr": "Mode sombre de Gmail",
+    "ja": "Gmail のダークモード",
+    "zh": "Gmail 深色模式"
+  },
+  "review.check.k4.detail": {
+    "en": "Gmail auto-inverts colors. Your email should look reasonable but consider testing it.",
+    "es": "Gmail invierte los colores automáticamente. Tu correo se verá razonable pero considera probarlo.",
+    "pt": "O Gmail inverte as cores automaticamente. Seu e-mail deve ficar razoável, mas vale testar.",
+    "fr": "Gmail inverse automatiquement les couleurs. Ton e-mail devrait bien rendre, mais teste-le.",
+    "ja": "Gmail は色を自動反転します。そこそこ見える想定ですが、実機でテストするのがおすすめです。",
+    "zh": "Gmail 会自动反色。邮件应该看起来尚可,但建议实测确认。"
+  },
+
+  "review.check.i1.title": {
+    "en": "Heavy image detected",
+    "es": "Imagen pesada detectada",
+    "pt": "Imagem pesada detectada",
+    "fr": "Image volumineuse détectée",
+    "ja": "重い画像を検出",
+    "zh": "检测到体积过大的图片"
+  },
+  "review.check.i1.detail": {
+    "en": "\"hero-otono.jpg\" is 2.3 MB. Recommended <500 KB for fast loading on 4G.",
+    "es": "\"hero-otono.jpg\" pesa 2.3 MB. Recomendado <500 KB para que cargue rápido en 4G.",
+    "pt": "\"hero-otono.jpg\" tem 2,3 MB. Recomendado <500 KB para carregar rápido no 4G.",
+    "fr": "« hero-otono.jpg » pèse 2,3 Mo. On recommande < 500 Ko pour un chargement rapide en 4G.",
+    "ja": "「hero-otono.jpg」は 2.3 MB あります。4G で素早く読み込むには 500 KB 未満が推奨です。",
+    "zh": "「hero-otono.jpg」有 2.3 MB。建议小于 500 KB,以便在 4G 下快速加载。"
+  },
+  "review.check.i1.fix.0": {
+    "en": "Compress automatically",
+    "es": "Comprimir automáticamente",
+    "pt": "Comprimir automaticamente",
+    "fr": "Compresser automatiquement",
+    "ja": "自動で圧縮",
+    "zh": "自动压缩"
+  },
+  "review.check.i2.title": {
+    "en": "Total email size: 1.8 MB",
+    "es": "Total del correo: 1.8 MB",
+    "pt": "Tamanho total do e-mail: 1,8 MB",
+    "fr": "Poids total de l’e-mail : 1,8 Mo",
+    "ja": "メール全体のサイズ: 1.8 MB",
+    "zh": "邮件总体积:1.8 MB"
+  },
+  "review.check.i2.detail": {
+    "en": "Under Gmail’s limit (102 KB clips the email, but your total weight is acceptable)",
+    "es": "Por debajo del límite de Gmail (102 KB truncan el correo, pero tu peso total es aceptable)",
+    "pt": "Abaixo do limite do Gmail (102 KB truncam o e-mail, mas o peso total está ok)",
+    "fr": "En dessous de la limite Gmail (au-delà de 102 Ko l’e-mail est tronqué, mais ton poids total reste acceptable)",
+    "ja": "Gmail の制限を下回っています（102 KB を超えると本文がクリップされますが、合計サイズは許容範囲内）",
+    "zh": "低于 Gmail 的限制(超过 102 KB 会被截断,但整体体积可以接受)"
+  },
+
+  "review.check.l1.title": {
+    "en": "All links work",
+    "es": "Todos los enlaces funcionan",
+    "pt": "Todos os links funcionam",
+    "fr": "Tous les liens fonctionnent",
+    "ja": "すべてのリンクが有効",
+    "zh": "所有链接均可用"
+  },
+  "review.check.l1.detail": {
+    "en": "4 links checked, all return 200 OK",
+    "es": "4 enlaces revisados, todos devuelven 200 OK",
+    "pt": "4 links verificados, todos retornam 200 OK",
+    "fr": "4 liens vérifiés, tous renvoient 200 OK",
+    "ja": "4 件のリンクを確認、すべて 200 OK を返しました",
+    "zh": "检查了 4 个链接,全部返回 200 OK"
+  },
+  "review.check.l2.title": {
+    "en": "No mailto: links missing an address",
+    "es": "Sin enlaces mailto: sin dirección",
+    "pt": "Sem links mailto: sem endereço",
+    "fr": "Aucun lien mailto: sans adresse",
+    "ja": "アドレス未指定の mailto: リンクなし",
+    "zh": "没有缺少地址的 mailto: 链接"
+  },
+  "review.check.l2.detail": {
+    "en": "0 broken mailto links",
+    "es": "0 enlaces rotos de tipo mailto",
+    "pt": "0 links mailto quebrados",
+    "fr": "0 lien mailto cassé",
+    "ja": "壊れた mailto リンクは 0 件",
+    "zh": "0 个损坏的 mailto 链接"
+  },
+
+  "review.check.g1.title": {
+    "en": "Unsubscribe link present",
+    "es": "Link de desuscripción presente",
+    "pt": "Link de descadastro presente",
+    "fr": "Lien de désabonnement présent",
+    "ja": "配信解除リンクあり",
+    "zh": "包含退订链接"
+  },
+  "review.check.g1.detail": {
+    "en": "Detected in the footer · required by GDPR/CAN-SPAM",
+    "es": "Detectado en el footer · obligatorio por GDPR/CAN-SPAM",
+    "pt": "Detectado no rodapé · obrigatório por GDPR/CAN-SPAM",
+    "fr": "Détecté dans le pied de page · exigé par le RGPD/CAN-SPAM",
+    "ja": "フッターで検出 · GDPR/CAN-SPAM の要件",
+    "zh": "在页脚中检测到 · GDPR/CAN-SPAM 要求"
+  },
+  "review.check.g2.title": {
+    "en": "Physical address in the footer",
+    "es": "Dirección física en el footer",
+    "pt": "Endereço físico no rodapé",
+    "fr": "Adresse postale dans le pied de page",
+    "ja": "フッターに住所あり",
+    "zh": "页脚包含实体地址"
+  },
+  "review.check.g2.detail": {
+    "en": "\"Acme SA · Av. Reforma 123, CDMX\" · required by CAN-SPAM",
+    "es": "\"Acme SA · Av. Reforma 123, CDMX\" · requerido por CAN-SPAM",
+    "pt": "\"Acme SA · Av. Reforma 123, CDMX\" · exigido pelo CAN-SPAM",
+    "fr": "« Acme SA · Av. Reforma 123, CDMX » · exigé par CAN-SPAM",
+    "ja": "「Acme SA · Av. Reforma 123, CDMX」· CAN-SPAM の要件",
+    "zh": "“Acme SA · Av. Reforma 123, CDMX” · CAN-SPAM 要求"
+  },
+  "review.check.g3.title": {
+    "en": "No plain-text version",
+    "es": "No hay versión texto plano",
+    "pt": "Sem versão em texto puro",
+    "fr": "Pas de version texte brut",
+    "ja": "プレーンテキスト版がありません",
+    "zh": "没有纯文本版本"
+  },
+  "review.check.g3.detail": {
+    "en": "Some spam filters penalize HTML-only emails. Generating a text fallback improves deliverability.",
+    "es": "Algunos filtros de spam castigan correos que solo son HTML. Generar el fallback textual mejora entregabilidad.",
+    "pt": "Alguns filtros de spam penalizam e-mails só em HTML. Gerar um fallback em texto melhora a entregabilidade.",
+    "fr": "Certains filtres antispam pénalisent les e-mails uniquement HTML. Générer une version texte améliore la délivrabilité.",
+    "ja": "HTML のみのメールを不利に扱うスパムフィルターがあります。テキスト版のフォールバックを用意すると到達率が上がります。",
+    "zh": "部分垃圾邮件过滤器会惩罚只有 HTML 的邮件。生成纯文本备用版本可以提升送达率。"
+  },
+  "review.check.g3.fix.0": {
+    "en": "Generate plain-text version",
+    "es": "Generar versión texto plano",
+    "pt": "Gerar versão em texto puro",
+    "fr": "Générer la version texte brut",
+    "ja": "プレーンテキスト版を生成",
+    "zh": "生成纯文本版本"
+  },
+  "review.check.g4.title": {
+    "en": "Estimated spam score: 2.1/10",
+    "es": "Spam score estimado: 2.1/10",
+    "pt": "Pontuação de spam estimada: 2,1/10",
+    "fr": "Score de spam estimé : 2,1/10",
+    "ja": "推定スパムスコア: 2.1/10",
+    "zh": "估计垃圾邮件评分:2.1/10"
+  },
+  "review.check.g4.detail": {
+    "en": "Very low. No common trigger words (\"free\", \"urgent\", excessive punctuation)",
+    "es": "Muy bajo. No hay palabras gatillo frecuentes (\"gratis\", \"urgente\", excesos de signos)",
+    "pt": "Muito baixa. Sem gatilhos frequentes (\"grátis\", \"urgente\", excesso de pontuação)",
+    "fr": "Très faible. Aucun mot déclencheur courant (« gratuit », « urgent », excès de ponctuation)",
+    "ja": "非常に低いです。「無料」「緊急」などの典型的なトリガーワードや過剰な記号は見当たりません",
+    "zh": "非常低。没有常见的触发词(“免费”“紧急”、过多的标点)"
+  }
+}
