@@ -331,6 +331,7 @@ window.stI18nDict.es = {
   'dash.tile.new.sub': 'En blanco, o partiendo de un ejemplo',
   'dash.tile.new.title': 'Crear plantilla nueva',
   'dash.trash.deletedAt': 'Borrada {when}',
+  'eb.image.placeholder': 'Clic para elegir una imagen',
   'editor.action.export': 'Compartir / Exportar',
   'editor.action.preview': 'Vista previa',
   'editor.action.review': 'Revisar',

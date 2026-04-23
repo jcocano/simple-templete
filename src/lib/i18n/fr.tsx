@@ -331,6 +331,7 @@ window.stI18nDict.fr = {
   'dash.tile.new.sub': 'Vierge, ou à partir d’un exemple',
   'dash.tile.new.title': 'Créer un nouveau modèle',
   'dash.trash.deletedAt': 'Supprimée {when}',
+  'eb.image.placeholder': 'Clique pour choisir une image',
   'editor.action.export': 'Partager / Exporter',
   'editor.action.preview': 'Aperçu',
   'editor.action.review': 'Vérifier',

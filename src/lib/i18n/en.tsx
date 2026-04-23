@@ -334,6 +334,7 @@ window.stI18nDict.en = {
   'dash.tile.new.sub': 'Blank, or from an example',
   'dash.tile.new.title': 'Create new template',
   'dash.trash.deletedAt': 'Deleted {when}',
+  'eb.image.placeholder': 'Click to pick an image',
   'editor.action.export': 'Share / Export',
   'editor.action.preview': 'Preview',
   'editor.action.review': 'Review',

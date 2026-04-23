@@ -332,6 +332,7 @@ window.stI18nDict.zh = {
   'dash.tile.new.sub': '空白,或从示例开始',
   'dash.tile.new.title': '新建模板',
   'dash.trash.deletedAt': '删除于 {when}',
+  'eb.image.placeholder': '点击选择图片',
   'editor.action.export': '分享 / 导出',
   'editor.action.preview': '预览',
   'editor.action.review': '审阅',

@@ -332,6 +332,7 @@ window.stI18nDict.ja = {
   'dash.tile.new.sub': '空白、または既成のサンプルから',
   'dash.tile.new.title': '新しいテンプレートを作成',
   'dash.trash.deletedAt': '削除: {when}',
+  'eb.image.placeholder': 'クリックして画像を選択',
   'editor.action.export': '共有 / エクスポート',
   'editor.action.preview': 'プレビュー',
   'editor.action.review': 'レビュー',

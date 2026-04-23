@@ -331,6 +331,7 @@ window.stI18nDict.pt = {
   'dash.tile.new.sub': 'Em branco, ou a partir de um exemplo',
   'dash.tile.new.title': 'Criar novo modelo',
   'dash.trash.deletedAt': 'Excluída {when}',
+  'eb.image.placeholder': 'Clique para escolher uma imagem',
   'editor.action.export': 'Compartilhar / Exportar',
   'editor.action.preview': 'Pré-visualização',
   'editor.action.review': 'Revisar',
