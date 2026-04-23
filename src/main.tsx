@@ -7,6 +7,13 @@ const platform = ua.includes("Mac") ? "darwin" : ua.includes("Win") ? "win32" : 
 document.documentElement.setAttribute("data-platform", platform);
 
 import "./lib/storage.tsx";
+import "./lib/i18n/en.tsx";
+import "./lib/i18n/es.tsx";
+import "./lib/i18n/pt.tsx";
+import "./lib/i18n/fr.tsx";
+import "./lib/i18n/ja.tsx";
+import "./lib/i18n/zh.tsx";
+import "./lib/i18n.tsx";
 import "./lib/workspaces.tsx";
 import "./lib/templates.tsx";
 import "./lib/occasions.tsx";
@@ -42,6 +49,7 @@ import "./app.tsx";
 
 (async () => {
   await window.stStorage.boot();
+  window.stI18n.rehydrate();
   const root = ReactDOM.createRoot(document.getElementById("root"));
   root.render(<window.App />);
 })();
