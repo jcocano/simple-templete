@@ -111,7 +111,7 @@ function SettingsPanel({ onClose, initialSection='account' }) {
           </div>
 
           <div style={{marginTop:'auto',padding:'12px 10px 4px',fontSize:10.5,color:'var(--fg-3)',lineHeight:1.55}}>
-            {t('settings.version', { version: __APP_VERSION__ })} · <span style={{color:'var(--accent)',cursor:'pointer'}} onClick={()=>window.shell?.openExternal?.('https://github.com/jcocano/simple-templete/blob/main/CHANGELOG.md')}>{t('settings.changelog')}</span>
+            {t('settings.version', { v: __APP_VERSION__ })} · <span style={{color:'var(--accent)',cursor:'pointer'}} onClick={()=>window.shell?.openExternal?.('https://github.com/jcocano/simple-templete/blob/main/CHANGELOG.md')}>{t('settings.changelog')}</span>
           </div>
         </aside>
 
