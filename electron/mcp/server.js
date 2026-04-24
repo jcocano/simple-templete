@@ -3,9 +3,9 @@ const { URL } = require('url');
 const auth = require('./auth');
 
 let httpServer = null;
-let transport = null;
-let mcpServer = null;
 let currentPort = null;
+let sdkModules = null;
+let toolsRef = null;
 
 const PORT_RETRY_COUNT = 10;
 
@@ -78,33 +78,45 @@ async function tryListen(server, requestedPort) {
   throw new Error('No available port in range');
 }
 
+// Stateless Streamable HTTP: per the MCP SDK contract, each request gets its
+// own Server+Transport pair, connected, served, then closed. Reusing a single
+// transport across requests works for the first handshake but the transport
+// retains protocol state that breaks subsequent tools/call requests.
+async function handleMcpRequest(req, res, body) {
+  const { Server, StreamableHTTPServerTransport, ListToolsRequestSchema, CallToolRequestSchema } = sdkModules;
+  const server = new Server(
+    { name: 'simple-template', version: '0.1.0' },
+    { capabilities: { tools: {} } }
+  );
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: toolsRef.toolDefs }));
+  server.setRequestHandler(CallToolRequestSchema, async (r) => toolsRef.callTool(r.params.name, r.params.arguments || {}));
+
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  res.on('close', () => {
+    Promise.resolve(transport.close()).catch(() => {});
+    Promise.resolve(server.close()).catch(() => {});
+  });
+  await server.connect(transport);
+  await transport.handleRequest(req, res, body);
+}
+
 async function start({ port: requestedPort, tools }) {
   if (httpServer) {
     return { port: currentPort };
   }
 
-  const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
-  const { StreamableHTTPServerTransport } = await import('@modelcontextprotocol/sdk/server/streamableHttp.js');
-  const { ListToolsRequestSchema, CallToolRequestSchema } = await import('@modelcontextprotocol/sdk/types.js');
-
-  mcpServer = new Server(
-    { name: 'simple-template', version: '0.1.0' },
-    { capabilities: { tools: {} } }
-  );
-
-  mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: tools.toolDefs,
-  }));
-
-  mcpServer.setRequestHandler(CallToolRequestSchema, async (req) => {
-    return tools.callTool(req.params.name, req.params.arguments || {});
-  });
-
-  transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-  });
-
-  await mcpServer.connect(transport);
+  const [sdkIndex, sdkHttp, sdkTypes] = await Promise.all([
+    import('@modelcontextprotocol/sdk/server/index.js'),
+    import('@modelcontextprotocol/sdk/server/streamableHttp.js'),
+    import('@modelcontextprotocol/sdk/types.js'),
+  ]);
+  sdkModules = {
+    Server: sdkIndex.Server,
+    StreamableHTTPServerTransport: sdkHttp.StreamableHTTPServerTransport,
+    ListToolsRequestSchema: sdkTypes.ListToolsRequestSchema,
+    CallToolRequestSchema: sdkTypes.CallToolRequestSchema,
+  };
+  toolsRef = tools;
 
   httpServer = http.createServer(async (req, res) => {
     try {
@@ -129,7 +141,7 @@ async function start({ port: requestedPort, tools }) {
             return sendJson(res, 400, { error: 'Invalid JSON body' });
           }
         }
-        await transport.handleRequest(req, res, body);
+        await handleMcpRequest(req, res, body);
         return;
       }
 
@@ -148,43 +160,14 @@ async function start({ port: requestedPort, tools }) {
 }
 
 async function stop() {
-  const tasks = [];
-
-  if (transport) {
-    try {
-      const r = transport.close();
-      if (r && typeof r.then === 'function') tasks.push(r);
-    } catch (err) {
-      console.error('[mcp/server]', err);
-    }
-  }
-
-  if (mcpServer) {
-    try {
-      const r = mcpServer.close();
-      if (r && typeof r.then === 'function') tasks.push(r);
-    } catch (err) {
-      console.error('[mcp/server]', err);
-    }
-  }
-
   if (httpServer) {
     const srv = httpServer;
-    tasks.push(new Promise((resolve) => {
-      srv.close(() => resolve());
-    }));
+    await new Promise((resolve) => srv.close(() => resolve()));
   }
-
-  try {
-    await Promise.all(tasks);
-  } catch (err) {
-    console.error('[mcp/server]', err);
-  }
-
   httpServer = null;
-  transport = null;
-  mcpServer = null;
   currentPort = null;
+  sdkModules = null;
+  toolsRef = null;
 }
 
 function isRunning() {
