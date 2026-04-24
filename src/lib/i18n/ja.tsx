@@ -741,6 +741,8 @@ window.stI18nDict.ja = {
   'modals.test.tag.suffix': 'を付けて区別します',
   'modals.test.title': '自分にテストを送信',
   'modals.test.toast.msg': '通常、数分以内に届きます。',
+  'modals.test.toast.title.one': '{n} 件のアドレスにテストを送信しました',
+  'modals.test.toast.title.other': '{n} 件のアドレスにテストを送信しました',
   'modals.vars.alreadyExists': 'タグ @{key} はすでに存在します',
   'modals.vars.available': '利用可能なタグ',
   'modals.vars.btn.create': '新しいタグを作成',

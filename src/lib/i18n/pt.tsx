@@ -740,6 +740,8 @@ window.stI18nDict.pt = {
   'modals.test.tag.suffix': 'ao assunto para diferenciar',
   'modals.test.title': 'Enviar um teste para você',
   'modals.test.toast.msg': 'Costuma levar alguns minutos para chegar.',
+  'modals.test.toast.title.one': 'Teste enviado para {n} e-mail',
+  'modals.test.toast.title.other': 'Teste enviado para {n} e-mails',
   'modals.vars.alreadyExists': 'Já existe uma etiqueta @{key}',
   'modals.vars.available': 'Etiquetas disponíveis',
   'modals.vars.btn.create': 'Criar nova etiqueta',

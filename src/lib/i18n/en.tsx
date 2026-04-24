@@ -743,6 +743,8 @@ window.stI18nDict.en = {
   'modals.test.tag.suffix': 'to the subject to tell it apart',
   'modals.test.title': 'Send a test to yourself',
   'modals.test.toast.msg': 'Usually takes a couple of minutes to arrive.',
+  'modals.test.toast.title.one': 'Test sent to {n} address',
+  'modals.test.toast.title.other': 'Test sent to {n} addresses',
   'modals.vars.alreadyExists': 'A tag @{key} already exists',
   'modals.vars.available': 'Available tags',
   'modals.vars.btn.create': 'Create new tag',

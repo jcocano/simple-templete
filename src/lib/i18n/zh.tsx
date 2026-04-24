@@ -741,6 +741,8 @@ window.stI18nDict.zh = {
   'modals.test.tag.suffix': '以便区分',
   'modals.test.title': '给自己发送测试',
   'modals.test.toast.msg': '通常几分钟内会到达。',
+  'modals.test.toast.title.one': '测试已发送到 {n} 个邮箱',
+  'modals.test.toast.title.other': '测试已发送到 {n} 个邮箱',
   'modals.vars.alreadyExists': '已存在标签 @{key}',
   'modals.vars.available': '可用标签',
   'modals.vars.btn.create': '新建标签',
