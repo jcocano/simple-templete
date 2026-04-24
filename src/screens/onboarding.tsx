@@ -6,7 +6,7 @@ function Onboarding({ onDone }) {
     <div className="onboard fade-in">
       <div className="card">
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-          <div className="brand-mark" style={{width:32,height:32,fontSize:15}}>S</div>
+          <window.BrandIcon size={32}/>
           <div style={{fontSize:13,color:'var(--fg-3)'}}>Simple Template</div>
         </div>
         <h1>{t('onboarding.title')}</h1>

@@ -36,6 +36,7 @@ import "./lib/image-folders.tsx";
 import "./lib/mcp.tsx";
 import "./lib/doc-thumb.tsx";
 import "./icons.tsx";
+import "./brand-icon.tsx";
 import "./data.tsx";
 import "./lib/gallery-templates.tsx";
 import "./ui.tsx";
