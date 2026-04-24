@@ -4,10 +4,16 @@
 //   build/icon.icns       → macOS bundle, built from the squircle master
 //   build/icon.ico        → Windows bundle, built from the plain master
 //
-// Why two PNG variants: macOS icons are expected to be a filled squircle
-// tile (Big Sur conventions) — the OS does not apply a mask. Linux taskbars
-// and Windows title-bars render the raw PNG without shape masking, so they
-// get the plain transparent artwork.
+// The macOS master follows the Big Sur icon grid exactly: 824×824 tile
+// centered in a 1024×1024 canvas (100px gutter), corner radius 185.4,
+// drop shadow (28px blur / 12px Y offset), artwork inset ~80% of tile.
+// See Apple HIG "App icons" — the gutter matters because the Dock scales
+// the full 1024 and the shadow falls outside the tile, giving icons the
+// familiar breathing room next to neighbors.
+//
+// Linux/Windows keep the plain artwork — those platforms render icons
+// without shape masking, so a transparent envelope reads better than a
+// squircle with baked-in padding.
 //
 // Cross-platform (pure JS — no brew/iconutil required). Rerun this after
 // editing assets/icon.svg:
@@ -31,32 +37,74 @@ await sharp(plainMaster)
   .png({ compressionLevel: 9 })
   .toFile(`${OUT}/icon.png`);
 
-// --- macOS squircle master ---
-// Big Sur-era icons use a squircle tile ≈22% corner radius on a 1024 canvas
-// with the artwork centered inside a small inset. Simple rounded rect with
-// rx = 225 is a close-enough approximation to Apple's true squircle.
-const MAC_SIZE = 1024;
-const MAC_RADIUS = 225;
-const MAC_INSET = 220;          // padding on each side → artwork at 584×584 (≈57%)
+// --- macOS icon (Big Sur grid) ---
+const CANVAS = 1024;
+const TILE = 824;
+const TILE_OFFSET = (CANVAS - TILE) / 2;   // 100
+const TILE_RADIUS = 185.4;
+const SHADOW_Y = 12;
+const SHADOW_BLUR_SIGMA = 14;               // ~28px gaussian radius
+const SHADOW_OPACITY = 0.18;
 
-const macBgSvg = Buffer.from(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${MAC_SIZE}" height="${MAC_SIZE}">` +
-    `<rect x="0" y="0" width="${MAC_SIZE}" height="${MAC_SIZE}" ` +
-      `rx="${MAC_RADIUS}" ry="${MAC_RADIUS}" fill="#FFFFFF"/>` +
+// Artwork fills roughly 80% of the tile — gives visual weight without
+// crowding the edges. Centered inside the tile.
+const ARTWORK = Math.round(TILE * 0.80);    // 659
+const ARTWORK_OFFSET = TILE_OFFSET + Math.round((TILE - ARTWORK) / 2);
+
+// Drop shadow: black squircle offset downward, then gaussian-blurred.
+const shadowSvg = Buffer.from(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS}" height="${CANVAS}">` +
+    `<rect x="${TILE_OFFSET}" y="${TILE_OFFSET + SHADOW_Y}" ` +
+      `width="${TILE}" height="${TILE}" ` +
+      `rx="${TILE_RADIUS}" ry="${TILE_RADIUS}" ` +
+      `fill="#000000" fill-opacity="${SHADOW_OPACITY}"/>` +
   `</svg>`
 );
+const shadowPng = await sharp(shadowSvg).blur(SHADOW_BLUR_SIGMA).png().toBuffer();
 
-const macArtwork = await sharp(SRC)
-  .resize(MAC_SIZE - MAC_INSET * 2, MAC_SIZE - MAC_INSET * 2)
+// Squircle tile with a subtle vertical gradient (white → light-blue) so the
+// envelope's inner white "paper" has enough contrast against the tile
+// background. Gradient also gives the tile a gentle sense of depth.
+const tileSvg = Buffer.from(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${CANVAS}" height="${CANVAS}">` +
+    `<defs>` +
+      `<linearGradient id="tileBg" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0" stop-color="#FFFFFF"/>` +
+        `<stop offset="1" stop-color="#DBEAFE"/>` +
+      `</linearGradient>` +
+    `</defs>` +
+    `<rect x="${TILE_OFFSET}" y="${TILE_OFFSET}" ` +
+      `width="${TILE}" height="${TILE}" ` +
+      `rx="${TILE_RADIUS}" ry="${TILE_RADIUS}" ` +
+      `fill="url(#tileBg)"/>` +
+  `</svg>`
+);
+const tilePng = await sharp(tileSvg).png().toBuffer();
+
+// Envelope artwork rasterized at the target size for crisp edges.
+const artworkPng = await sharp(SRC)
+  .resize(ARTWORK, ARTWORK)
   .png()
   .toBuffer();
 
-const macMaster = await sharp(macBgSvg)
-  .composite([{ input: macArtwork, top: MAC_INSET, left: MAC_INSET }])
+// Layered composite: transparent canvas → shadow → tile → artwork.
+const macMaster = await sharp({
+  create: {
+    width: CANVAS,
+    height: CANVAS,
+    channels: 4,
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  },
+})
+  .composite([
+    { input: shadowPng,  top: 0, left: 0 },
+    { input: tilePng,    top: 0, left: 0 },
+    { input: artworkPng, top: ARTWORK_OFFSET, left: ARTWORK_OFFSET },
+  ])
   .png({ compressionLevel: 9 })
   .toBuffer();
 
-// 512×512 variant for app.dock.setIcon at runtime
+// 512×512 variant for app.dock.setIcon at runtime.
 await sharp(macMaster)
   .resize(512, 512)
   .png({ compressionLevel: 9 })
