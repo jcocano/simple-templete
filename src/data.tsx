@@ -223,7 +223,7 @@ const BLANK_SECTIONS = [
 const DEFAULT_DOC = { sections: DEFAULT_SECTIONS };
 const BLANK_DOC   = { sections: BLANK_SECTIONS };
 
-// Preset section templates (for "Añadir sección") — descriptive names
+// Preset section templates (for "Add section") with descriptive names.
 const SECTION_PRESETS = [
   { id:'p-blank',      nameKey:'section.preset.blank',    name:'Empezar en blanco',       layout:'1col', preview:'blank' },
   { id:'p-hero',       nameKey:'section.preset.hero',     name:'Portada con saludo',      layout:'1col', preview:'hero' },

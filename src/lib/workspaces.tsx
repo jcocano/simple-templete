@@ -83,7 +83,6 @@ async function switchWorkspace(newId) {
   return { switched: true };
 }
 
-// ─── React hooks ─────────────────────────────────────────────────
 function useWorkspaces() {
   const [rows, setRows] = React.useState([]);
   React.useEffect(() => {

@@ -431,9 +431,7 @@ function BrandFontsGroup({ current, onPick }) {
   );
 }
 
-// ────────────────────────────────────────────────────────────────
 // R1 · Section-complete + R2 · Columns custom — SectionProps groups
-// ────────────────────────────────────────────────────────────────
 // Collapsible wrapper — a prop-group whose body toggles on click.
 function CollapsibleGroup({ title, defaultOpen = true, children }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
@@ -1214,7 +1212,6 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
   docRef.current = doc;
   varsRef.current = vars;
 
-  // ─── Undo / redo for `doc` ───────────────────────────────────────
   // Snapshots are pushed by a useEffect that watches `doc`. Bursts of edits
   // within HISTORY_COALESCE_MS collapse into a single undo step (typing in a
   // text field shouldn't create dozens of entries). The skip flag suppresses
@@ -1383,7 +1380,6 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
     };
   }, []);
 
-  // ─── Load doc from storage when the entity id changes ──────────
   // Two modes converge into the same doc shape (an array of sections).
   // Templates carry {sections:[...]}; blocks carry a single `section` that
   // we wrap into a 1-section array so the rest of the editor is oblivious.
@@ -1427,7 +1423,6 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
     return () => { cancelled = true; };
   }, [entity?.id, isBlockMode]);
 
-  // ─── Debounced save ──────────────────────────────────────────────
   // Serialized: if a save is in flight, a new flush waits for it to complete
   // before starting — so workspace-switch → confirm.flush never returns
   // before the pending IPC resolves against the old workspace.
@@ -1511,9 +1506,9 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
       getTemplateId: () => templateIdRef.current,
       getVars: () => varsRef.current,
       setVars: (next) => setVars(next || []),
-      // Devuelve un snapshot fresco del template (doc/name/vars/meta) para
-      // consumidores que no pueden confiar en el `tpl` de app.tsx (stale tras
-      // ediciones en memoria). Lo usa DetailsModal para renderTXT y para leer
+      // Returns a fresh template snapshot (doc/name/vars/meta) for consumers
+      // that cannot trust `tpl` from app.tsx after in-memory edits. Used by
+      // DetailsModal to render TXT and read the latest metadata.
       // meta actual.
       getSnapshot: () => ({
         ...(templateJsonRef.current || {}),
@@ -1523,8 +1518,8 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
         vars: varsRef.current,
         meta: (templateJsonRef.current && templateJsonRef.current.meta) || {},
       }),
-      // Mutación atómica de meta: patch-merge y flushSave inmediato. No
-      // requiere un state React porque el canvas no renderiza meta.
+      // Atomic metadata mutation: patch-merge + immediate flushSave.
+      // No React state needed because canvas does not render metadata.
       setMeta: async (patch) => {
         const prevMeta = (templateJsonRef.current && templateJsonRef.current.meta) || {};
         templateJsonRef.current = {
@@ -1910,9 +1905,7 @@ function Editor({ template, block, onBack, onPreview, onExport, onTestSend, onOp
   );
 }
 
-// ════════════════════════════════════════════════════════════════
-// Improve AI Modal — reescribe el texto de un bloque seleccionado
-// ════════════════════════════════════════════════════════════════
+// Improve AI modal rewrites text from the currently selected block.
 function ImproveAIModal({ block, onClose, onApply }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();

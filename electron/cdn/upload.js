@@ -75,9 +75,7 @@ function toBuffer(fileLike) {
   throw new Error('payload.file must be Uint8Array or Buffer.');
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // imgbb
-// ═══════════════════════════════════════════════════════════════════
 
 async function uploadImgBB({ secrets, file, filename, contentType }) {
   const apiKey = secrets?.apiKey;
@@ -114,9 +112,7 @@ async function uploadImgBB({ secrets, file, filename, contentType }) {
   return { ok: true, url: json.data?.url, deleteUrl: json.data?.delete_url, data: json.data };
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // Cloudinary (unsigned upload preset)
-// ═══════════════════════════════════════════════════════════════════
 
 async function uploadCloudinary({ config, file, filename, contentType }) {
   const cloudName = config?.cloudName;
@@ -155,9 +151,7 @@ async function uploadCloudinary({ config, file, filename, contentType }) {
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // S3 compatible (SigV4)
-// ═══════════════════════════════════════════════════════════════════
 
 async function uploadS3({ config, secrets, file, filename, contentType }) {
   const {

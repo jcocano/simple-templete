@@ -1,9 +1,13 @@
 // Settings panel — full-screen panel with sidebar + 7 sections
-// Section 3 (Envío de pruebas) reuses DeliveryInner from smtp-modal.jsx
+// Section 3 (test sending) reuses DeliveryInner from `smtp-modal.jsx`.
 
 // OS-specific display path for the local images folder. Shown verbatim
 // in the Storage → Local settings tile. Matches Electron's default
 // `app.getPath('userData')` + our `workspaces/{id}/images` subtree.
+/**
+ * Returns the display path used in UI for workspace local image storage.
+ * @returns {string} Platform-specific folder pattern.
+ */
 function localImagesPath() {
   const p = window.appInfo?.platform;
   if (p === 'win32')  return '%APPDATA%\\Simple Template\\workspaces\\{id}\\images\\';
@@ -174,7 +178,6 @@ function SettingsPanel({ onClose, initialSection='account' }) {
   );
 }
 
-// ───────────────────────────── Section helpers ─────────────────────────────
 
 function SRow({ label, hint, children, danger }) {
   return (
@@ -230,7 +233,6 @@ function SoonBanner({ msg }) {
   );
 }
 
-// ───────────────────────────── Workspace ─────────────────────────────
 function WorkspaceSection({ onChange }) {
   window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -469,7 +471,6 @@ function WorkspaceSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Appearance ─────────────────────────────
 function AppearanceSection({ onChange }) {
   const lang = window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -660,7 +661,7 @@ function AppearanceSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Account (perfil local) ─────────────────────────────
+// Account section.
 function AccountSection({ onChange }) {
   const lang = window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -761,11 +762,16 @@ function AccountSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Storage ─────────────────────────────
 
 // Hook: loads a sensitive CDN field from workspace secrets on mount. If the
 // field is missing from secrets but present in the legacy plaintext config,
 // migrates it transparently. Mirrors the `AISection` API-key pattern.
+/**
+ * Loads and persists one CDN secret field for the active workspace.
+ * @param {string} provider Storage provider id.
+ * @param {string} field Secret field name (e.g. apiKey, token).
+ * @returns {[string, Function, boolean]} Tuple: [value, setValue, loaded].
+ */
 function useCDNSecret(provider, field) {
   const [value, setValue] = React.useState('');
   const [loaded, setLoaded] = React.useState(false);
@@ -838,7 +844,7 @@ function StorageSection({ onChange }) {
   const [githubToken, setGithubToken] = useCDNSecret('github', 'token');
   const [ftpPassword, setFtpPassword] = useCDNSecret('ftp', 'password');
 
-  // "Probar conexión" state per provider: idle | testing | ok | err (+ message).
+  // Connection test state per provider: idle | testing | ok | err (+ message).
   const [testState, setTestState] = React.useState({});
   const doTest = async (providerId) => {
     setTestState(t => ({ ...t, [providerId]: { state: 'testing' } }));
@@ -1135,7 +1141,6 @@ function StorageSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Brand ─────────────────────────────
 // Single swatch with native color picker + remove-on-hover. Used by BrandSection.
 function ColorSwatch({ value, onChange, onRemove }) {
   window.stI18n.useLang();
@@ -1290,13 +1295,11 @@ function BrandSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Delivery (reuses DeliveryInner) ─────────────────────────────
 function DeliveryInner() {
   // Just render the inner UI (no Modal wrapper)
   return <DeliveryModal embedded={true}/>;
 }
 
-// ───────────────────────────── Editor ─────────────────────────────
 function EditorSection({ onChange }) {
   const lang = window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -1414,8 +1417,7 @@ function EditorSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Variables ─────────────────────────────
-// Source data in src/data.tsx stores `type` as a Spanish slug (e.g. 'número',
+// Source data in src/data.tsx stores `type` as a Spanish slug (e.g. 'numero',
 // 'enlace'). i18n keys can only contain ASCII, so map the non-ASCII ones.
 const VAR_TYPE_KEY = { 'número': 'numero' };
 
@@ -1459,7 +1461,7 @@ function VariablesSection({ onChange }) {
         <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.55,paddingBottom:16}}>
           {t('settings.variables.description')}
         </div>
-        {/* Inline form copiado del flujo de VariablesModal (src/modals.tsx) */}
+        {/* Inline form mirrored from VariablesModal flow (`src/modals.tsx`). */}
         {creating && (
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 28px',gap:6,padding:10,marginBottom:10,background:'var(--accent-soft)',borderRadius:'var(--r-md)',alignItems:'center'}}>
             <input className="field" value={draft.key} onChange={e=>setDraft(d=>({...d,key:e.target.value}))} onKeyDown={e=>{if(e.key==='Enter')addVar();if(e.key==='Escape')setCreating(false);}} placeholder={t('modals.vars.placeholder.key')} autoFocus style={{fontSize:12,padding:'4px 6px'}}/>
@@ -1491,7 +1493,6 @@ function VariablesSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Export ─────────────────────────────
 function ExportSection({ onChange }) {
   const lang = window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -1547,7 +1548,6 @@ function ExportSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── Notifications ─────────────────────────────
 function NotifSection({ onChange }) {
   window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -1597,7 +1597,7 @@ function NotifSection({ onChange }) {
   );
 }
 
-// ───────────────────────────── IA ─────────────────────────────
+// AI section.
 function AISection({ onChange }) {
   const lang = window.stI18n.useLang();
   const t = window.stI18n.t;

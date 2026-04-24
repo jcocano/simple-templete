@@ -1,6 +1,11 @@
 // Delivery settings — connect an account to send template previews (up to 5 recipients)
 // Used both as a standalone modal and embedded inside SettingsPanel
 
+/**
+ * Extracts the domain part from an email string.
+ * @param {string} email Candidate email value.
+ * @returns {string|null} Lowercased domain or null when invalid.
+ */
 function extractDomain(email) {
   if (!email || typeof email !== 'string') return null;
   const at = email.indexOf('@');
@@ -10,6 +15,11 @@ function extractDomain(email) {
 // Minimal stand-in template used when the user runs "Save and test" from
 // Settings without an editor open — we still want to send a real email so the
 // user can confirm deliverability end-to-end.
+/**
+ * Builds a minimal template used by "Save and test" when no editor template is open.
+ * @param {string} fromEmail Sender email used in the diagnostic copy.
+ * @returns {{name: string, vars: Array, meta: Object, doc: Object}} Template payload.
+ */
 function buildConnectivityTestTemplate(fromEmail = '') {
   const t = window.stI18n.t;
   const subject = t('smtp.connTest.subject');
@@ -109,6 +119,13 @@ function getProviders() {
 
 const MAX_RECIPIENTS = 5;
 
+/**
+ * Delivery settings UI used both in modal mode and embedded settings mode.
+ * @param {{onClose: Function, embedded?: boolean}} params Component props.
+ * @param {Function} params.onClose Close handler.
+ * @param {boolean} [params.embedded=false] Renders inline variant when true.
+ * @returns {JSX.Element|null} Rendered delivery UI.
+ */
 function DeliveryModal({ onClose, embedded = false }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();

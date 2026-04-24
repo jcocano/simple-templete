@@ -1,7 +1,5 @@
-// Biblioteca de imágenes — pantalla completa estilo WordPress Media Library.
-// Lee de stImages (workspace-scoped, persistido en SQLite). El modal
-// ImagePickerModal comparte la misma fuente, así que lo que subas aquí
-// aparece al insertar imágenes desde el editor.
+// Full-screen media library backed by workspace-scoped `stImages` (SQLite).
+// Shares the same source as ImagePicker, so uploads become immediately available.
 
 function fmtBytes(n) {
   if (n == null) return '—';
@@ -175,7 +173,6 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
       )}
 
       <div style={{display:'flex',flex:1,minHeight:0,overflow:'hidden'}}>
-        {/* Sidebar — carpetas */}
         <aside style={{
           width:220, flex:'0 0 220px',
           borderRight:'1px solid var(--line)',
@@ -209,7 +206,6 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
           )}
         </aside>
 
-        {/* Main — grid */}
         <main style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',overflow:'hidden'}}>
           <div style={{flex:1,overflow:'auto',padding:18}}
             onDragOver={(e)=>{ e.preventDefault(); setDragOver(true); }}
@@ -243,7 +239,6 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
                 gridTemplateColumns:'repeat(auto-fill, minmax(160px,1fr))',
                 gap:12,
               }}>
-                {/* Drop-zone tile */}
                 <button
                   type="button"
                   onClick={()=>fileInputRef.current?.click()}
@@ -292,7 +287,6 @@ function ImageLibraryScreen({ onBack, onOpenSettings }) {
           </div>
         </main>
 
-        {/* Right — preview/detail */}
         {sel && (
           <aside style={{
             width:300,flex:'0 0 300px',

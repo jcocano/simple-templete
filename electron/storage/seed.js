@@ -20,7 +20,6 @@ function sec(id, name, layout, over, blocks) {
   return { id, name, layout, style: style(over), columns: blocks };
 }
 
-// ─── Per-variant starter docs ────────────────────────────────────
 
 function docNewsletter() {
   return { sections: [

@@ -1418,7 +1418,6 @@ window.stI18nDict.es = {
   'ws.settingsEntry': 'Ajustes del espacio…',
   'ws.switch': 'Cambiar de espacio',
 
-  // ─── E1 · Media email-safe (video, gif, qr, countdown)
   'blockProps.type.video': 'Video',
   'blockProps.type.gif': 'GIF animado',
   'blockProps.type.qr': 'Código QR',
@@ -1467,7 +1466,6 @@ window.stI18nDict.es = {
   'eb.qr.placeholder': 'Escribe el contenido para generar el QR',
   'eb.countdown.setDateHint': 'Seteá una fecha objetivo en el panel derecho',
 
-  // ─── E2 · Content composites (testimonial, signature)
   'blockProps.type.testimonial': 'Testimonio',
   'blockProps.type.signature': 'Firma',
 
@@ -1528,13 +1526,11 @@ window.stI18nDict.es = {
   'eb.signature.titlePlaceholder': 'Título',
   'eb.signature.companyPlaceholder': 'Empresa',
 
-  // ─── R0 · Infra responsive (chip DeviceField)
   'deviceField.chip.mobile': 'Mobile',
   'deviceField.chip.tooltip': 'Definir un override sólo para mobile',
   'deviceField.chip.hasOverride': 'Override mobile activo — clic para editar',
   'deviceField.chip.clear': 'Quitar override (heredar desktop)',
 
-  // ─── E3 · Bloques avanzados (accordion, attachment)
   'blockProps.type.accordion': 'Desplegable',
   'blockProps.type.attachment': 'Adjunto',
 
@@ -1574,7 +1570,6 @@ window.stI18nDict.es = {
   'eb.attachment.download': 'Descargar',
   'eb.attachment.noFile': 'Archivo sin nombre',
 
-  // ─── E4 · Bloques ecommerce (cart, receipt)
   'blockProps.type.cart': 'Carrito',
   'blockProps.type.receipt': 'Recibo',
 
@@ -1633,7 +1628,6 @@ window.stI18nDict.es = {
   'eb.receipt.empty': 'Sin ítems — agregá uno en el panel de la derecha.',
   'eb.receipt.viewOrder': 'Ver pedido',
 
-  // ─── E5 · Bloque Mapa
   'blockProps.type.map': 'Mapa',
 
   'blockProps.field.mapLabel': 'Leyenda',
@@ -1677,7 +1671,6 @@ window.stI18nDict.es = {
 
   'eb.map.placeholder': 'Configurar mapa',
 
-  // ─── E6 · Countdown en vivo (modo B)
   'blockProps.field.countdownMode': 'Modo',
   'blockProps.field.liveImage': 'Timer en vivo',
   'blockProps.field.fallbackText': 'Texto alternativo',
@@ -1728,10 +1721,9 @@ window.stI18nDict.es = {
   'provider.motionmail.desc': 'Proveedor consolidado con varias plantillas.',
   'provider.motionmail.features': '20.000 vistas gratis · Con marca de agua',
 
-  // Acción de guardar compartida
+  // Shared save action
   'common.save': 'Guardar',
 
-  // ─── R1 · Sección completa (grupos y campos Beefree-style)
   'section.group.backgrounds': 'Fondos',
   'section.group.borders': 'Bordes',
   'section.group.layout': 'Disposición',
@@ -1793,7 +1785,6 @@ window.stI18nDict.es = {
   'section.badge.hiddenOnDesktop': 'Oculta en escritorio',
   'section.badge.hiddenOnMobile': 'Oculta en móvil',
 
-  // ─── R2 · Columnas custom (grilla 12 + overrides por columna)
   'section.columns.add': 'Añadir columna',
   'section.columns.delete': 'Eliminar columna',
   'section.columns.count': '{n} columna(s)',
@@ -1813,7 +1804,6 @@ window.stI18nDict.es = {
   'common.increase': 'Aumentar',
   'common.decrease': 'Disminuir',
 
-  // ─── R3 · Common block overrides (hidden + per-device style override)
   'blockProps.group.visibility': 'Visibilidad',
   'blockProps.hideOn.none': 'Visible',
   'blockProps.hideOn.desktop': 'Ocultar en escritorio',
@@ -1823,9 +1813,7 @@ window.stI18nDict.es = {
   'blockProps.hideOn.tooltip.mobile': 'Ocultar en móvil',
   'blockProps.badge.hiddenOn': 'Oculto en {device}',
 
-  // ─── R4 · Type-specific block overrides (sin cadenas nuevas — reutiliza labels existentes envueltos en DeviceField)
 
-  // ─── R5 · Export HTML puro + iframe preview
   'export.title': 'Exportar HTML',
   'export.dialect.label': 'Dialecto de variables',
   'export.dialect.native': 'Nativo / Handlebars ({{var}})',
@@ -1845,7 +1833,6 @@ window.stI18nDict.es = {
   'export.option.minify': 'Minificar HTML',
   'export.option.minify.hint': 'Reduce el tamaño del correo (recomendado para evitar el recorte de Gmail cerca de 102 KB).',
 
-  // ─── Sharing
   'share.modal.title': 'Compartir plantilla',
   'share.modal.sub': 'Generá un enlace para enviarle «{name}» a otra persona.',
   'share.modal.generating': 'Generando enlace…',

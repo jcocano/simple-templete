@@ -98,8 +98,8 @@ function remove(id) {
     if (fs.existsSync(blocksDir)) fs.rmdirSync(blocksDir);
   } catch {}
 
-  // Carpeta de imágenes locales del workspace (mode='local'). La tabla
-  // images ya se limpió por el CASCADE; acá borramos los archivos del disco.
+  // Workspace local-image folder (`mode='local'`). The `images` table is already
+  // cleaned by SQL CASCADE; here we remove disk files.
   const imgDir = workspaceImagesDir(id);
   try {
     if (fs.existsSync(imgDir)) fs.rmSync(imgDir, { recursive: true, force: true });

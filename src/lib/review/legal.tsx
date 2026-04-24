@@ -112,7 +112,7 @@
       : key;
   };
 
-  // ── g1 — Link de desuscripción ─────────────────────────────────────
+  // ── g1 — Unsubscribe link ───────────────────────────────────────────
   //
   // Primary path: scan emitted HTML for <a href="..."> with either the
   // `link_baja` merge tag or unsubscribe-flavoured words in URL or text.
@@ -186,7 +186,7 @@
     },
   });
 
-  // ── g2 — Dirección física ──────────────────────────────────────────
+  // ── g2 — Physical address ───────────────────────────────────────────
   //
   // Heuristic — any of the following counts as an address line:
   //   (a) keyword hit: calle, avenida, av., ave., street, st., road, rd.,
@@ -242,8 +242,8 @@
   //
   // Plain-text fallback: revisa si tpl.meta.plainText tiene contenido real.
   // El Detalles modal auto-genera el texto al abrir pero solo lo persiste si
-  // el usuario lo edita o confirma con guardar — así diferenciamos "nunca se
-  // configuró" (warn) de "hay versión" (ok).
+  // user edits it or confirms with save, so we can distinguish "never
+  // configured" (warn) from "configured version exists" (ok).
   window.stReview.register({
     id: 'g3',
     cat: 'legal',
@@ -262,7 +262,7 @@
     },
   });
 
-  // ── g4 — Spam score (heurística local) ─────────────────────────────
+  // ── g4 — Spam score (local heuristic) ───────────────────────────────
   //
   // Score is the sum of small penalties capped at 10. We also remember
   // which rules fired so the detail string can list the top three.

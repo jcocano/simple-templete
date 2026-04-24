@@ -1,6 +1,6 @@
-// Command Palette — atajo ⌘K / Ctrl+K
+// Command Palette shortcut: ⌘K / Ctrl+K.
 // API: window.dispatchEvent(new CustomEvent('st:cmd-open'))
-// Comandos registrados desde fuera vía window.registerCommands([...])
+// External commands can be registered via `window.registerCommands([...])`.
 
 function CommandPalette({ onNavigate, onClose }) {
   const t = window.stI18n.t;
@@ -18,7 +18,7 @@ function CommandPalette({ onNavigate, onClose }) {
     return () => window.removeEventListener('keydown', keyH);
   }, []);
 
-  // Comandos — construidos desde data y navegación
+  // Commands built from data + navigation context.
   const cmds = React.useMemo(() => {
     const TEMPLATES = window.TEMPLATES || [];
     const BLOCK_CATALOG = window.BLOCK_CATALOG || [];

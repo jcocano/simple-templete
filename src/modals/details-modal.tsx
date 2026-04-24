@@ -1,17 +1,9 @@
-// Detalles modal — edita subject, preheader y versión texto plano del correo.
+// Details modal edits email subject, preheader, and plain-text body.
 //
-// Se abre desde la toolbar del editor (botón "Detalles" entre Preview y Review)
-// y también desde los fixes de c1/c2/g3 del Review panel vía el evento
-// `st:open-details`.
-//
-// Persistencia: mutamos templateJsonRef.current.meta del editor a través de
-// window.__stEditor.setMeta() y dejamos que flushSave persista — el spread
-// existente en flushSave (editor.tsx) ya preserva `meta` entre guardados.
-//
-// Plain-text: si el campo viene vacío y window.stExport.renderTXT existe, se
-// auto-genera al abrir desde el snapshot actual del editor (no desde el prop
-// template, que puede estar stale respecto de ediciones no guardadas). El
-// usuario puede sobrescribir o pedir "Regenerar" explícitamente.
+// It opens from the editor toolbar and from Review fixes (`st:open-details`).
+// Persistence goes through `window.__stEditor.setMeta()`, then editor flushes
+// to storage. If plain text is missing, we generate it from the live editor
+// snapshot (not from possibly stale template props).
 
 function DetailsModal({ onClose }) {
   const t = window.stI18n.t;
@@ -42,8 +34,7 @@ function DetailsModal({ onClose }) {
   const [varPickerOpen, setVarPickerOpen] = React.useState(false);
   const subjectRef = React.useRef(null);
 
-  // Inserta `{{key}}` en la posición actual del cursor del input de subject.
-  // Si el input no está foco, lo appendea al final. Mantiene el foco post-inserción.
+  // Inserts `{{key}}` at cursor position in subject input; appends when blurred.
   const insertVarIntoSubject = (key) => {
     const token = `{{${key}}}`;
     const el = subjectRef.current;
@@ -53,15 +44,14 @@ function DetailsModal({ onClose }) {
     const next = subject.slice(0, start) + token + subject.slice(end);
     setSubject(next);
     setVarPickerOpen(false);
-    // Reposicionar cursor justo después del token insertado
+    // Place cursor right after inserted token.
     requestAnimationFrame(() => {
       if (!el) return;
       try { el.focus(); el.setSelectionRange(start + token.length, start + token.length); } catch { /* ignore */ }
     });
   };
-  // `plainAuto` flag: true cuando el valor actual viene del auto-generador y el
-  // usuario no lo tocó. Al saltar a la acción Regenerar o al editar, lo
-  // actualizamos. No se persiste — solo afecta el hint en UI y el save path.
+  // `plainAuto` is true while plain text still matches auto-generated content.
+  // It only affects UI hints/save branch and is never persisted.
   const [plainAuto, setPlainAuto] = React.useState(initial.plainAuto);
 
   const regenerate = () => {
@@ -78,9 +68,8 @@ function DetailsModal({ onClose }) {
   const save = async () => {
     const ed = window.__stEditor;
     if (!ed || typeof ed.setMeta !== 'function') { onClose(); return; }
-    // Persistimos siempre lo que el usuario ve: si abrió el modal y dejó el
-    // auto-generado como está, eso cuenta como "aceptado" y se guarda. Si lo
-    // editó, se guarda la versión editada. Cerrar sin tocar nada equivale a
+    // Persist exactly what user sees: untouched auto-generated text is accepted,
+    // edited text is saved as-is.
     // confirmar el auto-generado — mismo resultado.
     await ed.setMeta({
       subject,

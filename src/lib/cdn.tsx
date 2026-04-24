@@ -60,9 +60,9 @@ async function fileToUint8Array(file) {
   throw new Error(window.stI18n.t('cdn.err.fileReadFailed'));
 }
 
-// Base64 path: reads the file into a data URL. Opcional, para HTML
-// self-contained. No es el default — el modo recomendado es `local`.
-// El cap se mantiene permisivo (1024 KB) pero avisa si se excede.
+// Base64 path: reads file into a data URL. Optional for self-contained HTML.
+// Not the default; recommended mode is `local`. Size cap is permissive
+// (1024 KB) and emits a warning when exceeded.
 async function uploadBase64(file, opts = {}) {
   const bytes = await fileToUint8Array(file);
   const sizeKB = Math.round(bytes.length / 1024);
@@ -84,10 +84,9 @@ async function uploadBase64(file, opts = {}) {
   };
 }
 
-// Local (disco del usuario) path: delega a cdn.saveLocal en el main. El
-// archivo queda en userData/workspaces/{wsId}/images/{id}.{ext} y se sirve
-// via protocolo custom st-img://. Sin cap duro — solo un soft cap de 50MB
-// para prevenir OOM accidentales (drag de un video, p.ej.).
+// Local disk path: delegates to `cdn.saveLocal` in main. File is stored in
+// `userData/workspaces/{wsId}/images/{id}.{ext}` and served via `st-img://`.
+// No hard cap, only a 50MB soft cap to prevent accidental OOM uploads.
 const LOCAL_SOFT_CAP = 50 * 1024 * 1024;
 function randomImageId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -143,6 +142,11 @@ async function uploadLocal(file, opts = {}) {
   }
 }
 
+/**
+ * Encodes Uint8Array bytes into base64 using chunked conversion.
+ * @param {Uint8Array} bytes Binary payload.
+ * @returns {string} Base64 string.
+ */
 function uint8ToBase64(bytes) {
   // btoa expects a binary string. For large buffers, chunk to avoid "string
   // too long" errors.
@@ -160,10 +164,9 @@ async function upload(file, opts = {}) {
   const storageCfg = window.stStorage.getWSSetting('storage', {}) || {};
   const mode = opts.provider || storageCfg.mode || 'local';
 
-  // Optimización por default: resize a máx 2000 px + re-encode manteniendo
-  // el formato original. Activada salvo que el usuario la apague explícitamente
-  // (storage.optimize === false) o el caller pase skipOptimize. Se excluye
-  // solo SVG (resize rasterizaría el vector — indeseable).
+  // Default optimization: resize to max 2000 px and re-encode while preserving
+  // source format. Enabled unless user disabled it (`storage.optimize === false`)
+  // or caller passed `skipOptimize`. SVG is excluded to avoid rasterizing vectors.
   const shouldOptimize =
     storageCfg.optimize !== false
     && opts.skipOptimize !== true
@@ -212,6 +215,12 @@ async function upload(file, opts = {}) {
 
 // Generate a unique-ish filename. S3 and similar path-based providers rely
 // on this as the object key; collisions overwrite silently.
+/**
+ * Builds a provider-safe filename for object-key based storage backends.
+ * @param {{name?: string}|Blob|File} file Input file-like object.
+ * @param {{filename?: string}} opts Upload options.
+ * @returns {string} Stable filename to send to provider.
+ */
 function buildFilename(file, opts) {
   if (opts.filename) return opts.filename;
   const original = file?.name || 'upload';
@@ -222,6 +231,11 @@ function buildFilename(file, opts) {
   return `${base}-${ts}${rand}${ext ? '.' + ext : ''}`;
 }
 
+/**
+ * Infers content-type from file extension.
+ * @param {string} filename File name with extension.
+ * @returns {string} MIME type fallbacking to `application/octet-stream`.
+ */
 function guessContentType(filename) {
   const ext = (filename.split('.').pop() || '').toLowerCase();
   const map = {
@@ -236,21 +250,20 @@ function guessContentType(filename) {
   return map[ext] || 'application/octet-stream';
 }
 
-// Downscale + recompress an image before upload. Runs entirely in the
-// renderer via Canvas — no deps, no native bindings. Mantiene el formato
-// original (JPG → JPG, PNG → PNG) para máxima compatibilidad con clientes
-// de correo (Outlook desktop viejo no soporta WebP). GIF pierde animación
-// al pasar por canvas, así que lo dejamos como PNG estático.
+// Downscale + recompress image before upload. Runs in renderer via Canvas,
+// without native deps. Keeps source format (JPG -> JPG, PNG -> PNG) for max
+// email-client compatibility (older Outlook desktop does not support WebP).
+// GIF loses animation through canvas, so we emit static PNG.
 //
-// Returns a File con `name` + `type` seteados, para que el resto de
-// `upload()` lo trate igual que al original.
+// Returns a `File` with `name` and `type` set so downstream `upload()` treats
+// it exactly like the original input.
 async function optimizeImage(file, { maxDim = 2000, quality = 0.85 } = {}) {
   const srcType = file?.type || 'image/png';
   const isPng  = /png/i.test(srcType);
   const isGif  = /gif/i.test(srcType);
   const isJpeg = /jpe?g/i.test(srcType);
-  // PNG con alpha → PNG. GIF → PNG (pierde animación pero mantiene calidad
-  // del primer frame). JPG (y el resto) → JPG con calidad 85%.
+  // PNG with alpha -> PNG. GIF -> PNG (drops animation, keeps first-frame
+  // quality). JPG (and fallback types) -> JPG at quality 85%.
   const outType = (isPng || isGif) ? 'image/png' : 'image/jpeg';
 
   const bytes = await fileToUint8Array(file);
@@ -309,8 +322,8 @@ async function optimizeImage(file, { maxDim = 2000, quality = 0.85 } = {}) {
 }
 
 // Lightweight connectivity test — uploads a 1x1 transparent PNG and reports
-// whether the configured provider accepts it. Used by the "Probar conexión"
-// button in Settings → Almacenamiento.
+// whether the configured provider accepts it. Used by the "Test connection"
+// button in Settings -> Storage.
 const TEST_PNG_BYTES = new Uint8Array([
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,

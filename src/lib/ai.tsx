@@ -138,9 +138,7 @@ function tryParseJSON(raw) {
   return null;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // improveText — 3 variants for a single block
-// ═══════════════════════════════════════════════════════════════════
 
 const IMPROVE_ACTION_COPY = {
   rewrite: 'reescribilo manteniendo el sentido original pero con otras palabras',
@@ -210,9 +208,7 @@ async function improveText({ block, action = 'rewrite', extra = '', lang = 'es' 
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // generateTemplate — full doc.sections from a prompt
-// ═══════════════════════════════════════════════════════════════════
 
 async function generateTemplate({ prompt, tone, length = 'medio', blocks = [] } = {}) {
   if (!prompt || !prompt.trim()) return { ok: false, error: window.stI18n.t('ai.err.missingPrompt') };

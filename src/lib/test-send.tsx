@@ -113,8 +113,8 @@ async function send({ template, recipients, fromOverride } = {}) {
   if (loaded.error) return { ok: false, error: loaded.error };
   const { provider, cfg } = loaded;
 
-  // Inline any st-img:// URLs as data: URLs — nodemailer va a mandar el
-  // HTML tal cual, así que las imágenes locales tienen que viajar dentro.
+  // Inline `st-img://` URLs as data URLs because nodemailer sends HTML as-is,
+  // so local images must travel embedded in the payload.
   let html = window.stExport.renderHTML(template, { resolveVars: true });
   html = await window.stExport.inlineImages(html);
   const text = window.stExport.renderTXT(template, { resolveVars: true });
@@ -221,7 +221,7 @@ async function sendFromEditor(recipients, fromOverride) {
 
 // Lightweight pre-flight: runs every validation that `send()` would run EXCEPT
 // actually talking to SMTP. Intended for UIs that want to warn the user about
-// broken delivery cfg before they click "Enviar" — avoiding silent failures
+// broken delivery config before they click "Send" — avoiding silent failures
 // when the cfg would cause the server to accept + Gmail to drop.
 async function checkConfig() {
   const result = await loadWorkspaceDeliveryCfg();

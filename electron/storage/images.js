@@ -84,10 +84,10 @@ function get(workspaceId, id) {
 
 function remove(workspaceId, id) {
   if (!workspaceId || !id) return false;
-  // Capturar provider + local_path ANTES del delete — si la fila es local,
-  // borramos el archivo del disco también. Orden: SELECT → DELETE → unlink.
-  // Si la app crashea entre DELETE y unlink quedan archivos huérfanos; es
-  // aceptable (no hay GC automático pero tampoco corrompen estado).
+  // Capture provider + local_path BEFORE delete. If row is local, also remove
+  // disk file. Order: SELECT -> DELETE -> unlink.
+  // If app crashes between DELETE and unlink, orphan files can remain; this is
+  // acceptable (no automatic GC, but SQL state remains consistent).
   const row = db
     .get()
     .prepare('SELECT provider, local_path FROM images WHERE workspace_id = ? AND id = ?')

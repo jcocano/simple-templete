@@ -39,7 +39,6 @@ function stripTags(s = '') {
   return String(s).replace(/<[^>]+>/g, '').replace(/[ \t]+/g, ' ').trim();
 }
 
-// ─── Font stacks (email-safe fallbacks) ─────────────────────────────
 const EXPORT_FONT_STACKS = {
   'inter': 'Inter, Helvetica, Arial, sans-serif',
   'inter-tight': '"Inter Tight", Helvetica, Arial, sans-serif',
@@ -74,9 +73,7 @@ function getContent(data = {}) {
   return { ...flat, ...(content || {}) };
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // HTML RENDERER
-// ═══════════════════════════════════════════════════════════════════
 
 function renderHTMLBlock(block, ctx) {
   const s = block.data?.style || {};
@@ -322,9 +319,7 @@ function renderHTML(template, opts = {}) {
   return html;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MJML RENDERER
-// ═══════════════════════════════════════════════════════════════════
 
 function renderMJMLBlock(block, ctx) {
   const s = block.data?.style || {};
@@ -451,9 +446,7 @@ ${legal}
 </mjml>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // TXT RENDERER
-// ═══════════════════════════════════════════════════════════════════
 
 function renderTXTBlock(block, ctx) {
   const c = getContent(block.data);
@@ -538,9 +531,7 @@ function renderTXT(template, opts = {}) {
   ].join('\n\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // DOWNLOAD HELPERS
-// ═══════════════════════════════════════════════════════════════════
 
 function safeFilename(name) {
   return String(name || 'correo')
@@ -568,13 +559,12 @@ function downloadFile(filename, content, mime = 'text/plain') {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Reemplaza todas las URLs `st-img://{wsId}/{file}` que aparecen en `src="…"`
-// o `href="…"` dentro de un string (HTML o MJML) por data URLs base64 leídas
-// del disco vía IPC. Las URLs repetidas se resuelven una sola vez (cache).
+// Replaces every `st-img://{wsId}/{file}` URL found in `src="..."` or
+// `href="..."` with base64 data URLs read from disk via IPC. Repeated URLs are
+// resolved once and reused from cache.
 //
-// Idempotente: si no hay matches, devuelve el string sin overhead. Si alguna
-// URL no se puede leer (archivo borrado, etc.), la deja tal cual y sigue —
-// el correo renderizará con imagen rota, pero no falla todo el export.
+// Idempotent: if there are no matches, returns input unchanged. If one URL
+// cannot be read (deleted file, etc.), keeps it untouched and continues.
 async function inlineImages(str) {
   if (typeof str !== 'string' || !str.includes('st-img://')) return str;
   if (!window.cdn || typeof window.cdn.readLocalAsDataUrl !== 'function') return str;

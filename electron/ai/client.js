@@ -53,7 +53,6 @@ async function complete(payload = {}) {
   }
 }
 
-// ─── Anthropic ────────────────────────────────────────────────────
 async function callAnthropic({ model, apiKey, system, user, maxTokens = 2048, temperature = 0.7 }) {
   if (!apiKey) return {
     ok: false,
@@ -106,7 +105,6 @@ async function callAnthropic({ model, apiKey, system, user, maxTokens = 2048, te
   return { ok: true, text: out, usage: json.usage || null };
 }
 
-// ─── OpenAI ───────────────────────────────────────────────────────
 async function callOpenAI({ model, apiKey, system, user, maxTokens = 2048, temperature = 0.7, responseFormat }) {
   if (!apiKey) return {
     ok: false,
@@ -162,7 +160,6 @@ async function callOpenAI({ model, apiKey, system, user, maxTokens = 2048, tempe
   return { ok: true, text: out, usage: json.usage || null };
 }
 
-// ─── Google Gemini ────────────────────────────────────────────────
 async function callGoogle({ model, apiKey, system, user, maxTokens = 2048, temperature = 0.7, responseFormat }) {
   if (!apiKey) return {
     ok: false,
@@ -216,7 +213,6 @@ async function callGoogle({ model, apiKey, system, user, maxTokens = 2048, tempe
   return { ok: true, text: out, usage: json.usageMetadata || null };
 }
 
-// ─── Ollama (local) ───────────────────────────────────────────────
 async function callOllama({ model, ollamaUrl, system, user, maxTokens = 2048, temperature = 0.7, responseFormat }) {
   const base = (ollamaUrl || 'http://localhost:11434').replace(/\/+$/, '');
   const url = `${base}/api/chat`;
@@ -285,11 +281,9 @@ function mapHttpError(status) {
   return 'HTTP';
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // MODEL DISCOVERY — ask each provider which models are currently available.
 // The goal is to avoid hardcoded lists that rot (Anthropic, OpenAI, Google
 // all ship new models continuously; Ollama models are user-installed locally).
-// ═══════════════════════════════════════════════════════════════════
 
 async function listModels(payload = {}) {
   const { provider, apiKey, ollamaUrl } = payload;

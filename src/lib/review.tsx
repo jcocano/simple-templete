@@ -77,9 +77,7 @@ async function runReviewAsync(tpl, onUpdate) {
   return results;
 }
 
-// ───────────────────────────────────────────────────────────────────
 // Shared helpers for individual checks
-// ───────────────────────────────────────────────────────────────────
 
 function _eachBlock(tpl, visit) {
   const sections = (tpl && tpl.doc && Array.isArray(tpl.doc.sections)) ? tpl.doc.sections : [];

@@ -145,7 +145,6 @@ async function updateTemplate(id, patch) {
   return doc;
 }
 
-// ─── React hook ──────────────────────────────────────────────────
 // Returns rows merged from the SQLite index (name, updated_at) with
 // the richer JSON attributes (variant, color, folder, starred, status)
 // the dashboard needs. Re-reads all rows on any change event — fine at
