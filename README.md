@@ -8,7 +8,7 @@
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](#install)
 
-**Languages:** [English](./README.md) · [Español](./README.es.md)
+**Languages:** [English](./README.md) · [Español](./docs/es/README.md)
 
 ---
 

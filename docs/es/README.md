@@ -5,10 +5,10 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/jcocano/simple-templete?style=social)](https://github.com/jcocano/simple-templete/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/jcocano/simple-templete)](https://github.com/jcocano/simple-templete/issues)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.es.md)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](#instalaci%C3%B3n)
 
-**Idiomas:** [English](./README.md) · [Español](./README.es.md)
+**Idiomas:** [English](../../README.md) · [Español](./README.md)
 
 ---
 
@@ -85,11 +85,11 @@ Simple Template es gratis y open source. Si te sirve, acá van las formas de dev
 - **[Reportá un bug](https://github.com/jcocano/simple-templete/issues/new?template=bug_report.yml)** si algo está roto
 - **[Pedí una feature](https://github.com/jcocano/simple-templete/issues/new?template=feature_request.yml)** que te gustaría ver
 - **[Ayudá con traducciones](https://github.com/jcocano/simple-templete/issues/new?template=translation.yml)** — corrigiendo typos, proponiendo mejor copy, o agregando un idioma nuevo
-- **[Abrí un pull request](./CONTRIBUTING.es.md)** — mirá la guía de contribución para el setup de dev
+- **[Abrí un pull request](./CONTRIBUTING.md)** — mirá la guía de contribución para el setup de dev
 - **[Sumate a las discusiones](https://github.com/jcocano/simple-templete/discussions)** para preguntas, ideas y show-and-tell
 - **[Invitame un café](https://buymeacoffee.com/jesuscocana)** si querés bancar el desarrollo
 
-Mirá [CONTRIBUTING.es.md](./CONTRIBUTING.es.md) para la guía completa de contribución.
+Mirá [CONTRIBUTING.md](./CONTRIBUTING.md) para la guía completa de contribución.
 
 ## Roadmap
 
@@ -112,13 +112,13 @@ Mirá [CONTRIBUTING.es.md](./CONTRIBUTING.es.md) para la guía completa de contr
 ## Arquitectura
 
 - **Electron** con defaults de seguridad estrictos (`contextIsolation`, `sandbox`, IPC solo por preload)
-- **React 18** en el renderer con una convención custom de globals-en-`window` (ver [CLAUDE.md](./CLAUDE.md) si sos un agente AI o un contributor curioso)
+- **React 18** en el renderer con una convención custom de globals-en-`window` (ver [CLAUDE.md](../../CLAUDE.md) si sos un agente AI o un contributor curioso)
 - **better-sqlite3** para persistencia local
 - **Vite** para el bundling
 - Protocolo custom `st-img://` para servir imágenes del workspace sin relajar `webSecurity`
 - Usa `electron-builder` para empaquetado cross-platform
 
-Para notas detalladas de arquitectura, mirá [CONTRIBUTING.es.md](./CONTRIBUTING.es.md).
+Para notas detalladas de arquitectura, mirá [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Comunidad
 
@@ -126,11 +126,11 @@ Para notas detalladas de arquitectura, mirá [CONTRIBUTING.es.md](./CONTRIBUTING
 - [Issues](https://github.com/jcocano/simple-templete/issues) — bugs, features, traducciones
 - [Releases](https://github.com/jcocano/simple-templete/releases) — historial de versiones
 
-Leé el [Código de Conducta](./CODE_OF_CONDUCT.es.md) antes de participar.
+Leé el [Código de Conducta](./CODE_OF_CONDUCT.md) antes de participar.
 
 ## Seguridad
 
-¿Encontraste una vulnerabilidad? Por favor **no** abras un issue público. Mirá [SECURITY.es.md](./SECURITY.es.md) para el proceso de divulgación responsable.
+¿Encontraste una vulnerabilidad? Por favor **no** abras un issue público. Mirá [SECURITY.md](./SECURITY.md) para el proceso de divulgación responsable.
 
 ## Licencia
 
