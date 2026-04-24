@@ -1,13 +1,12 @@
-// IPC del modo 'local' de storage. Equivalente al bridge `cdn:upload` pero
-// sin red — el archivo queda en userData/workspaces/{wsId}/images/. La URL
-// resultante es `st-img://{wsId}/{imageId}.{ext}`, servida por el protocol
-// handler registrado en main.js.
+// IPC handlers for local storage mode. Equivalent to `cdn:upload` without
+// network: file is stored in userData/workspaces/{wsId}/images/. Result URL is
+// `st-img://{wsId}/{imageId}.{ext}`, served by the custom protocol in main.js.
 
 const { ipcMain } = require('electron');
 const imageFiles = require('../storage/image-files');
 
 function register() {
-  // Guardar un archivo local. Payload: { workspaceId, imageId, ext, bytes:Uint8Array }.
+  // Save local file. Payload: { workspaceId, imageId, ext, bytes: Uint8Array }.
   ipcMain.handle('images:saveLocal', async (_e, payload) => {
     if (!payload || typeof payload !== 'object') {
       return {
@@ -66,8 +65,8 @@ function register() {
     }
   });
 
-  // Leer un archivo local como data URL — útil para inline-en-export y otros
-  // callers del renderer que necesitan base64 desde un st-img:// URL.
+  // Read local file as data URL for export inlining and other renderer callers
+  // that need base64 content from an st-img:// URL.
   ipcMain.handle('images:readLocalAsDataUrl', async (_e, url) => {
     const parsed = imageFiles.parseStImgUrl(url);
     if (!parsed) {

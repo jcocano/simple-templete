@@ -1419,7 +1419,6 @@ window.stI18nDict.ja = {
   'ws.settingsEntry': 'ワークスペース設定…',
   'ws.switch': 'ワークスペースを切り替え',
 
-  // ─── E1 · メール対応メディアブロック (video, gif, qr, countdown)
   'blockProps.type.video': '動画',
   'blockProps.type.gif': 'アニメ GIF',
   'blockProps.type.qr': 'QR コード',
@@ -1468,7 +1467,6 @@ window.stI18nDict.ja = {
   'eb.qr.placeholder': '内容を入力して QR を生成',
   'eb.countdown.setDateHint': '右パネルで対象日時を設定',
 
-  // ─── E2 · コンテンツ複合ブロック (testimonial, signature)
   'blockProps.type.testimonial': '推薦文',
   'blockProps.type.signature': '署名',
 
@@ -1529,13 +1527,11 @@ window.stI18nDict.ja = {
   'eb.signature.titlePlaceholder': '肩書き',
   'eb.signature.companyPlaceholder': '会社',
 
-  // ─── R0 · レスポンシブインフラ (DeviceField チップ)
   'deviceField.chip.mobile': 'モバイル',
   'deviceField.chip.tooltip': 'モバイル専用の上書きを設定',
   'deviceField.chip.hasOverride': 'モバイル上書き有効 — クリックで編集',
   'deviceField.chip.clear': '上書きをクリア (デスクトップを継承)',
 
-  // ─── E3 · 高度なブロック (accordion, attachment)
   'blockProps.type.accordion': 'アコーディオン',
   'blockProps.type.attachment': '添付ファイル',
 
@@ -1575,7 +1571,6 @@ window.stI18nDict.ja = {
   'eb.attachment.download': 'ダウンロード',
   'eb.attachment.noFile': '無題のファイル',
 
-  // ─── E4 · Eコマースブロック (cart, receipt)
   'blockProps.type.cart': 'カート',
   'blockProps.type.receipt': 'レシート',
 
@@ -1634,7 +1629,6 @@ window.stI18nDict.ja = {
   'eb.receipt.empty': '商品がありません — 右パネルで追加してください。',
   'eb.receipt.viewOrder': '注文を見る',
 
-  // ─── E5 · マップブロック
   'blockProps.type.map': 'マップ',
 
   'blockProps.field.mapLabel': 'キャプション',
@@ -1678,7 +1672,6 @@ window.stI18nDict.ja = {
 
   'eb.map.placeholder': 'マップを設定',
 
-  // ─── E6 · ライブカウントダウン (モードB)
   'blockProps.field.countdownMode': 'モード',
   'blockProps.field.liveImage': 'ライブタイマー',
   'blockProps.field.fallbackText': '代替テキスト',
@@ -1729,10 +1722,9 @@ window.stI18nDict.ja = {
   'provider.motionmail.desc': '複数テンプレートを持つ定評あるプロバイダー。',
   'provider.motionmail.features': '2万ビュー無料 · ウォーターマーク付き',
 
-  // 保存アクション
+  // Shared save action.
   'common.save': '保存',
 
-  // ─── R1 · セクション完全版 (Beefree スタイルのグループとフィールド)
   'section.group.backgrounds': '背景',
   'section.group.borders': '枠線',
   'section.group.layout': 'レイアウト',
@@ -1794,7 +1786,6 @@ window.stI18nDict.ja = {
   'section.badge.hiddenOnDesktop': 'デスクトップで非表示',
   'section.badge.hiddenOnMobile': 'モバイルで非表示',
 
-  // ─── R2 · カラムカスタム (12グリッド + カラムごとの上書き)
   'section.columns.add': 'カラムを追加',
   'section.columns.delete': 'カラムを削除',
   'section.columns.count': '{n} カラム',
@@ -1814,7 +1805,6 @@ window.stI18nDict.ja = {
   'common.increase': '増やす',
   'common.decrease': '減らす',
 
-  // ─── R3 · Common block overrides (hidden + per-device style override)
   'blockProps.group.visibility': '表示設定',
   'blockProps.hideOn.none': '表示',
   'blockProps.hideOn.desktop': 'デスクトップで非表示',
@@ -1824,9 +1814,7 @@ window.stI18nDict.ja = {
   'blockProps.hideOn.tooltip.mobile': 'モバイルで非表示',
   'blockProps.badge.hiddenOn': '{device}で非表示',
 
-  // ─── R4 · Type-specific block overrides (新規文字列なし — DeviceFieldで既存ラベルを再利用)
 
-  // ─── R5 · Export HTML puro + iframe preview
   'export.title': 'HTMLをエクスポート',
   'export.dialect.label': '差し込みタグの方言',
   'export.dialect.native': 'ネイティブ / Handlebars ({{var}})',
@@ -1846,7 +1834,6 @@ window.stI18nDict.ja = {
   'export.option.minify': 'HTMLを最小化',
   'export.option.minify.hint': 'メールサイズを削減します（Gmailが約102KBで本文を切るのを避けるため推奨）。',
 
-  // ─── Sharing
   'share.modal.title': 'テンプレートを共有',
   'share.modal.sub': '「{name}」を他の人に送るためのリンクを生成します。',
   'share.modal.generating': 'リンクを生成中…',

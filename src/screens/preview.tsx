@@ -1,7 +1,5 @@
-// Vista previa — iframe con HTML puro generado por docToEmailHtml (R5).
-// El contenido del iframe es EXACTAMENTE lo que saldrá exportado (dialect
-// 'native'), con substitución de variables al vuelo para que se vean los
-// valores sample. El chrome simulado (Gmail-like) queda fuera del iframe.
+// Email preview uses the same HTML pipeline as export (`docToEmailHtml`).
+// The iframe shows only generated email markup; the client chrome stays outside.
 
 function Preview({ template, onBack }) {
   const t = window.stI18n.t;
@@ -98,21 +96,14 @@ function Preview({ template, onBack }) {
     };
   }, [previewHtml]);
 
-  // Ancho del card del cliente. En desktop, card e iframe comparten ancho para
-  // evitar que el chromeBg asome a los lados del email. En mobile el card es
-  // 15px más ancho para acomodar el bisel/borde tipo teléfono.
-  //
-  // El iframe debe superar 600px en desktop: el HTML exportado usa
-  // `@media (max-width:600px)` para apilar columnas en mobile, y ese mq es
-  // inclusivo (≤600). Si el iframe quedara a 600 exacto dispararía el layout
-  // mobile dentro del preview desktop. `max(docMaxWidth+40, 640)` mantiene
-  // siempre al menos 40px de "stage" a los lados (como el pane de Gmail) y
-  // escala si la sección mide más de 600.
+  // Desktop iframe width must stay above 600px because export HTML stacks
+  // columns at `@media (max-width:600px)`. `max(docMaxWidth+40, 640)` keeps
+  // desktop preview in desktop layout and preserves side gutter around email.
   const docMaxWidth = (doc.sections || []).reduce((m, s) => Math.max(m, s.style?.width || 600), 600);
   const iframeWidth = isMobile ? 375 : Math.max(docMaxWidth + 40, 640);
   const emailWidth = isMobile ? 390 : iframeWidth;
 
-  // Chrome del cliente
+  // Fake mail-client chrome colors around the iframe.
   const clientBg     = isDark ? '#0b0b0d' : '#edece6';
   const chromeBg     = isDark ? '#17171a' : '#ffffff';
   const chromeFg     = isDark ? '#e7e7ea' : '#1a1a17';
@@ -174,7 +165,6 @@ function Preview({ template, onBack }) {
 
   return (
     <div className="editor" style={{background:'var(--bg)'}}>
-      {/* Top bar */}
       <div className="editor-top">
         <button className="btn ghost sm" onClick={onBack}><I.chevronL size={14}/> {t('preview.back')}</button>
         <div style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:600,letterSpacing:-0.2}}>{t('preview.title')}</div>
@@ -182,7 +172,6 @@ function Preview({ template, onBack }) {
 
         <div className="grow"/>
 
-        {/* Switch 1 — Dispositivo */}
         <div className="seg" role="tablist" aria-label={t('preview.device')}>
           <button
             className={device==='desktop'?'on':''}
@@ -202,7 +191,6 @@ function Preview({ template, onBack }) {
           </button>
         </div>
 
-        {/* Switch 2 — Tema */}
         <div className="seg" role="tablist" aria-label={t('preview.theme')}>
           <button
             className={theme==='light'?'on':''}
@@ -225,7 +213,6 @@ function Preview({ template, onBack }) {
         <button className="btn sm"><I.send size={13}/> {t('preview.sendTest')}</button>
       </div>
 
-      {/* Stage del cliente de correo */}
       <div style={{
         flex:1,
         background: clientBg,
@@ -253,7 +240,6 @@ function Preview({ template, onBack }) {
           {StatusBar}
           {EmailChrome}
 
-          {/* Iframe con el HTML email real — nada fuera del generador. */}
           {doc.sections.length === 0 ? (
             <div style={{padding:'40px 24px',textAlign:'center',color:'#8e8b7e',fontSize:13,background:'#ffffff'}}>
               {t('preview.empty')}

@@ -64,9 +64,7 @@ function Modal({ title, sub, onClose, children, footer, size }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
 // EXPORT / SEND MODAL — 2 tabs: "Enviar a personas" y "Para devs"
-// ════════════════════════════════════════════════════════════════
 function ExportModal({ onClose }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
@@ -110,7 +108,6 @@ function ModalTab({ label, icon, active, onClick, sub }) {
   );
 }
 
-// ─── TAB 1: SEND TO PEOPLE ──────────────────────────────────────
 function SendTab({ onClose }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();
@@ -272,13 +269,11 @@ function SendTab({ onClose }) {
   );
 }
 
-// ─── TAB 2: FOR DEVELOPERS ──────────────────────────────────────
 function DevsTab({ onClose }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();
   // Lectura inicial desde Settings → Export (`getWSSetting('export', {})`).
-  // Sólo en mount; no re-sincronizamos si el user cambia Settings con el modal
-  // abierto (overkill para un caso borde).
+  // Read once on mount; we do not live-sync while modal stays open.
   const [fmt, setFmt] = React.useState(() => {
     const ex = window.stStorage?.getWSSetting?.('export', {}) || {};
     const f = ex.format;
@@ -290,9 +285,9 @@ function DevsTab({ onClose }) {
   });
   const [includeTxt, setIncludeTxt] = React.useState(() => {
     const ex = window.stStorage?.getWSSetting?.('export', {}) || {};
-    // Opt-in explícito: sólo ON si el user lo marcó `true` en Settings.
-    // Settings UI lo trata como `!== false` (ON por default), pero el modal
-    // históricamente arranca OFF — no cambiamos el comportamiento para users
+    // Explicit opt-in: ON only when user set `true` in Settings.
+    // Settings UI treats this as `!== false` (default ON), but modal has
+    // historically defaulted to OFF; keep backward behavior for users
     // que nunca tocaron Settings.
     return ex.plaintext === true;
   });
@@ -322,12 +317,11 @@ function DevsTab({ onClose }) {
     return () => { alive = false; };
   }, []);
 
-  // Output se computa en un effect porque `inlineImages` es async (lee bytes
-  // del disco via IPC por cada st-img:// URL). Para HTML/MJML pasa por inline;
-  // TXT no tiene imágenes, va directo.
+  // Output is computed in an effect because `inlineImages` is async (IPC disk
+  // reads for each `st-img://` URL). HTML/MJML go through inlining; TXT bypasses.
   //
-  // R5: HTML ahora pasa por `window.docToEmailHtml` (email-safe, table-based,
-  // soporta mergeDialect). MJML/TXT siguen usando stExport.
+  // R5: HTML now uses `window.docToEmailHtml` (email-safe, table-based,
+  // supports mergeDialect). MJML/TXT still use `stExport`.
   const [output, setOutput] = React.useState(null);
   React.useEffect(() => {
     if (!template) { setOutput(null); setWarnings([]); return; }
@@ -531,9 +525,7 @@ function DevsTab({ onClose }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
 // TEST SEND MODAL
-// ════════════════════════════════════════════════════════════════
 function TestSendModal({ onClose }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
@@ -650,9 +642,7 @@ function TestSendModal({ onClose }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
 // VARIABLES / TAGS MODAL
-// ════════════════════════════════════════════════════════════════
 function VariablesModal({ onClose }) {
   const t = window.stI18n.t;
   const lang = window.stI18n.useLang();

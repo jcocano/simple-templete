@@ -1421,7 +1421,6 @@ window.stI18nDict.en = {
   'ws.settingsEntry': 'Workspace settings…',
   'ws.switch': 'Switch workspace',
 
-  // ─── E1 · Email-safe media blocks (video, gif, qr, countdown)
   'blockProps.type.video': 'Video',
   'blockProps.type.gif': 'Animated GIF',
   'blockProps.type.qr': 'QR code',
@@ -1470,7 +1469,6 @@ window.stI18nDict.en = {
   'eb.qr.placeholder': 'Enter content to generate QR',
   'eb.countdown.setDateHint': 'Set a target date in the right panel',
 
-  // ─── E2 · Content composites (testimonial, signature)
   'blockProps.type.testimonial': 'Testimonial',
   'blockProps.type.signature': 'Signature',
 
@@ -1531,13 +1529,11 @@ window.stI18nDict.en = {
   'eb.signature.titlePlaceholder': 'Title',
   'eb.signature.companyPlaceholder': 'Company',
 
-  // ─── R0 · Responsive infra (DeviceField chip)
   'deviceField.chip.mobile': 'Mobile',
   'deviceField.chip.tooltip': 'Set a mobile-specific override',
   'deviceField.chip.hasOverride': 'Mobile override active — click to edit',
   'deviceField.chip.clear': 'Clear mobile override (inherit desktop)',
 
-  // ─── E3 · Advanced blocks (accordion, attachment)
   'blockProps.type.accordion': 'Accordion',
   'blockProps.type.attachment': 'Attachment',
 
@@ -1577,7 +1573,6 @@ window.stI18nDict.en = {
   'eb.attachment.download': 'Download',
   'eb.attachment.noFile': 'Untitled file',
 
-  // ─── E4 · Ecommerce blocks (cart, receipt)
   'blockProps.type.cart': 'Cart',
   'blockProps.type.receipt': 'Receipt',
 
@@ -1636,7 +1631,6 @@ window.stI18nDict.en = {
   'eb.receipt.empty': 'No items — add one in the right panel.',
   'eb.receipt.viewOrder': 'View order',
 
-  // ─── E5 · Map block
   'blockProps.type.map': 'Map',
 
   'blockProps.field.mapLabel': 'Caption',
@@ -1680,7 +1674,6 @@ window.stI18nDict.en = {
 
   'eb.map.placeholder': 'Configure map',
 
-  // ─── E6 · Countdown live (mode B)
   'blockProps.field.countdownMode': 'Mode',
   'blockProps.field.liveImage': 'Live timer',
   'blockProps.field.fallbackText': 'Fallback text',
@@ -1734,7 +1727,6 @@ window.stI18nDict.en = {
   // Shared save action
   'common.save': 'Save',
 
-  // ─── R1 · Section complete (Beefree-style groups & fields)
   'section.group.backgrounds': 'Backgrounds',
   'section.group.borders': 'Borders',
   'section.group.layout': 'Layout',
@@ -1796,7 +1788,6 @@ window.stI18nDict.en = {
   'section.badge.hiddenOnDesktop': 'Hidden on desktop',
   'section.badge.hiddenOnMobile': 'Hidden on mobile',
 
-  // ─── R2 · Columns custom (12-grid + per-column overrides)
   'section.columns.add': 'Add column',
   'section.columns.delete': 'Delete column',
   'section.columns.count': '{n} column(s)',
@@ -1816,7 +1807,6 @@ window.stI18nDict.en = {
   'common.increase': 'Increase',
   'common.decrease': 'Decrease',
 
-  // ─── R3 · Common block overrides (hidden + per-device style override)
   'blockProps.group.visibility': 'Visibility',
   'blockProps.hideOn.none': 'Visible',
   'blockProps.hideOn.desktop': 'Hide on desktop',
@@ -1826,9 +1816,7 @@ window.stI18nDict.en = {
   'blockProps.hideOn.tooltip.mobile': 'Hide on mobile',
   'blockProps.badge.hiddenOn': 'Hidden on {device}',
 
-  // ─── R4 · Type-specific block overrides (no new strings — uses existing field labels wrapped in DeviceField)
 
-  // ─── R5 · Export HTML puro + iframe preview
   'export.title': 'Export HTML',
   'export.dialect.label': 'Merge tag dialect',
   'export.dialect.native': 'Native / Handlebars ({{var}})',
@@ -1848,7 +1836,6 @@ window.stI18nDict.en = {
   'export.option.minify': 'Minify HTML',
   'export.option.minify.hint': 'Reduces email size (recommended to avoid Gmail clipping around 102 KB).',
 
-  // ─── Sharing
   'share.modal.title': 'Share template',
   'share.modal.sub': 'Generate a link to send "{name}" to someone else.',
   'share.modal.generating': 'Generating link…',

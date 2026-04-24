@@ -1,4 +1,4 @@
-// User-editable occasions (categorías) persisted per-workspace in
+// User-editable occasions (categories) persisted per workspace in
 // wsSettings.occasions. Templates link to an occasion via `occasionId`
 // on their doc; legacy docs carrying only a `folder` string are matched
 // to an occasion by name (lazy migration — no disk write until the user
@@ -132,7 +132,7 @@ async function deleteOccasion(id) {
 }
 
 // Writes the link both as `occasionId` (new, canonical) and `folder`
-// (legacy display string, still shown in the list view's "Ocasión" column).
+// (legacy display string, still shown in the list view "Occasion" column).
 async function setTemplateOccasion(templateId, occasionId) {
   const list = listOccasions();
   const occ = occasionId ? list.find((o) => o.id === occasionId) : null;

@@ -1,4 +1,4 @@
-// Dashboard — lista + galería de plantillas
+// Dashboard screen with template list and gallery.
 
 function TplThumb({ t }) {
   // Render a real-content mini preview. Text uses tiny but legible sizes.
@@ -978,11 +978,9 @@ function Dashboard({ onOpen, onNew }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
 // Occasion modal — create / edit. Color choice is a fixed palette
 // (MongoDB Compass-style) rather than a free-form picker so the
 // sidebar stays visually coherent across workspaces.
-// ════════════════════════════════════════════════════════════════
 function OccasionModal({ mode, occasion, onClose }) {
   const palette = window.stOccasions.PALETTE;
   const [name, setName] = React.useState(occasion?.name || '');
@@ -1060,11 +1058,9 @@ function OccasionModal({ mode, occasion, onClose }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
 // "Mover a…" popover — anchored to the card/row's action button.
 // Uses fixed positioning so it isn't clipped by the card's overflow:
 // hidden (which exists so the thumbnail stays inside the rounded card).
-// ════════════════════════════════════════════════════════════════
 function MoveMenuPopover({ menu, occasions, onClose }) {
   window.stI18n.useLang();
   const t = window.stI18n.t;
@@ -1127,9 +1123,7 @@ function MoveMenuPopover({ menu, occasions, onClose }) {
   );
 }
 
-// ════════════════════════════════════════════════════════════════
-// AI Generate Modal — prompt para generar plantilla desde cero
-// ════════════════════════════════════════════════════════════════
+// AI Generate modal for creating a template from a prompt.
 function AIGenerateModal({ onClose, onGenerated }) {
   const aiCfg = window.stStorage.getSetting('ai', {});
   const configured = aiCfg.enabled !== false && (aiCfg.keyConfigured || aiCfg.key || aiCfg.provider === 'ollama');
@@ -1200,7 +1194,7 @@ function AIGenerateModal({ onClose, onGenerated }) {
 
   // Derive a short template name from the user's prompt. Trims to the first
   // sentence / 60 chars and capitalizes, so the dashboard card has a label
-  // that's more descriptive than "Plantilla sin título".
+  // that's more descriptive than "Untitled template".
   function promptToName(p) {
     const first = String(p).split(/[.\n]/)[0].trim();
     const clipped = first.length > 60 ? first.slice(0, 57) + '…' : first;

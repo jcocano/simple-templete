@@ -36,7 +36,7 @@ function App() {
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
 
-  // ⌘K / Ctrl+K → abre command palette
+  // ⌘K / Ctrl+K opens command palette.
   React.useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -101,9 +101,8 @@ function App() {
     return () => window.removeEventListener('message', onMsg);
   }, []);
 
-  // Review panel fixes (c1/c2/g3) disparan st:open-details para abrir el modal
-  // de Detalles. Se cierra el Review al mismo tiempo — el usuario vuelve a
-  // abrirlo a mano para ver el re-chequeo.
+  // Review fixes (c1/c2/g3) emit `st:open-details` to open Details modal.
+  // Review closes at the same time; user can reopen it to re-run checks.
   React.useEffect(() => {
     const onOpenDetails = () => { setReviewOpen(false); setModal('details'); };
     window.addEventListener('st:open-details', onOpenDetails);

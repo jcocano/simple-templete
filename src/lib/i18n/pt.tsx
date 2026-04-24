@@ -1418,7 +1418,6 @@ window.stI18nDict.pt = {
   'ws.settingsEntry': 'Ajustes do espaço…',
   'ws.switch': 'Trocar de espaço',
 
-  // ─── E1 · Blocos de mídia email-safe (video, gif, qr, countdown)
   'blockProps.type.video': 'Vídeo',
   'blockProps.type.gif': 'GIF animado',
   'blockProps.type.qr': 'Código QR',
@@ -1467,7 +1466,6 @@ window.stI18nDict.pt = {
   'eb.qr.placeholder': 'Digite o conteúdo para gerar o QR',
   'eb.countdown.setDateHint': 'Defina uma data alvo no painel direito',
 
-  // ─── E2 · Blocos compostos (testimonial, signature)
   'blockProps.type.testimonial': 'Depoimento',
   'blockProps.type.signature': 'Assinatura',
 
@@ -1528,13 +1526,11 @@ window.stI18nDict.pt = {
   'eb.signature.titlePlaceholder': 'Cargo',
   'eb.signature.companyPlaceholder': 'Empresa',
 
-  // ─── R0 · Infra responsive (chip DeviceField)
   'deviceField.chip.mobile': 'Mobile',
   'deviceField.chip.tooltip': 'Definir um override só para mobile',
   'deviceField.chip.hasOverride': 'Override mobile ativo — clique para editar',
   'deviceField.chip.clear': 'Remover override (herdar desktop)',
 
-  // ─── E3 · Blocos avançados (accordion, attachment)
   'blockProps.type.accordion': 'Accordion',
   'blockProps.type.attachment': 'Anexo',
 
@@ -1574,7 +1570,6 @@ window.stI18nDict.pt = {
   'eb.attachment.download': 'Baixar',
   'eb.attachment.noFile': 'Arquivo sem nome',
 
-  // ─── E4 · Blocos de ecommerce (cart, receipt)
   'blockProps.type.cart': 'Carrinho',
   'blockProps.type.receipt': 'Recibo',
 
@@ -1633,7 +1628,6 @@ window.stI18nDict.pt = {
   'eb.receipt.empty': 'Nenhum item — adicione um no painel à direita.',
   'eb.receipt.viewOrder': 'Ver pedido',
 
-  // ─── E5 · Bloco de Mapa
   'blockProps.type.map': 'Mapa',
 
   'blockProps.field.mapLabel': 'Legenda',
@@ -1677,7 +1671,6 @@ window.stI18nDict.pt = {
 
   'eb.map.placeholder': 'Configurar mapa',
 
-  // ─── E6 · Countdown ao vivo (modo B)
   'blockProps.field.countdownMode': 'Modo',
   'blockProps.field.liveImage': 'Timer ao vivo',
   'blockProps.field.fallbackText': 'Texto alternativo',
@@ -1728,10 +1721,9 @@ window.stI18nDict.pt = {
   'provider.motionmail.desc': 'Provedor consolidado com várias templates.',
   'provider.motionmail.features': '20.000 visualizações grátis · Com marca d\'água',
 
-  // Ação de salvar compartilhada
+  // Shared save action
   'common.save': 'Salvar',
 
-  // ─── R1 · Seção completa (grupos e campos estilo Beefree)
   'section.group.backgrounds': 'Fundos',
   'section.group.borders': 'Bordas',
   'section.group.layout': 'Layout',
@@ -1793,7 +1785,6 @@ window.stI18nDict.pt = {
   'section.badge.hiddenOnDesktop': 'Oculta no desktop',
   'section.badge.hiddenOnMobile': 'Oculta no mobile',
 
-  // ─── R2 · Colunas custom (grade de 12 + overrides por coluna)
   'section.columns.add': 'Adicionar coluna',
   'section.columns.delete': 'Remover coluna',
   'section.columns.count': '{n} coluna(s)',
@@ -1813,7 +1804,6 @@ window.stI18nDict.pt = {
   'common.increase': 'Aumentar',
   'common.decrease': 'Diminuir',
 
-  // ─── R3 · Common block overrides (hidden + per-device style override)
   'blockProps.group.visibility': 'Visibilidade',
   'blockProps.hideOn.none': 'Visível',
   'blockProps.hideOn.desktop': 'Ocultar no desktop',
@@ -1823,9 +1813,7 @@ window.stI18nDict.pt = {
   'blockProps.hideOn.tooltip.mobile': 'Ocultar no mobile',
   'blockProps.badge.hiddenOn': 'Oculto em {device}',
 
-  // ─── R4 · Type-specific block overrides (sem strings novas — reutiliza labels existentes envolvidos em DeviceField)
 
-  // ─── R5 · Export HTML puro + iframe preview
   'export.title': 'Exportar HTML',
   'export.dialect.label': 'Dialeto de variáveis',
   'export.dialect.native': 'Nativo / Handlebars ({{var}})',
@@ -1845,7 +1833,6 @@ window.stI18nDict.pt = {
   'export.option.minify': 'Minificar HTML',
   'export.option.minify.hint': 'Reduz o tamanho do e-mail (recomendado para evitar o corte do Gmail perto de 102 KB).',
 
-  // ─── Sharing
   'share.modal.title': 'Compartilhar modelo',
   'share.modal.sub': 'Gere um link para enviar «{name}» para outra pessoa.',
   'share.modal.generating': 'Gerando link…',

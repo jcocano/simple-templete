@@ -8,7 +8,7 @@
 //        from the emitted email HTML when available) and classifies each as
 //        unsafe / empty / malformed / placeholder / ok. Severity ladder:
 //        unsafe > empty > malformed > placeholder > ok.
-//   l2 — mailto sin dirección: pulls the mailto: entries out of the same
+//   l2 — mailto without address: pulls mailto entries out of the same
 //        harvested list and flags any that don't match a loose
 //        local-part@domain.tld shape (or are bare `mailto:`).
 //
@@ -275,7 +275,7 @@
     },
   });
 
-  // ── l2 — mailto sin dirección ──────────────────────────────────────
+  // ── l2 — mailto without address ────────────────────────────────────
   window.stReview.register({
     id: 'l2',
     cat: 'links',

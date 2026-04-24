@@ -15,9 +15,9 @@ const cdnIpc = require("./ipc/cdn");
 const imagesLocalIpc = require("./ipc/images-local");
 const shareIpc = require("./ipc/share");
 
-// st-img://{wsId}/{filename} — protocolo custom para servir imágenes del disco
-// sin relajar webSecurity. Hay que registrarlo como `secure` + `standard`
-// ANTES de whenReady, si no el renderer bloquea el request por CORS.
+// st-img://{wsId}/{filename} custom protocol serves workspace images from disk
+// without relaxing webSecurity. Must be registered as `secure` + `standard`
+// before whenReady, otherwise renderer blocks requests via CORS policy.
 protocol.registerSchemesAsPrivileged([
   {
     scheme: "st-img",
@@ -186,7 +186,7 @@ app.whenReady().then(() => {
     });
   }
 
-  // Actual handler del protocolo custom. Devuelve los bytes del archivo o 404.
+  // Custom protocol handler. Returns file bytes or 404.
   protocol.handle("st-img", async (request) => {
     try {
       const parsed = imageFiles.parseStImgUrl(request.url);

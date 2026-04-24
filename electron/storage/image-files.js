@@ -1,7 +1,7 @@
-// Filesystem layer para imágenes locales (mode='local').
-// Los archivos viven en userData/workspaces/{wsId}/images/{imageId}.{ext}.
-// Filename = imageId generado por el renderer (hex random con prefijo img_)
-// + extensión sanitizada contra allow-list → no hay traversal posible.
+// Filesystem layer for local images (`mode='local'`).
+// Files live at userData/workspaces/{wsId}/images/{imageId}.{ext}.
+// Filename = renderer-generated imageId (random hex with `img_` prefix)
+// + allow-list sanitized extension, which prevents path traversal.
 
 const fs = require('fs');
 const path = require('path');
@@ -38,8 +38,8 @@ function isSafeWorkspaceId(wsId) {
   return typeof wsId === 'string' && WS_ID_RE.test(wsId);
 }
 
-// Escribe bytes a disco para un workspace/id/ext dados. Devuelve el basename
-// como `localPath` (lo que queda guardado en la columna `images.local_path`).
+// Writes bytes to disk for a given workspace/id/ext and returns basename as
+// `localPath` (stored in `images.local_path`).
 function write(workspaceId, imageId, ext, bytes) {
   if (!isSafeWorkspaceId(workspaceId)) {
     const err = new Error('Invalid workspaceId.');
@@ -62,8 +62,8 @@ function write(workspaceId, imageId, ext, bytes) {
   return { localPath: filename, ext: safeExt };
 }
 
-// Lee bytes + mime. Devuelve null si falta el archivo, o si los inputs son
-// sospechosos (defensivo — el protocol handler y los IPCs dependen de esto).
+// Reads bytes + mime. Returns null when file is missing or inputs look
+// suspicious (defensive path used by protocol handler and IPCs).
 function read(workspaceId, localPath) {
   if (!isSafeWorkspaceId(workspaceId)) return null;
   if (!isSafeLocalPath(localPath)) return null;
@@ -93,9 +93,9 @@ function remove(workspaceId, localPath) {
   }
 }
 
-// Parsea st-img://{wsId}/{filename} → { workspaceId, localPath } o null.
-// Delegar acá mantiene la lógica de parseo centralizada para que el protocol
-// handler, el export inline y el SMTP transform la reusen.
+// Parses st-img://{wsId}/{filename} -> { workspaceId, localPath } or null.
+// Centralizing this parser keeps protocol handler, export inlining, and SMTP
+// transform aligned.
 function parseStImgUrl(url) {
   if (typeof url !== 'string' || !url.startsWith('st-img://')) return null;
   try {

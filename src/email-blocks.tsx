@@ -514,9 +514,7 @@ function EBHtml({ data = {}, onEdit, device }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // E1 · Media email-safe blocks
-// ═══════════════════════════════════════════════════════════
 
 // Video — thumb + play overlay + link. No iframe (email-safe).
 // Auto-detecta YouTube/Vimeo; Vimeo fetch-ea OEmbed una sola vez.
@@ -809,9 +807,7 @@ function EBCountdown({ data = {}, onEdit, device }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // E2 · Content composites — testimonial, signature
-// ═══════════════════════════════════════════════════════════
 
 // Star rating (SVG filled/outline). Email-safe: only inline SVG, no JS.
 function EBStars({ value=0, max=5, size=16, color='#f5a623' }) {
@@ -1064,9 +1060,7 @@ function EBSignature({ data = {}, onEdit, device }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // E3 · Advanced blocks — accordion, attachment
-// ═══════════════════════════════════════════════════════════
 
 // Derive a file extension from a filename (best-effort).
 function guessExt(filename='') {
@@ -1197,9 +1191,7 @@ function EBAttachment({ data = {}, onEdit, device }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // E4 · Ecommerce composites — cart, receipt
-// ═══════════════════════════════════════════════════════════
 
 function fmtMoney(val, currency='USD') {
   if (val == null || val === '') return '';
@@ -1410,9 +1402,7 @@ function EBReceipt({ data = {}, onEdit, device }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // E5 · Map (static image → external link)
-// ═══════════════════════════════════════════════════════════
 
 function EBMap({ data = {}, onEdit, device }) {
   if (window.isVisibleOn && !window.isVisibleOn(data.hidden, device)) {

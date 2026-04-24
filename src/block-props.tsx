@@ -1,7 +1,6 @@
-// BlockProps — Panel derecho de propiedades por bloque
-// 3 pestañas: Contenido · Estilo · Espaciado
-// Soporta todos los tipos de bloque: text, heading, image, icon, button, divider, spacer,
-//                                     header, footer, product, social
+// BlockProps renders the right-side block property panel.
+// Tabs: Content, Style, and Spacing.
+// Supports: text, heading, image, icon, button, divider, spacer, header, footer, product, social.
 
 function BlockProps({ block, onChange, onDelete }) {
   const t = window.stI18n.t;
@@ -200,9 +199,7 @@ function BlockTypeIcon({ type }) {
   return Ico ? <Ico size={14}/> : null;
 }
 
-// ═══════════════════════════════════════════════════════════
 // TAB: CONTENIDO
-// ═══════════════════════════════════════════════════════════
 function ContentTab({ block, upd, onPickImage, onPickEmoji, emojiOpen }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();
@@ -1118,9 +1115,7 @@ function ContentTab({ block, upd, onPickImage, onPickEmoji, emojiOpen }) {
   return <Group title={t('blockProps.tab.content')}><div style={{fontSize:12,color:'var(--fg-3)'}}>{t('blockProps.content.none')}</div></Group>;
 }
 
-// ═══════════════════════════════════════════════════════════
 // TAB: ESTILO
-// ═══════════════════════════════════════════════════════════
 // Tri-state pill identical in behavior to the section-level HideOnPill.
 // Kept local to avoid crossing module boundaries and to let us customize
 // tooltips via i18n keys under blockProps.hideOn.*.
@@ -1171,7 +1166,7 @@ function StyleTab({ block, upd }) {
   const mob = block.data?.mobile || {};
   const bt = block.type;
 
-  // Tipografía compartida
+  // Shared typography controls.
   // Responsive fields (size, weight, color, align) are wrapped in <DeviceField>
   // so the user can override them per-device. Prefixed variants (e.g. 'title',
   // 'body' used by hero) keep the same pattern.
@@ -2132,9 +2127,7 @@ function StyleTab({ block, upd }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
 // TAB: ESPACIADO
-// ═══════════════════════════════════════════════════════════
 function SpacingTab({ block, upd }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();

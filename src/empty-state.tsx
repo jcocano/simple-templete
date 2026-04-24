@@ -1,26 +1,20 @@
-// EmptyState — componente reusable para estados vacíos
-// Usa ilustraciones SVG inline con la paleta del tema (var(--accent), var(--line), etc.)
+// Reusable empty-state component with inline SVG illustrations.
+// Illustrations inherit theme tokens (`var(--accent)`, `var(--line)`, etc.).
 
-// ═══════════════════════════════════════════════════════════════
 // SVG illustrations — minimal, geometric, ~180x140
-// ═══════════════════════════════════════════════════════════════
 
 function IllNoTemplates() {
-  // Sobre con puntos animados (plantillas)
+  // Envelope illustration used for "no templates" states.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Fondo decorativo */}
       <circle cx="40" cy="30" r="4" fill="var(--accent-soft)"/>
       <circle cx="170" cy="40" r="3" fill="var(--accent-soft)"/>
       <circle cx="30" cy="120" r="3" fill="var(--accent-soft)"/>
       <circle cx="180" cy="110" r="5" fill="var(--accent-soft)"/>
-      {/* Sobre principal */}
       <rect x="45" y="45" width="110" height="72" rx="6" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
       <path d="M45 50 L100 88 L155 50" stroke="var(--line-2)" strokeWidth="1.5" fill="none"/>
-      {/* Líneas internas (mock contenido) */}
       <rect x="60" y="95" width="40" height="3" rx="1.5" fill="var(--line)"/>
       <rect x="60" y="102" width="60" height="3" rx="1.5" fill="var(--line)"/>
-      {/* Sparkle acento */}
       <circle cx="145" cy="40" r="10" fill="var(--accent)" opacity="0.15"/>
       <path d="M145 34 L146 38 L150 40 L146 42 L145 46 L144 42 L140 40 L144 38 Z" fill="var(--accent)"/>
     </svg>
@@ -28,14 +22,13 @@ function IllNoTemplates() {
 }
 
 function IllNoBlocks() {
-  // Cuadrícula con un bloque faltante
+  // Grid illustration with one missing block.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="40" y="30" width="40" height="30" rx="4" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
       <rect x="90" y="30" width="40" height="30" rx="4" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
       <rect x="140" y="30" width="30" height="30" rx="4" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
       <rect x="40" y="70" width="40" height="30" rx="4" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
-      {/* Placeholder dashed — bloque faltante */}
       <rect x="90" y="70" width="40" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="3 3"/>
       <path d="M110 80 L110 90 M105 85 L115 85" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round"/>
       <rect x="140" y="70" width="30" height="30" rx="4" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
@@ -46,17 +39,15 @@ function IllNoBlocks() {
 }
 
 function IllNoHistory() {
-  // Reloj con agujas
+  // Clock illustration used for history-like empty states.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="100" cy="75" r="52" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
       <circle cx="100" cy="75" r="42" fill="none" stroke="var(--line)" strokeWidth="1" strokeDasharray="2 4"/>
-      {/* Marcas */}
       <line x1="100" y1="28" x2="100" y2="34" stroke="var(--fg-3)" strokeWidth="2" strokeLinecap="round"/>
       <line x1="147" y1="75" x2="141" y2="75" stroke="var(--fg-3)" strokeWidth="2" strokeLinecap="round"/>
       <line x1="100" y1="122" x2="100" y2="116" stroke="var(--fg-3)" strokeWidth="2" strokeLinecap="round"/>
       <line x1="53" y1="75" x2="59" y2="75" stroke="var(--fg-3)" strokeWidth="2" strokeLinecap="round"/>
-      {/* Agujas */}
       <line x1="100" y1="75" x2="100" y2="45" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round"/>
       <line x1="100" y1="75" x2="125" y2="85" stroke="var(--accent-2)" strokeWidth="2" strokeLinecap="round"/>
       <circle cx="100" cy="75" r="3" fill="var(--accent)"/>
@@ -65,15 +56,13 @@ function IllNoHistory() {
 }
 
 function IllSearch() {
-  // Lupa sin resultado
+  // Search illustration used for empty query results.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="85" cy="65" r="32" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="2"/>
       <line x1="108" y1="88" x2="130" y2="110" stroke="var(--line-2)" strokeWidth="4" strokeLinecap="round"/>
-      {/* Interrogación dentro */}
       <path d="M78 58 Q78 50 85 50 Q92 50 92 58 Q92 64 85 66 L85 72" stroke="var(--accent)" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
       <circle cx="85" cy="78" r="1.8" fill="var(--accent)"/>
-      {/* Círculos decorativos */}
       <circle cx="150" cy="40" r="3" fill="var(--accent-soft)"/>
       <circle cx="40" cy="100" r="4" fill="var(--accent-soft)"/>
     </svg>
@@ -81,16 +70,13 @@ function IllSearch() {
 }
 
 function IllEditorEmpty() {
-  // Canvas con cursor de inserción
+  // Editor canvas illustration with insertion cursor.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="40" y="25" width="120" height="100" rx="6" fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5"/>
-      {/* Drop zone punteada */}
       <rect x="55" y="55" width="90" height="40" rx="4" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="4 4"/>
-      {/* Plus en el centro */}
       <circle cx="100" cy="75" r="12" fill="var(--accent)" opacity="0.12"/>
       <path d="M100 68 L100 82 M93 75 L107 75" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round"/>
-      {/* Mano / cursor */}
       <path d="M155 110 L162 117 L165 114 L160 109 Z" fill="var(--fg-2)"/>
       <path d="M158 115 L163 120" stroke="var(--fg-2)" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -98,13 +84,12 @@ function IllEditorEmpty() {
 }
 
 function IllGalleryFilter() {
-  // Filtro / embudo
+  // Gallery filter/funnel illustration.
   return (
     <svg viewBox="0 0 200 150" width="180" height="135" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M65 35 L135 35 L115 70 L115 115 L85 100 L85 70 Z"
         fill="var(--surface)" stroke="var(--line-2)" strokeWidth="1.5" strokeLinejoin="round"/>
       <line x1="75" y1="50" x2="125" y2="50" stroke="var(--line)" strokeWidth="1"/>
-      {/* Cero / vacío debajo */}
       <circle cx="150" cy="105" r="14" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5"/>
       <line x1="142" y1="97" x2="158" y2="113" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round"/>
     </svg>
@@ -120,9 +105,7 @@ const ILLUSTRATIONS = {
   'gallery':      IllGalleryFilter,
 };
 
-// ═══════════════════════════════════════════════════════════════
-// EmptyState — composable
-// ═══════════════════════════════════════════════════════════════
+// Composable EmptyState wrapper.
 
 function EmptyState({
   illustration = 'no-templates',
@@ -130,8 +113,8 @@ function EmptyState({
   msg,
   primaryAction,   // { label, icon, onClick }
   secondaryAction, // { label, icon, onClick }
-  tips = [],       // array de strings
-  compact = false, // padding reducido (para inline empty states)
+  tips = [],       // string[]
+  compact = false, // reduced padding for inline placements
   style = {},
 }) {
   const t = window.stI18n.t;

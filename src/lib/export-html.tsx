@@ -27,9 +27,7 @@
 // Public surface:
 //   window.docToEmailHtml(doc, opts) → { html, warnings }
 
-// ───────────────────────────────────────────────────────────────────
 // Helpers
-// ───────────────────────────────────────────────────────────────────
 
 function _esc(s = '') {
   return String(s)
@@ -135,9 +133,7 @@ function _borderDecls(border, important = false) {
   return [];
 }
 
-// ───────────────────────────────────────────────────────────────────
 // Merge-tag mapping — native/sendgrid pass-through, mailgun/mailchimp rewrite.
-// ───────────────────────────────────────────────────────────────────
 
 const _MERGE_TAG_IDENTIFIER_RE = /^[a-zA-Z_][a-zA-Z0-9_.]*$/;
 
@@ -266,9 +262,7 @@ function _tagRaw(text, ctx) {
   return mapMergeTag(text, ctx.dialect, ctx.previewVars, ctx.warnings);
 }
 
-// ───────────────────────────────────────────────────────────────────
 // Sanitizer for the `html` block.
-// ───────────────────────────────────────────────────────────────────
 
 const _HTML_ALLOWED_TAGS = new Set([
   'DIV','P','SPAN','A','IMG','BR','STRONG','EM','UL','OL','LI','TABLE','TR','TD','TH','THEAD','TBODY',
@@ -371,9 +365,7 @@ function safeHtmlSubset(raw = '') {
   return { html: body.innerHTML || '', warnings };
 }
 
-// ───────────────────────────────────────────────────────────────────
 // Block emitters — each returns a string of HTML (no wrappers).
-// ───────────────────────────────────────────────────────────────────
 
 function _emitText(blk, ctx) {
   const data = blk.data || {};
@@ -969,9 +961,7 @@ const _EMITTERS = {
   map: _emitMap,
 };
 
-// ───────────────────────────────────────────────────────────────────
 // Column / Section / Document rendering
-// ───────────────────────────────────────────────────────────────────
 
 function _emitBlocks(blocks, ctx, mediaChunks) {
   const out = [];
@@ -1116,9 +1106,7 @@ ${colsHtml}
 </table>`;
 }
 
-// ───────────────────────────────────────────────────────────────────
 // Public API
-// ───────────────────────────────────────────────────────────────────
 
 function docToEmailHtml(doc, opts = {}) {
   const warnings = [];

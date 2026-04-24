@@ -6,11 +6,23 @@
 // The modal never reaches the network for a save — it only writes whatever
 // imageUrl/destinationUrl/label/address/lat/lng the user settled on.
 
+/**
+ * Builds an OpenStreetMap static image URL for preview rendering.
+ * @param {{lat: number, lng: number, zoom?: number, width?: number, height?: number}} params Map params.
+ * @returns {string} Static map URL or empty string when coordinates are missing.
+ */
 function osmStaticUrl({ lat, lng, zoom = 14, width = 600, height = 300 }) {
   if (lat == null || lng == null) return '';
   return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&markers=${lat},${lng},red-pushpin`;
 }
 
+/**
+ * Builds a Google Maps destination URL from coordinates or plain address.
+ * @param {string} [address=''] Free-form address.
+ * @param {number|undefined} lat Latitude.
+ * @param {number|undefined} lng Longitude.
+ * @returns {string} Search URL for external navigation.
+ */
 function googleMapsSearchUrl(address = '', lat, lng) {
   if (lat != null && lng != null) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`;
@@ -86,6 +98,11 @@ function MapPickerTabButton({ id, label, active, onClick, icon }) {
   );
 }
 
+/**
+ * Modal to pick map preview image + destination link for map blocks.
+ * @param {{open: boolean, onClose: Function, onSave: Function, initial?: Object}} params Component props.
+ * @returns {JSX.Element|null} Rendered map-picker modal.
+ */
 function MapPickerModal({ open, onClose, onSave, initial = {} }) {
   const t = window.stI18n.t;
   window.stI18n.useLang();

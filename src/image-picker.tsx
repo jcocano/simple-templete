@@ -1,10 +1,9 @@
-// Modal de selección de imagen — 3 tabs: Biblioteca local / URL / CDN
-// + Emoji picker para bloque Icono
+// Image picker modal with 3 tabs: library, URL, and CDN.
+// Includes emoji picker support for icon blocks.
 //
-// La biblioteca lee del store real (stImages), que es workspace-scoped y
-// persiste en SQLite. Al subir un archivo, se sube al provider configurado
-// (stCDN) y luego se guarda el registro para que aparezca en la grid y en
-// la pantalla dedicada Biblioteca de imágenes.
+// Library data comes from workspace-scoped `stImages` (SQLite). Uploaded files
+// go through the configured CDN provider (`stCDN`) and are then persisted so
+// they appear both here and in the dedicated image-library screen.
 
 function formatBytes(n) {
   if (n == null) return '—';
@@ -13,8 +12,8 @@ function formatBytes(n) {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// Hook pequeño: leer y suscribirse al cache de stImages. Cargamos on mount
-// si el cache está frío. Devuelve siempre la lista más reciente.
+// Reads and subscribes to the `stImages` cache. Triggers an initial fetch when
+// cache is cold and always exposes the latest in-memory list.
 function useImageLibrary() {
   const [items, setItems] = React.useState(() => window.stImages?.listCached?.() || []);
   React.useEffect(() => {
@@ -440,7 +439,6 @@ function ImagePickerModal({ open, onClose, onSelect }) {
   );
 }
 
-// ────────── Emoji picker ──────────
 // `name` is looked up via t('imagePicker.emoji.cat.<id>') — see EmojiPicker.
 const EMOJI_CATS = [
   { id:'smileys',  name:'Caras y emociones', icon:'😀',

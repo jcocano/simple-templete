@@ -1419,7 +1419,6 @@ window.stI18nDict.zh = {
   'ws.settingsEntry': '工作区设置…',
   'ws.switch': '切换工作区',
 
-  // ─── E1 · 邮件安全媒体块 (video, gif, qr, countdown)
   'blockProps.type.video': '视频',
   'blockProps.type.gif': '动态 GIF',
   'blockProps.type.qr': '二维码',
@@ -1468,7 +1467,6 @@ window.stI18nDict.zh = {
   'eb.qr.placeholder': '输入内容以生成二维码',
   'eb.countdown.setDateHint': '在右侧面板中设置目标日期',
 
-  // ─── E2 · 内容复合块 (testimonial, signature)
   'blockProps.type.testimonial': '推荐语',
   'blockProps.type.signature': '签名',
 
@@ -1529,13 +1527,11 @@ window.stI18nDict.zh = {
   'eb.signature.titlePlaceholder': '头衔',
   'eb.signature.companyPlaceholder': '公司',
 
-  // ─── R0 · 响应式基础设施 (DeviceField 芯片)
   'deviceField.chip.mobile': '移动',
   'deviceField.chip.tooltip': '设置仅移动端的覆盖',
   'deviceField.chip.hasOverride': '移动端覆盖已启用 — 点击编辑',
   'deviceField.chip.clear': '清除覆盖 (继承桌面)',
 
-  // ─── E3 · 高级块 (accordion, attachment)
   'blockProps.type.accordion': '折叠面板',
   'blockProps.type.attachment': '附件',
 
@@ -1575,7 +1571,6 @@ window.stI18nDict.zh = {
   'eb.attachment.download': '下载',
   'eb.attachment.noFile': '未命名文件',
 
-  // ─── E4 · 电商块 (cart, receipt)
   'blockProps.type.cart': '购物车',
   'blockProps.type.receipt': '收据',
 
@@ -1634,7 +1629,6 @@ window.stI18nDict.zh = {
   'eb.receipt.empty': '暂无商品 — 在右侧面板添加。',
   'eb.receipt.viewOrder': '查看订单',
 
-  // ─── E5 · 地图块
   'blockProps.type.map': '地图',
 
   'blockProps.field.mapLabel': '说明',
@@ -1678,7 +1672,6 @@ window.stI18nDict.zh = {
 
   'eb.map.placeholder': '配置地图',
 
-  // ─── E6 · 实时倒计时 (模式B)
   'blockProps.field.countdownMode': '模式',
   'blockProps.field.liveImage': '实时计时器',
   'blockProps.field.fallbackText': '替代文本',
@@ -1729,10 +1722,9 @@ window.stI18nDict.zh = {
   'provider.motionmail.desc': '具有多种模板的成熟提供商。',
   'provider.motionmail.features': '2万次浏览免费 · 带水印',
 
-  // 保存操作
+  // Shared save action.
   'common.save': '保存',
 
-  // ─── R1 · 完整版节段 (Beefree 风格分组和字段)
   'section.group.backgrounds': '背景',
   'section.group.borders': '边框',
   'section.group.layout': '布局',
@@ -1794,7 +1786,6 @@ window.stI18nDict.zh = {
   'section.badge.hiddenOnDesktop': '桌面端已隐藏',
   'section.badge.hiddenOnMobile': '移动端已隐藏',
 
-  // ─── R2 · 自定义列 (12列网格 + 每列覆盖)
   'section.columns.add': '添加列',
   'section.columns.delete': '删除列',
   'section.columns.count': '{n} 列',
@@ -1814,7 +1805,6 @@ window.stI18nDict.zh = {
   'common.increase': '增加',
   'common.decrease': '减少',
 
-  // ─── R3 · Common block overrides (hidden + per-device style override)
   'blockProps.group.visibility': '可见性',
   'blockProps.hideOn.none': '可见',
   'blockProps.hideOn.desktop': '在桌面端隐藏',
@@ -1824,9 +1814,7 @@ window.stI18nDict.zh = {
   'blockProps.hideOn.tooltip.mobile': '在移动端隐藏',
   'blockProps.badge.hiddenOn': '在{device}隐藏',
 
-  // ─── R4 · Type-specific block overrides (无新字符串 — 通过 DeviceField 复用已有字段标签)
 
-  // ─── R5 · Export HTML puro + iframe preview
   'export.title': '导出 HTML',
   'export.dialect.label': '合并标签方言',
   'export.dialect.native': '原生 / Handlebars ({{var}})',
@@ -1846,7 +1834,6 @@ window.stI18nDict.zh = {
   'export.option.minify': '压缩 HTML',
   'export.option.minify.hint': '可减少邮件体积（建议开启，以避免 Gmail 在约 102 KB 处截断）。',
 
-  // ─── Sharing
   'share.modal.title': '分享模板',
   'share.modal.sub': '生成一个链接，将「{name}」发送给其他人。',
   'share.modal.generating': '正在生成链接…',
