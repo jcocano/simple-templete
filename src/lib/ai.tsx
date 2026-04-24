@@ -19,6 +19,7 @@ const PROVIDER_DEFAULTS = {
   openai: 'gpt-4.1',
   google: 'gemini-2.5-flash',
   ollama: 'llama3.3',
+  openrouter: 'openai/gpt-4o-mini',
 };
 
 const ALLOWED_BLOCK_TYPES = new Set([

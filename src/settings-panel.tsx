@@ -1609,10 +1609,11 @@ function AISection({ onChange }) {
   // stAI.listModels, with a free-text input so the user can always type a
   // newly-released model name we don't know about yet.
   const PROVIDERS = React.useMemo(() => [
-    { id:'anthropic', name:'Anthropic Claude', hint:t('settings.ai.provider.anthropic.hint'), url:'https://console.anthropic.com' },
-    { id:'openai',    name:'OpenAI',           hint:t('settings.ai.provider.openai.hint'),    url:'https://platform.openai.com' },
-    { id:'google',    name:'Google Gemini',    hint:t('settings.ai.provider.google.hint'),    url:'https://aistudio.google.com' },
-    { id:'ollama',    name:'Ollama (local)',   hint:t('settings.ai.provider.ollama.hint'),    url:'http://localhost:11434' },
+    { id:'anthropic',  name:'Anthropic Claude', hint:t('settings.ai.provider.anthropic.hint'),  url:'https://console.anthropic.com' },
+    { id:'openai',     name:'OpenAI',           hint:t('settings.ai.provider.openai.hint'),     url:'https://platform.openai.com' },
+    { id:'google',     name:'Google Gemini',    hint:t('settings.ai.provider.google.hint'),     url:'https://aistudio.google.com' },
+    { id:'openrouter', name:'OpenRouter',       hint:t('settings.ai.provider.openrouter.hint'), url:'https://openrouter.ai/keys' },
+    { id:'ollama',     name:'Ollama (local)',   hint:t('settings.ai.provider.ollama.hint'),     url:'http://localhost:11434' },
   ], [lang]);
   const provider = PROVIDERS.find(p => p.id === (ai.provider||'anthropic'));
   const enabled = ai.enabled !== false;
@@ -1777,7 +1778,7 @@ function AISection({ onChange }) {
                 value={apiKey}
                 onChange={e=>setApiKeyValue(e.target.value)}
                 disabled={!apiKeyLoaded}
-                placeholder={provider.id==='anthropic'?'sk-ant-…':provider.id==='openai'?'sk-…':'AIza…'}
+                placeholder={provider.id==='anthropic'?'sk-ant-…':provider.id==='openai'?'sk-…':provider.id==='openrouter'?'sk-or-v1-…':'AIza…'}
                 style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}/>
               {keyOk && <span className="chip ok" style={{fontSize:10.5}}><I.check size={10}/> {t('settings.ai.apikey.valid')}</span>}
             </div>
@@ -1811,7 +1812,7 @@ function AISection({ onChange }) {
                   list={`ai-models-${provider.id}`}
                   value={ai.model || ''}
                   onChange={e => set('model', e.target.value)}
-                  placeholder={provider.id === 'ollama' ? 'llama3.3' : provider.id === 'anthropic' ? 'claude-sonnet-4-5' : provider.id === 'openai' ? 'gpt-4.1' : 'gemini-2.5-flash'}
+                  placeholder={provider.id === 'ollama' ? 'llama3.3' : provider.id === 'anthropic' ? 'claude-sonnet-4-5' : provider.id === 'openai' ? 'gpt-4.1' : provider.id === 'openrouter' ? 'openai/gpt-4o-mini' : 'gemini-2.5-flash'}
                   style={{flex:1, fontFamily:'var(--font-mono)', fontSize:12}}/>
                 <button
                   type="button"
@@ -2034,6 +2035,7 @@ function AIHistoryEntry({ entry, expanded, onToggle }) {
     : entry.provider === 'openai' ? 'OpenAI'
     : entry.provider === 'google' ? 'Gemini'
     : entry.provider === 'ollama' ? 'Ollama'
+    : entry.provider === 'openrouter' ? 'OpenRouter'
     : entry.provider;
 
   return (

@@ -1030,6 +1030,7 @@ window.stI18nDict.pt = {
   'settings.ai.provider.label': 'Provedor',
   'settings.ai.provider.ollama.hint': 'Modelos locais via Ollama (sem chave de API)',
   'settings.ai.provider.openai.hint': 'Modelos GPT da OpenAI',
+  'settings.ai.provider.openrouter.hint': 'Gateway multi-provedor (Anthropic, OpenAI, Google, Meta…) com uma única chave de API',
   'settings.ai.tone.group.title': 'Tom e estilo padrão',
   'settings.ai.tone.hint': 'A IA tentará manter este registro ao gerar ou reescrever texto.',
   'settings.ai.tone.label': 'Tom preferido',

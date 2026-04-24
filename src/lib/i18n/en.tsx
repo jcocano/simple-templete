@@ -1033,6 +1033,7 @@ window.stI18nDict.en = {
   'settings.ai.provider.label': 'Provider',
   'settings.ai.provider.ollama.hint': 'Local models via Ollama (no API key)',
   'settings.ai.provider.openai.hint': 'GPT models from OpenAI',
+  'settings.ai.provider.openrouter.hint': 'Multi-provider gateway (Anthropic, OpenAI, Google, Meta…) with a single key',
   'settings.ai.tone.group.title': 'Default tone and style',
   'settings.ai.tone.hint': 'The AI will try to keep this register when generating or rewriting text.',
   'settings.ai.tone.label': 'Preferred tone',

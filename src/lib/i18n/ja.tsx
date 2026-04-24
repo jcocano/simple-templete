@@ -1031,6 +1031,7 @@ window.stI18nDict.ja = {
   'settings.ai.provider.label': 'プロバイダー',
   'settings.ai.provider.ollama.hint': 'Ollama によるローカルモデル（API キー不要）',
   'settings.ai.provider.openai.hint': 'OpenAI の GPT モデル',
+  'settings.ai.provider.openrouter.hint': '単一の API キーで複数プロバイダー（Anthropic、OpenAI、Google、Meta…）にアクセスできるゲートウェイ',
   'settings.ai.tone.group.title': '既定のトーンとスタイル',
   'settings.ai.tone.hint': 'テキストを生成または書き直す際に、AI はこの調子を保とうとします。',
   'settings.ai.tone.label': '好みのトーン',

@@ -2038,7 +2038,7 @@ function ImproveAIModal({ block, onClose, onApply }) {
         <div className="modal-foot">
           <div style={{fontSize:11,color:'var(--fg-3)',flex:1}}>
             {(() => {
-              const providerName = aiCfg.provider==='openai'?'OpenAI':aiCfg.provider==='google'?'Gemini':aiCfg.provider==='ollama'?'Ollama':'Claude';
+              const providerName = aiCfg.provider==='openai'?'OpenAI':aiCfg.provider==='google'?'Gemini':aiCfg.provider==='ollama'?'Ollama':aiCfg.provider==='openrouter'?'OpenRouter':'Claude';
               const label = aiCfg.model ? `${providerName} · ${aiCfg.model}` : providerName;
               const parts = t('editor.improveAi.using').split('{model}');
               return <>{parts[0]}<b style={{color:'var(--fg-2)'}}>{label}</b>{parts[1] || ''}</>;

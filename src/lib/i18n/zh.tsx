@@ -1031,6 +1031,7 @@ window.stI18nDict.zh = {
   'settings.ai.provider.label': '提供商',
   'settings.ai.provider.ollama.hint': '通过 Ollama 使用本地模型（无需 API 密钥）',
   'settings.ai.provider.openai.hint': 'OpenAI 的 GPT 模型',
+  'settings.ai.provider.openrouter.hint': '通过一把 API 密钥访问多家提供商（Anthropic、OpenAI、Google、Meta…）的网关',
   'settings.ai.tone.group.title': '默认语气与风格',
   'settings.ai.tone.hint': '在生成或改写文本时,AI 会尽量保持该风格。',
   'settings.ai.tone.label': '偏好语气',

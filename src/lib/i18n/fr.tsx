@@ -1030,6 +1030,7 @@ window.stI18nDict.fr = {
   'settings.ai.provider.label': 'Fournisseur',
   'settings.ai.provider.ollama.hint': 'Modèles locaux via Ollama (sans clé API)',
   'settings.ai.provider.openai.hint': 'Modèles GPT d’OpenAI',
+  'settings.ai.provider.openrouter.hint': 'Passerelle multi-fournisseurs (Anthropic, OpenAI, Google, Meta…) avec une seule clé API',
   'settings.ai.tone.group.title': 'Ton et style par défaut',
   'settings.ai.tone.hint': 'L\'IA essaiera de garder ce registre en générant ou en réécrivant du texte.',
   'settings.ai.tone.label': 'Ton préféré',
