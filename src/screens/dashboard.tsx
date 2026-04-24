@@ -504,7 +504,7 @@ function Dashboard({ onOpen, onNew }) {
     <div className="editor" style={{flexDirection:'row'}}>
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">S</div>
+          <window.BrandIcon size={26}/>
           <div className="brand-name">Simple Template</div>
           <button
             className="btn icon sm ghost"
