@@ -26,8 +26,24 @@ const SETTINGS_SECTIONS = [
   { id:'variables',  labelKey:'settings.nav.variables',  descKey:'settings.nav.variables.desc',  icon:'braces'   },
   { id:'export',     labelKey:'settings.nav.export',     descKey:'settings.nav.export.desc',     icon:'download' },
   { id:'ai',         labelKey:'settings.nav.ai',         descKey:'settings.nav.ai.desc',         icon:'sparkles' },
+  { id:'mcp',        labelKey:'settings.nav.mcp',        descKey:'settings.nav.mcp.desc',        icon:'server'   },
   { id:'notif',      labelKey:'settings.nav.notif',      descKey:'settings.nav.notif.desc',      icon:'bell'     },
 ];
+
+// Fallback labels for the MCP section. The rest of the settings panel uses
+// the shared i18n dictionary (window.stI18nDict). This section was added in
+// isolation so it ships Spanish literals directly; if the key is missing the
+// renderer falls back to these strings via `mcpT()` below.
+const MCP_ES = {
+  'settings.nav.mcp': 'MCP (Agentes IA)',
+  'settings.nav.mcp.desc': 'Permitir que agentes de IA creen y editen plantillas.',
+};
+
+function mcpT(key) {
+  const full = window.stI18n?.t?.(key);
+  if (full && full !== key) return full;
+  return MCP_ES[key] || key;
+}
 
 function SettingsPanel({ onClose, initialSection='account' }) {
   window.stI18n.useLang();
@@ -118,7 +134,7 @@ function SettingsPanel({ onClose, initialSection='account' }) {
                   onMouseEnter={e=>{ if(!active) e.currentTarget.style.background='color-mix(in oklab, var(--accent) 6%, transparent)'; }}
                   onMouseLeave={e=>{ if(!active) e.currentTarget.style.background='transparent'; }}>
                   <Icon size={14} style={{color:active?'var(--accent)':'var(--fg-3)',flexShrink:0}}/>
-                  <span>{t(s.labelKey)}</span>
+                  <span>{mcpT(s.labelKey)}</span>
                 </button>
               );
             })}
@@ -139,10 +155,10 @@ function SettingsPanel({ onClose, initialSection='account' }) {
           }}>
             <div style={{flex:1,minWidth:0}}>
               <h3 style={{margin:0,fontSize:18,fontWeight:500,fontFamily:'var(--font-display)'}}>
-                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? t(s.labelKey) : ''; })()}
+                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? mcpT(s.labelKey) : ''; })()}
               </h3>
               <div style={{fontSize:12,color:'var(--fg-3)',marginTop:3}}>
-                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? t(s.descKey) : ''; })()}
+                {(() => { const s = SETTINGS_SECTIONS.find(s=>s.id===section); return s ? mcpT(s.descKey) : ''; })()}
               </div>
             </div>
             <div style={{
@@ -162,6 +178,7 @@ function SettingsPanel({ onClose, initialSection='account' }) {
             {section==='account'     && <AccountSection onChange={flashSaved}/>}
             {section==='appearance'  && <AppearanceSection onChange={flashSaved}/>}
             {section==='ai'          && <AISection onChange={flashSaved}/>}
+            {section==='mcp'         && <SettingsMcpSection/>}
             {/* Per-workspace sections: key bump forces remount on workspace switch
                 so each section re-reads its state from the new workspace. */}
             {section==='brand'       && <BrandSection key={currentWorkspace?.id} onChange={flashSaved}/>}
@@ -2181,4 +2198,387 @@ function AIHistoryEntry({ entry, expanded, onToggle }) {
   );
 }
 
-Object.assign(window, { SettingsPanel });
+// MCP Server section — exposes the embedded MCP server's config so external
+// IA agents (Claude Desktop, Cursor, etc.) can connect to it. Uses the
+// `window.stMCP` facade and, when available, the `window.useMCPStatus` hook.
+// Falls back to polling via setInterval + stMCP.status() when the hook isn't
+// yet wired (prevents render-time race on old builds).
+function SettingsMcpSection() {
+  const hookStatus = typeof window.useMCPStatus === 'function' ? window.useMCPStatus() : null;
+  const [fallbackStatus, setFallbackStatus] = React.useState(null);
+
+  // If the hook is unavailable, poll the facade as a fallback.
+  React.useEffect(() => {
+    if (typeof window.useMCPStatus === 'function') return;
+    if (!window.stMCP || typeof window.stMCP.status !== 'function') return;
+    let alive = true;
+    const refresh = async () => {
+      try {
+        const s = await window.stMCP.status();
+        if (alive) setFallbackStatus(s || {});
+      } catch {
+        if (alive) setFallbackStatus({});
+      }
+    };
+    refresh();
+    const id = setInterval(refresh, 3000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
+
+  const status = hookStatus || fallbackStatus || {};
+  const running = !!status.running;
+  const enabledLive = !!status.enabled;
+  const url = status.url || (status.port ? `http://127.0.0.1:${status.port}/mcp` : 'http://127.0.0.1:7777/mcp');
+  const token = status.token || '';
+  const livePort = Number(status.port) || 7777;
+
+  // Local mirrors so inputs are responsive without waiting for status round-trips.
+  const [enabled, setEnabled] = React.useState(enabledLive);
+  const [port, setPort] = React.useState(livePort);
+  const [portDirty, setPortDirty] = React.useState(false);
+  const [portErr, setPortErr] = React.useState(null);
+  const [busy, setBusy] = React.useState(false);
+
+  // Howto panel (mirrors AI provider pattern: inline, anchored, not floating).
+  const [showHowto, setShowHowto] = React.useState(false);
+  const [howtoClient, setHowtoClient] = React.useState('claude'); // 'claude' | 'cursor'
+
+  // Copy feedback
+  const [copied, setCopied] = React.useState(null); // 'url' | 'token' | 'snippet' | null
+
+  React.useEffect(() => { setEnabled(enabledLive); }, [enabledLive]);
+  React.useEffect(() => {
+    if (!portDirty && livePort) setPort(livePort);
+  }, [livePort, portDirty]);
+
+  const flashCopied = (k) => {
+    setCopied(k);
+    clearTimeout(window.__mcMcpCopyT);
+    window.__mcMcpCopyT = setTimeout(() => setCopied(null), 1400);
+  };
+
+  const copyText = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      flashCopied(key);
+    } catch {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        flashCopied(key);
+      } catch {}
+    }
+  };
+
+  const onToggleEnabled = async (next) => {
+    if (busy) return;
+    setEnabled(next);
+    setBusy(true);
+    try {
+      if (window.stMCP?.setEnabled) await window.stMCP.setEnabled(next);
+    } catch (err) {
+      setEnabled(!next); // revert
+      window.toast?.({ kind:'err', title:'MCP', msg: err?.message || 'No se pudo cambiar el estado.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onApplyPort = async () => {
+    const n = Number(port);
+    if (!Number.isInteger(n) || n < 1024 || n > 65535) {
+      setPortErr('El puerto debe ser un entero entre 1024 y 65535.');
+      return;
+    }
+    setPortErr(null);
+    setBusy(true);
+    try {
+      if (window.stMCP?.setPort) await window.stMCP.setPort(n);
+      setPortDirty(false);
+      window.toast?.({ kind:'ok', title:'MCP', msg:`Puerto actualizado a ${n}.` });
+    } catch (err) {
+      window.toast?.({ kind:'err', title:'MCP', msg: err?.message || 'No se pudo aplicar el puerto.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRotateToken = async () => {
+    const ok = window.confirm('Rotar el token va a desconectar clientes MCP existentes. ¿Continuar?');
+    if (!ok) return;
+    setBusy(true);
+    try {
+      if (window.stMCP?.rotateToken) await window.stMCP.rotateToken();
+      window.toast?.({ kind:'ok', title:'MCP', msg:'Token rotado. Actualizá tus clientes.' });
+    } catch (err) {
+      window.toast?.({ kind:'err', title:'MCP', msg: err?.message || 'No se pudo rotar el token.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Snippets interpolated with live URL + token (or a placeholder when token
+  // isn't available yet — e.g. server not running).
+  const TOKEN_DISPLAY = token || '<TU-TOKEN-AQUÍ>';
+  const claudeSnippet = JSON.stringify({
+    mcpServers: {
+      'simple-template': {
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/client-http', url],
+        env: { MCP_HTTP_BEARER_TOKEN: TOKEN_DISPLAY },
+      },
+    },
+  }, null, 2);
+  const cursorSnippet = JSON.stringify({
+    mcpServers: {
+      'simple-template': {
+        url,
+        headers: { Authorization: `Bearer ${TOKEN_DISPLAY}` },
+      },
+    },
+  }, null, 2);
+
+  const snippet = howtoClient === 'cursor' ? cursorSnippet : claudeSnippet;
+  const snippetIntro = howtoClient === 'cursor'
+    ? 'Pegá este bloque en `~/.cursor/mcp.json`. La app debe estar abierta para que el servidor responda.'
+    : 'Pegá este fragmento en `claude_desktop_config.json` (reemplazá `<TU-TOKEN-AQUÍ>` con el token de abajo si todavía no está activo). Reiniciá Claude Desktop. La app debe estar abierta para que el servidor responda.';
+
+  const Switch = ({checked, onChange:oc, disabled}) => (
+    <label className="switch" style={{opacity: disabled ? .6 : 1}}>
+      <input type="checkbox" checked={!!checked} disabled={!!disabled} onChange={e=>oc(e.target.checked)}/>
+      <span/>
+    </label>
+  );
+
+  return (
+    <>
+      {/* Header card with status pill + howto toggle at the top-right. */}
+      <div style={{
+        position:'relative',
+        padding:'16px 18px',
+        marginBottom:20,
+        background:'linear-gradient(135deg, color-mix(in oklab, var(--accent) 10%, var(--surface)), var(--surface-2))',
+        border:'1px solid var(--line)',borderRadius:'var(--r-md)',
+      }}>
+        <div style={{display:'grid',gridTemplateColumns:'auto 1fr auto auto',gap:16,alignItems:'center'}}>
+          <div style={{width:40,height:40,borderRadius:10,background:'var(--accent)',color:'#fff',display:'grid',placeItems:'center'}}>
+            <I.server size={18}/>
+          </div>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:13,fontWeight:500}}>Servidor MCP</div>
+            <div style={{fontSize:11.5,color:'var(--fg-3)',marginTop:2,lineHeight:1.5}}>
+              Permite que agentes de IA (Claude Desktop, Cursor, etc.) creen y editen plantillas usando las mismas acciones que vos. Se cierra cuando cerrás la app.
+            </div>
+          </div>
+          <div>
+            <span style={{
+              display:'inline-flex',alignItems:'center',gap:6,
+              fontSize:11,fontWeight:500,
+              padding:'3px 10px',borderRadius:999,
+              background: running ? 'color-mix(in oklab, var(--ok) 18%, transparent)' : 'color-mix(in oklab, var(--fg-3) 14%, transparent)',
+              color: running ? 'var(--ok)' : 'var(--fg-3)',
+              border:'1px solid ' + (running ? 'color-mix(in oklab, var(--ok) 40%, var(--line))' : 'var(--line)'),
+            }}>
+              <span style={{
+                width:6,height:6,borderRadius:999,
+                background: running ? 'var(--ok)' : 'var(--fg-3)',
+              }}/>
+              {running ? 'Activo' : 'Detenido'}
+            </span>
+          </div>
+          <button
+            type="button"
+            aria-label="Cómo conectar"
+            title="Cómo conectar un cliente MCP"
+            onClick={() => setShowHowto(v => !v)}
+            style={{
+              width:22,height:22,padding:0,
+              display:'grid',placeItems:'center',
+              border:'1px solid var(--line)',
+              borderRadius:999,
+              background: showHowto ? 'var(--accent)' : 'var(--surface)',
+              color: showHowto ? '#fff' : 'var(--fg-3)',
+              fontSize:11,fontWeight:600,
+              cursor:'pointer',lineHeight:1,
+            }}
+          >?</button>
+        </div>
+
+        {/* Inline howto panel — anchored in flow, not floating. */}
+        {showHowto && (
+          <div style={{
+            marginTop:12,
+            border:'1px solid var(--line)',
+            borderRadius:'var(--r-md)',
+            background:'var(--surface-2)',
+            padding:'12px 14px',
+          }}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
+              <div style={{fontSize:12,fontWeight:600}}>Conectar un cliente MCP</div>
+              <div style={{flex:1}}/>
+              <div style={{display:'flex',gap:4}}>
+                {[
+                  {id:'claude', label:'Claude Desktop'},
+                  {id:'cursor', label:'Cursor'},
+                ].map(tab => {
+                  const on = howtoClient === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setHowtoClient(tab.id)}
+                      style={{
+                        fontSize:11,padding:'4px 10px',
+                        border: on ? '1px solid var(--accent)' : '1px solid var(--line)',
+                        borderRadius:999,
+                        background: on ? 'var(--accent-soft)' : 'var(--surface)',
+                        color: on ? 'var(--accent)' : 'var(--fg-2)',
+                        cursor:'pointer',fontWeight: on ? 600 : 500,
+                      }}>
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHowto(false)}
+                aria-label="Cerrar"
+                style={{
+                  width:22,height:22,padding:0,
+                  display:'grid',placeItems:'center',
+                  border:'none',borderRadius:6,
+                  background:'transparent',color:'var(--fg-3)',cursor:'pointer',
+                }}
+              ><I.x size={12}/></button>
+            </div>
+            <div style={{fontSize:11.5,color:'var(--fg-2)',lineHeight:1.6,marginBottom:10}}>
+              {snippetIntro}
+            </div>
+            <div style={{position:'relative'}}>
+              <pre style={{
+                margin:0,padding:'10px 12px',
+                background:'var(--surface)',
+                border:'1px solid var(--line)',
+                borderRadius:'var(--r-sm)',
+                fontFamily:'var(--font-mono)',fontSize:11,
+                whiteSpace:'pre',overflow:'auto',maxHeight:260,
+              }}>{snippet}</pre>
+              <button
+                type="button"
+                onClick={() => copyText(snippet, 'snippet')}
+                className="btn sm"
+                style={{
+                  position:'absolute',top:8,right:8,
+                  display:'inline-flex',alignItems:'center',gap:6,
+                  background: copied==='snippet' ? 'var(--ok)' : 'var(--accent)',
+                  color:'#fff',border:'none',
+                  padding:'6px 12px',fontSize:11.5,fontWeight:600,
+                  borderRadius:'var(--r-sm)',cursor:'pointer',
+                }}>
+                {copied==='snippet' ? <><I.check size={12}/> Copiado</> : <><I.copy size={12}/> Copiar configuración</>}
+              </button>
+            </div>
+            {!token && (
+              <div style={{fontSize:11,color:'var(--fg-3)',marginTop:8,lineHeight:1.5}}>
+                El token todavía no está disponible. Habilitá el servidor primero y volvé a copiar la configuración.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <SGroup title="Servidor">
+        <SRow label="Habilitado" hint="Arranca el servidor MCP local mientras la app esté abierta.">
+          <Switch checked={enabled} disabled={busy} onChange={onToggleEnabled}/>
+        </SRow>
+
+        {running && (
+          <SRow label="URL del servidor" hint="La URL que tu cliente MCP debe usar para conectarse.">
+            <div style={{display:'flex',gap:6,alignItems:'center'}}>
+              <input
+                className="field"
+                readOnly
+                value={url}
+                style={{flex:1,fontFamily:'var(--font-mono)',fontSize:12}}
+                onFocus={e => e.target.select()}
+              />
+              <button
+                type="button"
+                className="btn sm ghost"
+                onClick={() => copyText(url, 'url')}
+                title="Copiar URL">
+                {copied==='url' ? <><I.check size={12}/> Copiado</> : <><I.copy size={12}/> Copiar</>}
+              </button>
+            </div>
+          </SRow>
+        )}
+
+        {running && (
+          <SRow label="Token de acceso" hint="Cada cliente MCP debe enviar este token como bearer. Tratalo como una contraseña.">
+            <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}>
+              <input
+                className="field"
+                type="password"
+                readOnly
+                value={token}
+                style={{flex:1,minWidth:220,fontFamily:'var(--font-mono)',fontSize:12}}
+                onFocus={e => e.target.select()}
+              />
+              <button
+                type="button"
+                className="btn sm ghost"
+                onClick={() => copyText(token, 'token')}
+                disabled={!token}
+                title="Copiar token">
+                {copied==='token' ? <><I.check size={12}/> Copiado</> : <><I.copy size={12}/> Copiar</>}
+              </button>
+              <button
+                type="button"
+                className="btn sm"
+                onClick={onRotateToken}
+                disabled={busy}
+                style={{color:'var(--danger)'}}
+                title="Generar un token nuevo y revocar el anterior">
+                <I.history size={12}/> Rotar
+              </button>
+            </div>
+          </SRow>
+        )}
+
+        <SRow label="Puerto" hint="Entero entre 1024 y 65535. Cambiarlo reinicia el servidor.">
+          <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}>
+            <input
+              className="field"
+              type="number"
+              min="1024"
+              max="65535"
+              step="1"
+              value={port}
+              onChange={e => { setPort(e.target.value); setPortDirty(true); setPortErr(null); }}
+              style={{width:140,fontFamily:'var(--font-mono)',fontSize:12}}
+            />
+            <button
+              type="button"
+              className="btn sm"
+              onClick={onApplyPort}
+              disabled={busy || !portDirty}>
+              Aplicar
+            </button>
+            {portErr && (
+              <div style={{fontSize:11,color:'var(--danger)',flexBasis:'100%',marginTop:4}}>
+                {portErr}
+              </div>
+            )}
+          </div>
+        </SRow>
+      </SGroup>
+    </>
+  );
+}
+
+Object.assign(window, { SettingsPanel, SettingsMcpSection });
