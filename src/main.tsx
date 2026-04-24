@@ -37,6 +37,7 @@ import "./lib/mcp.tsx";
 import "./lib/doc-thumb.tsx";
 import "./icons.tsx";
 import "./data.tsx";
+import "./lib/gallery-templates.tsx";
 import "./ui.tsx";
 import "./email-blocks.tsx";
 import "./lib/html-minify.tsx";

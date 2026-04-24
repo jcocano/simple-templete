@@ -1352,6 +1352,7 @@ function Gallery({ onBack, onPick }) {
     name: t(`gallery.starter.${s.id}.name`),
     cat:  t(`gallery.cat.${s.catId}`),
     folder: t(`gallery.cat.${s.catId}`),
+    doc: window.galleryTemplates ? window.galleryTemplates.seedDocFor(s.id, t) : null,
   });
   return (
     <div className="editor">
