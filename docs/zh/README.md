@@ -3,8 +3,8 @@
 > 面向 macOS、Windows 和 Linux 的开源、local-first 邮件模板编辑器 —— 一个完全在你本机运行的无代码 Beefree 替代品，AI agent 可端到端驱动。
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/jcocano/simple-templete?style=social)](https://github.com/jcocano/simple-templete/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/jcocano/simple-templete)](https://github.com/jcocano/simple-templete/issues)
+[![GitHub stars](https://img.shields.io/github/stars/jcocano/simple-template?style=social)](https://github.com/jcocano/simple-template/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/jcocano/simple-template)](https://github.com/jcocano/simple-template/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](../../CONTRIBUTING.md)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](#install)
 
@@ -14,7 +14,7 @@
 
 Simple Template 是一款桌面应用，适合任何需要交付精致、响应式邮件营销活动但不想碰 HTML 的人。模板存放在你自己的磁盘上 —— 没有账号、没有云、没有追踪 —— 并且你可以随时通过内置的 MCP 服务器把键盘交给 AI agent。
 
-> **喜欢这个项目？** 给一个 [GitHub star](https://github.com/jcocano/simple-templete) 是帮助它成长最简单的方式。
+> **喜欢这个项目？** 给一个 [GitHub star](https://github.com/jcocano/simple-template) 是帮助它成长最简单的方式。
 
 ## 适合谁使用
 
@@ -153,8 +153,8 @@ Simple Template 内置了 **Model Context Protocol** 服务器。任何兼容 MC
 ### 从源码构建
 
 ```sh
-git clone https://github.com/jcocano/simple-templete.git
-cd simple-templete
+git clone https://github.com/jcocano/simple-template.git
+cd simple-template
 npm install
 npm run dev
 ```
@@ -168,7 +168,7 @@ npm run dev
 
 ### 预构建二进制
 
-从 [release 页面](https://github.com/jcocano/simple-templete/releases)下载适用于你平台的安装包：
+从 [release 页面](https://github.com/jcocano/simple-template/releases)下载适用于你平台的安装包：
 
 | 平台 | 下载 |
 |---|---|
@@ -273,19 +273,19 @@ npm run dist
 
 Simple Template 免费且开源。如果它对你有帮助，以下这些都很有用：
 
-- **[给仓库加 star](https://github.com/jcocano/simple-templete)**，让更多人发现它
-- **[报告 bug](https://github.com/jcocano/simple-templete/issues/new?template=bug_report.yml)**，如果有东西坏了
-- **[提出功能请求](https://github.com/jcocano/simple-templete/issues/new?template=feature_request.yml)**，说出你想看到的
-- **[帮助翻译](https://github.com/jcocano/simple-templete/issues/new?template=translation.yml)** —— 修正笔误、改善文案或添加新语言
+- **[给仓库加 star](https://github.com/jcocano/simple-template)**，让更多人发现它
+- **[报告 bug](https://github.com/jcocano/simple-template/issues/new?template=bug_report.yml)**，如果有东西坏了
+- **[提出功能请求](https://github.com/jcocano/simple-template/issues/new?template=feature_request.yml)**，说出你想看到的
+- **[帮助翻译](https://github.com/jcocano/simple-template/issues/new?template=translation.yml)** —— 修正笔误、改善文案或添加新语言
 - **[提交 pull request](../../CONTRIBUTING.md)** —— 开发环境搭建见 contributing 指南
-- **[加入讨论](https://github.com/jcocano/simple-templete/discussions)**，进行问答、交流想法和展示成果
+- **[加入讨论](https://github.com/jcocano/simple-template/discussions)**，进行问答、交流想法和展示成果
 - **[请我喝一杯咖啡](https://buymeacoffee.com/jesuscocana)**，如果你愿意资助持续开发
 
 ## 社区
 
-- **[Discussions](https://github.com/jcocano/simple-templete/discussions)** —— 问答、想法、展示成果
-- **[Issues](https://github.com/jcocano/simple-templete/issues)** —— bug、功能、翻译
-- **[Releases](https://github.com/jcocano/simple-templete/releases)** —— 版本历史
+- **[Discussions](https://github.com/jcocano/simple-template/discussions)** —— 问答、想法、展示成果
+- **[Issues](https://github.com/jcocano/simple-template/issues)** —— bug、功能、翻译
+- **[Releases](https://github.com/jcocano/simple-template/releases)** —— 版本历史
 
 参与前请阅读 [Code of Conduct](../../CODE_OF_CONDUCT.md)。
 

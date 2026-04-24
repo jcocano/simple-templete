@@ -3,8 +3,8 @@
 > Éditeur de modèles d'e-mails open-source et local-first pour macOS, Windows et Linux — une alternative no-code à Beefree qui fonctionne entièrement sur votre machine et que les agents IA peuvent piloter de bout en bout.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/jcocano/simple-templete?style=social)](https://github.com/jcocano/simple-templete/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/jcocano/simple-templete)](https://github.com/jcocano/simple-templete/issues)
+[![GitHub stars](https://img.shields.io/github/stars/jcocano/simple-template?style=social)](https://github.com/jcocano/simple-template/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/jcocano/simple-template)](https://github.com/jcocano/simple-template/issues)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](../../CONTRIBUTING.md)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)](#installation)
 
@@ -14,7 +14,7 @@
 
 Simple Template est une application de bureau pour toutes les personnes qui ont besoin de livrer des campagnes e-mail soignées et responsives sans toucher au HTML. Les modèles vivent sur votre disque — pas de comptes, pas de cloud, pas de tracking — et vous pouvez confier le clavier à un agent IA à tout moment via un serveur MCP intégré.
 
-> **Le projet vous plaît ?** Une [étoile GitHub](https://github.com/jcocano/simple-templete) est le moyen le plus simple de l'aider à grandir.
+> **Le projet vous plaît ?** Une [étoile GitHub](https://github.com/jcocano/simple-template) est le moyen le plus simple de l'aider à grandir.
 
 ## À qui ça s'adresse
 
@@ -153,8 +153,8 @@ Chaque problème dispose d'une action de correction directe lorsque c'est possib
 ### Depuis les sources
 
 ```sh
-git clone https://github.com/jcocano/simple-templete.git
-cd simple-templete
+git clone https://github.com/jcocano/simple-template.git
+cd simple-template
 npm install
 npm run dev
 ```
@@ -168,7 +168,7 @@ Prérequis :
 
 ### Binaires pré-compilés
 
-Téléchargez l'installateur pour votre plateforme depuis la [page des releases](https://github.com/jcocano/simple-templete/releases) :
+Téléchargez l'installateur pour votre plateforme depuis la [page des releases](https://github.com/jcocano/simple-template/releases) :
 
 | Plateforme | Téléchargement |
 |---|---|
@@ -273,19 +273,19 @@ Stade prototype — pas encore de lanceur de tests complet. Barre minimale avant
 
 Simple Template est libre et open source. S'il vous aide, voici tout ce qui est utile :
 
-- **[Mettez une étoile au dépôt](https://github.com/jcocano/simple-templete)** pour que plus de monde le découvre
-- **[Signalez un bug](https://github.com/jcocano/simple-templete/issues/new?template=bug_report.yml)** si quelque chose est cassé
-- **[Demandez une fonctionnalité](https://github.com/jcocano/simple-templete/issues/new?template=feature_request.yml)** que vous aimeriez voir
-- **[Aidez avec les traductions](https://github.com/jcocano/simple-templete/issues/new?template=translation.yml)** — corrigez des fautes, améliorez la copie, ou ajoutez une nouvelle langue
+- **[Mettez une étoile au dépôt](https://github.com/jcocano/simple-template)** pour que plus de monde le découvre
+- **[Signalez un bug](https://github.com/jcocano/simple-template/issues/new?template=bug_report.yml)** si quelque chose est cassé
+- **[Demandez une fonctionnalité](https://github.com/jcocano/simple-template/issues/new?template=feature_request.yml)** que vous aimeriez voir
+- **[Aidez avec les traductions](https://github.com/jcocano/simple-template/issues/new?template=translation.yml)** — corrigez des fautes, améliorez la copie, ou ajoutez une nouvelle langue
 - **[Ouvrez une pull request](../../CONTRIBUTING.md)** — voir le guide de contribution pour la configuration de dev
-- **[Rejoignez les discussions](https://github.com/jcocano/simple-templete/discussions)** pour les questions, idées et démonstrations
+- **[Rejoignez les discussions](https://github.com/jcocano/simple-template/discussions)** pour les questions, idées et démonstrations
 - **[Offrez-moi un café](https://buymeacoffee.com/jesuscocana)** si vous voulez financer le développement continu
 
 ## Communauté
 
-- **[Discussions](https://github.com/jcocano/simple-templete/discussions)** — Q&R, idées, démonstrations
-- **[Issues](https://github.com/jcocano/simple-templete/issues)** — bugs, fonctionnalités, traductions
-- **[Releases](https://github.com/jcocano/simple-templete/releases)** — historique des versions
+- **[Discussions](https://github.com/jcocano/simple-template/discussions)** — Q&R, idées, démonstrations
+- **[Issues](https://github.com/jcocano/simple-template/issues)** — bugs, fonctionnalités, traductions
+- **[Releases](https://github.com/jcocano/simple-template/releases)** — historique des versions
 
 Merci de lire le [Code de conduite](../../CODE_OF_CONDUCT.md) avant de participer.
 
