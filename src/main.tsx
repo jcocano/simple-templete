@@ -33,6 +33,7 @@ import "./lib/sharing/bundle.tsx";
 import "./lib/sharing/index.tsx";
 import "./lib/images.tsx";
 import "./lib/image-folders.tsx";
+import "./lib/mcp.tsx";
 import "./icons.tsx";
 import "./data.tsx";
 import "./ui.tsx";
