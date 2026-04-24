@@ -99,11 +99,17 @@ function Preview({ template, onBack }) {
   }, [previewHtml]);
 
   // Ancho del card del cliente. En desktop, card e iframe comparten ancho para
-  // evitar que el chromeBg asome a los lados del email (se notaba en dark por
-  // la diferencia contra el bg del iframe). En mobile el card es 15px más
-  // ancho para acomodar el bisel/borde tipo teléfono.
+  // evitar que el chromeBg asome a los lados del email. En mobile el card es
+  // 15px más ancho para acomodar el bisel/borde tipo teléfono.
+  //
+  // El iframe debe superar 600px en desktop: el HTML exportado usa
+  // `@media (max-width:600px)` para apilar columnas en mobile, y ese mq es
+  // inclusivo (≤600). Si el iframe quedara a 600 exacto dispararía el layout
+  // mobile dentro del preview desktop. `max(docMaxWidth+40, 640)` mantiene
+  // siempre al menos 40px de "stage" a los lados (como el pane de Gmail) y
+  // escala si la sección mide más de 600.
   const docMaxWidth = (doc.sections || []).reduce((m, s) => Math.max(m, s.style?.width || 600), 600);
-  const iframeWidth = isMobile ? 375 : docMaxWidth;
+  const iframeWidth = isMobile ? 375 : Math.max(docMaxWidth + 40, 640);
   const emailWidth = isMobile ? 390 : iframeWidth;
 
   // Chrome del cliente
