@@ -168,9 +168,23 @@ Requisitos:
 
 ### Binarios pre-compilados
 
-Todavía no hay — el release v0.1.0 está pendiente de code-signing y CI/CD. [Dale una estrella al repo](https://github.com/jcocano/simple-templete) o [mirá los releases](https://github.com/jcocano/simple-templete/releases) para enterarte.
+Bajate el instalador para tu plataforma desde la [página de releases](https://github.com/jcocano/simple-templete/releases):
 
-Mientras tanto podés buildear instaladores localmente:
+| Plataforma | Descarga |
+|---|---|
+| macOS (Apple Silicon / Intel) | `.dmg` o `.zip` |
+| Windows | `.exe` (instalador NSIS) |
+| Linux | `.AppImage` o `.deb` |
+
+> **Aviso — binarios sin firmar.** Simple Template es open source y todavía no incluye un Apple Developer ID pago ni un certificado de code-signing de Windows. Los artefactos se buildean en CI desde el código público, pero tu sistema operativo te va a avisar la primera vez que los abras:
+>
+> - **macOS** — Gatekeeper dice *"no se puede abrir porque Apple no puede comprobar que no contenga software malicioso"*. Click derecho en la app → **Abrir** → confirmar. Desde Terminal: `xattr -d com.apple.quarantine "/Applications/Simple Template.app"`.
+> - **Windows** — SmartScreen muestra *"Windows protegió tu PC"*. Click en **Más información** → **Ejecutar de todas formas**.
+> - **Linux** — para el `.AppImage` hay que marcarlo ejecutable primero: `chmod +x SimpleTemplate-*.AppImage`. El `.deb` se instala normal con `apt install ./...deb`.
+>
+> Code-signing y notarización van a llegar en una versión futura.
+
+Si preferís buildear los instaladores localmente:
 
 ```sh
 npm run dist
@@ -254,33 +268,6 @@ Estado prototipo — todavía no hay test runner completo. El mínimo antes de a
 1. Que `npm run test:export` pase (smoke test contra tres fixtures)
 2. Correr `npm run dev` y ejercitar la feature a mano
 3. Si tocaste packaging o main de Electron, correr también `npm run pack` y abrir la app empaquetada
-
-## Roadmap
-
-**v0.1 (shipeado):**
-- Editor visual core, biblioteca de saved blocks, biblioteca de imágenes, ocasiones
-- IA con 5 providers: mejorar texto y generar plantilla
-- Servidor MCP con 28 tools tipados y lock en vivo del editor
-- Export a HTML / MJML / plain text / ZIP con preservación de variables
-- Test-send SMTP + OAuth (Gmail, Outlook)
-- Review pre-flight en 7 categorías
-- Compartir vía bundles `.st` encriptados + deep-links `simpletemplete://`
-- Seis idiomas con cambio en vivo
-- Local-first SQLite + secretos en el keychain del sistema
-
-**v0.1.x (próximo):**
-- Builds code-signed y notarizados (macOS + Windows)
-- Pipeline de CI/CD con canal de auto-update
-- Instaladores pre-compilados en cada release
-
-**Más adelante (ideas, no compromisos):**
-- Embeds más ricos para bloques de video / GIF / mapa / acordeón
-- Optimización de imágenes en export y reescritura de dominios CDN
-- Providers de IA adicionales
-- Chequeos de review más profundos
-
-**Fuera de scope a propósito:**
-- Listas de contactos, historial de envíos, tracking de opens/clicks, CDN hosteado — eso va en tu plataforma de mailing, no en un editor local.
 
 ## Banca el proyecto
 

@@ -168,9 +168,23 @@ Requirements:
 
 ### Pre-built binaries
 
-Not shipped yet — v0.1.0 release is pending code-signing and CI/CD. [Star the repo](https://github.com/jcocano/simple-templete) or [watch for releases](https://github.com/jcocano/simple-templete/releases) to get notified.
+Download the latest installer for your platform from the [releases page](https://github.com/jcocano/simple-templete/releases):
 
-Until then, you can build installers locally:
+| Platform | Download |
+|---|---|
+| macOS (Apple Silicon / Intel) | `.dmg` or `.zip` |
+| Windows | `.exe` (NSIS installer) |
+| Linux | `.AppImage` or `.deb` |
+
+> **Heads up — unsigned binaries.** Simple Template is open-source and does not yet ship with a paid Apple Developer ID or Windows code-signing certificate. The artifacts are built in CI from the public source, but your OS will warn you on first launch:
+>
+> - **macOS** — Gatekeeper says *"can't be opened because Apple cannot check it for malicious software"*. Right-click the app → **Open** → confirm. From Terminal: `xattr -d com.apple.quarantine "/Applications/Simple Template.app"`.
+> - **Windows** — SmartScreen shows *"Windows protected your PC"*. Click **More info** → **Run anyway**.
+> - **Linux** — for the `.AppImage`, mark it executable first: `chmod +x SimpleTemplate-*.AppImage`. The `.deb` installs normally with `apt install ./...deb`.
+>
+> Code-signing and notarization will land in a future release.
+
+If you'd rather build installers locally:
 
 ```sh
 npm run dist
@@ -254,33 +268,6 @@ Prototype-stage — no full test runner yet. Minimum bar before opening a PR:
 1. `npm run test:export` passes (smoke test against three fixtures)
 2. `npm run dev` and exercise the feature manually
 3. If you touched packaging or Electron main, also run `npm run pack` and open the built app
-
-## Roadmap
-
-**v0.1 (shipped):**
-- Core visual editor, saved-blocks library, image library, occasions
-- AI across 5 providers with improve-text and generate-template
-- MCP server with 28 typed tools and editor live-lock
-- Export to HTML / MJML / plain text / ZIP with variable preservation
-- SMTP + OAuth (Gmail, Outlook) test-send
-- Pre-flight review across 7 categories
-- Share via encrypted `.st` bundles + `simpletemplete://` deep links
-- Six languages with live switching
-- Local-first SQLite + OS-keychain secrets
-
-**v0.1.x (next):**
-- Code-signed and notarized builds (macOS + Windows)
-- CI/CD release pipeline with auto-update channel
-- Pre-built installers on every release
-
-**Later (ideas, not commitments):**
-- Richer embeds for video / GIF / map / accordion blocks
-- Export image optimization and CDN domain rewriting
-- Additional AI providers
-- Deeper review checks
-
-**Out of scope on purpose:**
-- Contact lists, send history, open/click tracking, hosted CDN — those belong in your mailing platform, not in a local editor.
 
 ## Support the project
 
