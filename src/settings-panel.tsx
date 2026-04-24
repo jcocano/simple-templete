@@ -1,6 +1,16 @@
 // Settings panel — full-screen panel with sidebar + 7 sections
 // Section 3 (Envío de pruebas) reuses DeliveryInner from smtp-modal.jsx
 
+// OS-specific display path for the local images folder. Shown verbatim
+// in the Storage → Local settings tile. Matches Electron's default
+// `app.getPath('userData')` + our `workspaces/{id}/images` subtree.
+function localImagesPath() {
+  const p = window.appInfo?.platform;
+  if (p === 'win32')  return '%APPDATA%\\Simple Template\\workspaces\\{id}\\images\\';
+  if (p === 'linux')  return '~/.config/Simple Template/workspaces/{id}/images/';
+  return '~/Library/Application Support/Simple Template/workspaces/{id}/images/';
+}
+
 const SETTINGS_SECTIONS = [
   { id:'workspace',  labelKey:'settings.nav.workspace',  descKey:'settings.nav.workspace.desc',  icon:'layers'   },
   { id:'account',    labelKey:'settings.nav.account',    descKey:'settings.nav.account.desc',    icon:'user'     },
@@ -953,7 +963,7 @@ function StorageSection({ onChange }) {
         <SGroup title={t('settings.storage.config.local.title')}>
           <div style={{padding:14,background:'var(--surface-2)',border:'1px solid var(--line)',borderRadius:'var(--r-md)'}}>
             <div style={{fontSize:12.5,color:'var(--fg-2)',lineHeight:1.6,marginBottom:10}}>
-              {t('settings.storage.config.local.body.prefix')} <code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>userData/workspaces/&#123;id&#125;/images</code> {t('settings.storage.config.local.body.mid')} (<code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>st-img://</code>).
+              {t('settings.storage.config.local.body.prefix')} <code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>{localImagesPath()}</code> {t('settings.storage.config.local.body.mid')} (<code style={{fontFamily:'var(--font-mono)',fontSize:11.5}}>st-img://</code>).
             </div>
             <div style={{fontSize:11.5,color:'var(--fg-3)',lineHeight:1.6}}>
               {t('settings.storage.config.local.bullet1')}<br/>

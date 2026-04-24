@@ -2,6 +2,10 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 const invoke = (channel, ...args) => ipcRenderer.invoke(channel, ...args);
 
+contextBridge.exposeInMainWorld('appInfo', {
+  platform: process.platform,
+});
+
 contextBridge.exposeInMainWorld('storage', {
   templates: {
     list: (workspaceId) => invoke('storage:templates:list', workspaceId),
