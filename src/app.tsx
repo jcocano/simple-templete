@@ -181,6 +181,20 @@ function App() {
     setScreen('editor');
   };
 
+  // When an MCP agent calls open_template, navigate to the editor with the
+  // requested template. Read the full doc from storage so the editor has a
+  // normalized template (stTemplates.read does the legacy doc-shape migration).
+  React.useEffect(() => {
+    const h = async (e) => {
+      const templateId = e && e.detail && e.detail.templateId;
+      if (!templateId) return;
+      const fresh = await window.stTemplates.read(templateId);
+      if (fresh) openEditor(fresh);
+    };
+    window.addEventListener('st:mcp-open-template', h);
+    return () => window.removeEventListener('st:mcp-open-template', h);
+  }, []);
+
   const openBlockEditor = (blk) => {
     setBlockBeingEdited(blk);
     setTpl(null);

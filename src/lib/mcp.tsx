@@ -17,6 +17,15 @@
     });
     window.mcp.onExternalChange((detail) => {
       window.dispatchEvent(new CustomEvent('st:template-change-external', { detail }));
+      // Also re-dispatch as a normal template-change so existing UI that lists
+      // templates (useTemplates, useTrashedTemplates, dashboard, library, etc.)
+      // refreshes on agent-driven mutations without knowing about MCP at all.
+      const event = (detail && detail.event) || 'update';
+      if (event === 'open') return;
+      const kind = event === 'delete' ? 'delete' : event === 'create' ? 'create' : 'update';
+      window.dispatchEvent(new CustomEvent('st:template-change', {
+        detail: { id: detail && detail.templateId, kind },
+      }));
     });
     window.mcp.onOpenTemplate((detail) => {
       window.dispatchEvent(new CustomEvent('st:mcp-open-template', { detail }));
