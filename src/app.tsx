@@ -204,7 +204,9 @@ function App() {
   const openFromGallery = async (preset) => {
     const seedDoc = preset.blank
       ? { sections: [] }
-      : JSON.parse(JSON.stringify(window.DEFAULT_DOC));
+      : (preset.doc
+          ? JSON.parse(JSON.stringify(preset.doc))
+          : JSON.parse(JSON.stringify(window.DEFAULT_DOC)));
     const newTpl = await window.stTemplates.create({
       name: preset.name,
       folder: preset.cat || 'Sin carpeta',
